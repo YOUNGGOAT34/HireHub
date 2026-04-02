@@ -15,9 +15,9 @@ public class JobService {
         return jobs;
     }
 
-    public String addJob(Job job){
+    public Job addJob(Job job){
         jobs.add(job);
-        return "Job created successfully";
+        return job;
     }
 
     public Job getById(Long id){
@@ -40,22 +40,22 @@ public class JobService {
          return false;
     }
 
-    public boolean updateJob(Long id,Job updatedJob){
+    public Job updateJob(Long id,Job updatedJob){
 
         for(Job job:jobs){
             if(job.getId().equals(id)){
                 job.setSalary(updatedJob.getSalary());
                 job.setTitle(updatedJob.getTitle());
                 job.setDescription(updatedJob.getDescription());
-                return  true;
+                return  job;
             }
         }
 
-        return false;
+        return null;
     }
 
 
-    public boolean patchJob(Long id,Job updatedJob){
+    public Job patchJob(Long id,Job updatedJob){
         for(Job job:jobs){
             if(updatedJob.getSalary()!=null){
                  job.setSalary((updatedJob.getSalary()));
@@ -68,8 +68,10 @@ public class JobService {
             if(updatedJob.getDescription()!=null){
                 job.setDescription(updatedJob.getDescription());
             }
+
+            return job;
         }
-        return true;
+        return null;
     }
 
 }
