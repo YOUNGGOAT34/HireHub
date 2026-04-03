@@ -16,13 +16,14 @@ public class JobService {
     }
 
     public Job addJob(Job job){
+
         jobs.add(job);
         return job;
     }
 
     public Job getById(Long id){
          for(Job job:jobs){
-              if (job.getId().equals(id)){
+              if (id.equals(job.getId())){
                   return job;
              }
          }
@@ -43,7 +44,7 @@ public class JobService {
     public Job updateJob(Long id,Job updatedJob){
 
         for(Job job:jobs){
-            if(job.getId().equals(id)){
+            if(id.equals(job.getId())){
                 job.setSalary(updatedJob.getSalary());
                 job.setTitle(updatedJob.getTitle());
                 job.setDescription(updatedJob.getDescription());

@@ -1,47 +1,47 @@
 package com.goat.HireHub.job;
 
 public class Job {
-       private Long Id;
-       private String Title;
-       private String Description;
-       private  Double Salary;
+       private Long id;
+       private String title;
+       private String description;
+       private  Double salary;
 
     public Job(Double salary, String description, String title, Long id) {
-        Salary = salary;
-        Description = description;
-        Title = title;
-        Id = id;
+        this.salary = salary;
+        this.description = description;
+        this.title = title;
+        this.id = id;
     }
 
     public Long getId() {
-        return Id;
+        return this.id;
     }
 
     public void setId(Long id) {
-        Id = id;
+        this.id = id;
     }
 
     public String getTitle() {
-        return Title;
+        return this.title;
     }
 
     public void setTitle(String title) {
-        Title = title;
+        this.title = title;
     }
 
     public String getDescription() {
-        return Description;
+        return this.description;
     }
 
     public void setDescription(String description) {
-        Description = description;
+        this.description = description;
     }
 
     public Double getSalary() {
-        return Salary;
+        return this.salary;
     }
 
     public void setSalary(Double salary) {
-        Salary = salary;
+        this.salary = salary;
     }
 }
