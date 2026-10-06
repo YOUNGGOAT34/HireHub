@@ -1,16 +1,27 @@
 package com.goat.HireHub.job;
 
+import jakarta.persistence.*;
+
+@Entity
+@Table(name="jobs")
 public class Job {
+       @Id
+       @GeneratedValue(strategy = GenerationType.SEQUENCE)
+       @Column(name="job_id")
        private Long id;
+       @Column(name="job_title")
        private String title;
+       @Column(name="job_description")
        private String description;
        private  Double salary;
 
-    public Job(Double salary, String description, String title, Long id) {
+       protected Job(){}
+
+    public Job(Double salary, String description, String title) {
         this.salary = salary;
         this.description = description;
         this.title = title;
-        this.id = id;
+
     }
 
     public Long getId() {
@@ -36,11 +47,9 @@ public class Job {
     public void setDescription(String description) {
         this.description = description;
     }
-
     public Double getSalary() {
         return this.salary;
     }
-
     public void setSalary(Double salary) {
         this.salary = salary;
     }

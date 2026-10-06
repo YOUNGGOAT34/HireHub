@@ -8,7 +8,7 @@ import java.util.List;
 
 @Service
 public class JobService {
-    private List<Job> jobs=new ArrayList<>();
+    private final List<Job> jobs=new ArrayList<>();
 
 
     public List<Job> getAll(){
