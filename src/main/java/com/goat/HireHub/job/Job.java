@@ -1,5 +1,6 @@
 package com.goat.HireHub.job;
 
+import com.goat.HireHub.company.Company;
 import jakarta.persistence.*;
 
 @Entity
@@ -14,14 +15,17 @@ public class Job {
        @Column(name="job_description")
        private String description;
        private  Double salary;
+       @ManyToOne
+       @JoinColumn(name="company_id")
+       private Company company;
 
        protected Job(){}
 
-    public Job(Double salary, String description, String title) {
+    public Job(Double salary, String description, String title,Company company) {
         this.salary = salary;
         this.description = description;
         this.title = title;
-
+        this.company=company;
     }
 
     public Long getId() {
@@ -52,5 +56,13 @@ public class Job {
     }
     public void setSalary(Double salary) {
         this.salary = salary;
+    }
+
+    public Company getCompany() {
+        return company;
+    }
+
+    public void setCompany(Company company) {
+        this.company = company;
     }
 }
