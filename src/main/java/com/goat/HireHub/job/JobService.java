@@ -1,78 +1,72 @@
 package com.goat.HireHub.job;
 
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestBody;
-
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+
 
 @Service
 public class JobService {
-    private final List<Job> jobs=new ArrayList<>();
 
+    private final JobRepository jobRepository;
+
+    public JobService(JobRepository jobRep){
+         this.jobRepository=jobRep;
+    }
 
     public List<Job> getAll(){
-        return jobs;
+        return jobRepository.findAll();
     }
 
     public Job addJob(Job job){
-
-        jobs.add(job);
-        return job;
+        return jobRepository.save(job);
     }
 
     public Job getById(Long id){
-         for(Job job:jobs){
-              if (id.equals(job.getId())){
-                  return job;
-             }
-         }
-         return null;
+        Optional<Job> job=jobRepository.findById(id);
+        return job.orElse(null);
     }
 
-    public boolean deleteJob(Long id){
-         for(Job job:jobs){
-             if(job.getId().equals(id)){
-                 jobs.remove(job);
-                 return true;
-             }
+    public boolean deleteById(Long id){
+         if(jobRepository.existsById(id)){
+              jobRepository.deleteById(id);
+              return true;
          }
-
          return false;
     }
 
+    @Transactional
     public Job updateJob(Long id,Job updatedJob){
+        Job savedJob=jobRepository.findById(id)
+                .orElseThrow(()->new RuntimeException("job not found with id "+id));
 
-        for(Job job:jobs){
-            if(id.equals(job.getId())){
-                job.setSalary(updatedJob.getSalary());
-                job.setTitle(updatedJob.getTitle());
-                job.setDescription(updatedJob.getDescription());
-                return  job;
-            }
-        }
+        savedJob.setDescription(updatedJob.getDescription());
+        savedJob.setTitle(updatedJob.getTitle());
+        savedJob.setSalary(updatedJob.getSalary());
 
-        return null;
+        return savedJob;
     }
 
-
+    @Transactional
     public Job patchJob(Long id,Job updatedJob){
-        for(Job job:jobs){
-            if(updatedJob.getSalary()!=null){
-                 job.setSalary((updatedJob.getSalary()));
-            }
 
-            if(updatedJob.getTitle()!=null){
-                job.setTitle(updatedJob.getTitle());
-            }
+        Job savedJob=jobRepository.findById(id)
+                .orElseThrow(()->new RuntimeException("job not found with id "+id));
 
-            if(updatedJob.getDescription()!=null){
-                job.setDescription(updatedJob.getDescription());
-            }
-
-            return job;
+        if(updatedJob.getSalary()!=null){
+            savedJob.setSalary((updatedJob.getSalary()));
         }
-        return null;
+
+        if(updatedJob.getTitle()!=null){
+            savedJob.setTitle(updatedJob.getTitle());
+        }
+
+        if(updatedJob.getDescription()!=null){
+            savedJob.setDescription(updatedJob.getDescription());
+        }
+
+        return savedJob;
     }
 
 }

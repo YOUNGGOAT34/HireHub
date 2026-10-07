@@ -1,11 +1,9 @@
 package com.goat.HireHub.job;
 
-import org.apache.coyote.Response;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.ArrayList;
 import java.util.List;
 
 
@@ -25,6 +23,7 @@ public class Controller {
     @GetMapping
 
       public ResponseEntity<List<Job>> getAll(){
+
         return ResponseEntity.ok(service.getAll());
       }
 
@@ -48,7 +47,7 @@ public class Controller {
 
       @DeleteMapping("/{id}")
       public ResponseEntity<Void> deleteJob(@PathVariable Long id){
-          boolean deleted= service.deleteJob(id);
+          boolean deleted= service.deleteById(id);
           if(deleted){
               return ResponseEntity.noContent().build();
           }
