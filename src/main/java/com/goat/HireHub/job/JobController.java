@@ -11,10 +11,10 @@ import java.util.List;
 @RequestMapping("/jobs")
 public class JobController {
 
-    private final JobService service;
+    private final JobService jobService;
 
     public JobController(JobService service) {
-        this.service = service;
+        this.jobService = service;
     }
 
     /*
@@ -24,51 +24,33 @@ public class JobController {
 
       public ResponseEntity<List<Job>> getAll(){
 
-        return ResponseEntity.ok(service.getAll());
+        return ResponseEntity.ok(jobService.getAll());
       }
 
       //get a job by an id
       @GetMapping("/{id}")
       public ResponseEntity<Job> getById(@PathVariable Long id){
-        Job job=service.getById(id);
-        if(job!=null){
-            return ResponseEntity.ok(job);
-        }
-
-        return ResponseEntity.notFound().build();
-
+            return ResponseEntity.ok(jobService.getById(id));
       }
 
       @PostMapping
      public ResponseEntity<Job> addJob(@RequestBody Job job){
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.addJob(job));
+        return ResponseEntity.status(HttpStatus.CREATED).body(jobService.addJob(job));
       }
 
       @DeleteMapping("/{id}")
       public ResponseEntity<Void> deleteJob(@PathVariable Long id){
-          boolean deleted= service.deleteById(id);
-          if(deleted){
-              return ResponseEntity.noContent().build();
-          }
-          return ResponseEntity.notFound().build();
+          jobService.deleteById(id);
+          return ResponseEntity.noContent().build();
       }
 
       @PutMapping("/{id}")
     public ResponseEntity<Job> updateJob(@PathVariable Long id,@RequestBody Job updatedJob){
-             Job updated=service.updateJob(id, updatedJob);
-             if(updated !=null){
-                 return ResponseEntity.status(HttpStatus.OK).body(updated);
-             }
-             return ResponseEntity.notFound().build();
+        return ResponseEntity.status(HttpStatus.OK).body(jobService.updateJob(id, updatedJob));
       }
 
       @PatchMapping("/{id}")
-      public ResponseEntity<Job> patchJob(@PathVariable Long id,@RequestBody Job updatedJob){
-         Job patched= service.patchJob(id, updatedJob);
-         if(patched!=null){
-             return ResponseEntity.ok(patched);
-         }
-         return ResponseEntity.notFound().build();
+      public ResponseEntity<Job> patchJob(@PathVariable Long id,@RequestBody Job updatedJob) {
+          return ResponseEntity.ok(jobService.patchJob(id, updatedJob));
       }
 }
