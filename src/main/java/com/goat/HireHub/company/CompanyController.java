@@ -1,5 +1,9 @@
 package com.goat.HireHub.company;
 
+import com.goat.HireHub.company.dto.CompanyPatchRequest;
+import com.goat.HireHub.company.dto.CompanyRequest;
+import com.goat.HireHub.company.dto.CompanyResponse;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,17 +20,17 @@ public class CompanyController {
      }
 
      @GetMapping
-     public ResponseEntity<List<Company>> getAllCompanies(){
+     public ResponseEntity<List<CompanyResponse>> getAllCompanies(){
            return ResponseEntity.ok(companyService.getAllCompanies());
      }
 
      @GetMapping("/{id}")
-     public ResponseEntity<Company> getCompanyById(@PathVariable Long id){
+     public ResponseEntity<CompanyResponse> getCompanyById(@PathVariable Long id){
          return ResponseEntity.ok(companyService.getCompanyById(id));
      }
 
      @PostMapping
-    public ResponseEntity<Company> addCompany(@RequestBody Company company){
+    public ResponseEntity<CompanyResponse> addCompany(@Valid @RequestBody CompanyRequest company){
           return ResponseEntity.status(HttpStatus.CREATED).body(companyService.addCompany(company));
      }
 
@@ -38,14 +42,14 @@ public class CompanyController {
      }
 
      @PutMapping("/{id}")
-    public ResponseEntity<Company> updateCompany(@PathVariable Long id,@RequestBody Company updatedCompany){
+    public ResponseEntity<CompanyResponse> updateCompany(@PathVariable Long id,@Valid @RequestBody CompanyRequest updatedCompany){
               return ResponseEntity.ok(companyService.updateCompany(id,updatedCompany));
 
      }
 
      @PatchMapping("/{id}")
 
-     public ResponseEntity<Company> patchCompany(@PathVariable Long id,@RequestBody Company updatedCompany){
+     public ResponseEntity<CompanyResponse> patchCompany(@PathVariable Long id,@Valid @RequestBody CompanyPatchRequest updatedCompany){
              return ResponseEntity.ok(companyService.patchCompany(id,updatedCompany));
      }
 

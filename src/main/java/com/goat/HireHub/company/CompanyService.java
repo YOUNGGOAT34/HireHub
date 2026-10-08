@@ -1,5 +1,8 @@
 package com.goat.HireHub.company;
 
+import com.goat.HireHub.company.dto.CompanyPatchRequest;
+import com.goat.HireHub.company.dto.CompanyRequest;
+import com.goat.HireHub.company.dto.CompanyResponse;
 import com.goat.HireHub.exception.ResourceNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
@@ -14,13 +17,20 @@ public class CompanyService {
           this.companyRepository=companyRepository;
      }
 
-     public List<Company> getAllCompanies(){
-          return companyRepository.findAll();
+    private Company findOrThrow(Long id){
+        return companyRepository.findById(id)
+                .orElseThrow(()->new ResourceNotFoundException("company not found",id));
+    }
+
+     public List<CompanyResponse> getAllCompanies(){
+         return companyRepository.findAll().stream()
+                 .map(CompanyResponse::from)
+                 .toList();
      }
 
-     public Company getCompanyById(Long id){
-         return companyRepository.findById(id)
-                 .orElseThrow(()->new ResourceNotFoundException("company not found",id));
+     public CompanyResponse getCompanyById(Long id){
+         Company company=findOrThrow(id);
+         return CompanyResponse.from(company);
      }
 
      public void deleteById(Long id){
@@ -32,32 +42,35 @@ public class CompanyService {
           throw new ResourceNotFoundException("company not found",id);
      }
 
-     public Company addCompany(Company company){
-          return companyRepository.save(company);
+     public CompanyResponse addCompany(CompanyRequest company){
+         Company saved=new Company();
+         saved.setName(company.name());
+         saved.setDescription(company.description());
+
+          return CompanyResponse.from(companyRepository.save(saved));
      }
 
      @Transactional
-     public Company updateCompany(Long id,Company updatedCompany){
-          Company savedCompany=getCompanyById(id);
+     public CompanyResponse updateCompany(Long id,CompanyRequest updatedCompany){
+          Company savedCompany=findOrThrow(id);
 
-          savedCompany.setDescription(updatedCompany.getDescription());
-          savedCompany.setName(updatedCompany.getName());
-
-          return savedCompany;
+          savedCompany.setDescription(updatedCompany.description());
+          savedCompany.setName(updatedCompany.name());
+          return CompanyResponse.from(savedCompany);
      }
 
      @Transactional
-     public  Company patchCompany(Long id,Company updatedCompany){
-         Company savedCompany=getCompanyById(id);
+     public  CompanyResponse patchCompany(Long id, CompanyPatchRequest updatedCompany){
+         Company savedCompany=findOrThrow(id);
 
-         if (updatedCompany.getName()!=null){
-              savedCompany.setName(updatedCompany.getName());
+         if (updatedCompany.name()!=null){
+              savedCompany.setName(updatedCompany.name());
          }
 
-         if (updatedCompany.getDescription()!=null){
-             savedCompany.setDescription(updatedCompany.getDescription());
+         if (updatedCompany.description()!=null){
+             savedCompany.setDescription(updatedCompany.description());
          }
 
-         return savedCompany;
+         return CompanyResponse.from(savedCompany);
      }
 }
