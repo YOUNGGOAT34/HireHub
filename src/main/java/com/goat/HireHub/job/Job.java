@@ -3,6 +3,8 @@ package com.goat.HireHub.job;
 import com.goat.HireHub.company.Company;
 import jakarta.persistence.*;
 
+import java.math.BigDecimal;
+
 @Entity
 @Table(name="jobs")
 public class Job {
@@ -12,16 +14,16 @@ public class Job {
        private Long id;
        @Column(name="job_title")
        private String title;
-       @Column(name="job_description")
+       @Column(name="job_description",length=500)
        private String description;
-       private  Double salary;
-       @ManyToOne
+       private BigDecimal salary;
+       @ManyToOne(fetch = FetchType.LAZY)
        @JoinColumn(name="company_id")
        private Company company;
 
        protected Job(){}
 
-    public Job(Double salary, String description, String title,Company company) {
+    public Job(BigDecimal salary, String description, String title,Company company) {
         this.salary = salary;
         this.description = description;
         this.title = title;
@@ -51,10 +53,10 @@ public class Job {
     public void setDescription(String description) {
         this.description = description;
     }
-    public Double getSalary() {
+    public BigDecimal getSalary() {
         return this.salary;
     }
-    public void setSalary(Double salary) {
+    public void setSalary(BigDecimal salary) {
         this.salary = salary;
     }
 
