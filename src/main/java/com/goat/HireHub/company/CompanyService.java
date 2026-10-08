@@ -1,5 +1,6 @@
 package com.goat.HireHub.company;
 
+import com.goat.HireHub.exception.ResourceNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -19,7 +20,7 @@ public class CompanyService {
 
      public Company getCompanyById(Long id){
          return companyRepository.findById(id)
-                 .orElseThrow(()->new RuntimeException("company not found"));
+                 .orElseThrow(()->new ResourceNotFoundException("company not found",id));
      }
 
      public void deleteById(Long id){
@@ -28,7 +29,7 @@ public class CompanyService {
               return;
           }
 
-          throw new RuntimeException("company not found");
+          throw new ResourceNotFoundException("company not found",id);
      }
 
      public Company addCompany(Company company){
@@ -37,8 +38,7 @@ public class CompanyService {
 
      @Transactional
      public Company updateCompany(Long id,Company updatedCompany){
-          Company savedCompany=companyRepository.findById(id)
-                  .orElseThrow(()->new RuntimeException("company not found"));
+          Company savedCompany=getCompanyById(id);
 
           savedCompany.setDescription(updatedCompany.getDescription());
           savedCompany.setName(updatedCompany.getName());
@@ -48,8 +48,7 @@ public class CompanyService {
 
      @Transactional
      public  Company patchCompany(Long id,Company updatedCompany){
-         Company savedCompany=companyRepository.findById(id)
-                 .orElseThrow(()->new RuntimeException("company not found with id "+id));
+         Company savedCompany=getCompanyById(id);
 
          if (updatedCompany.getName()!=null){
               savedCompany.setName(updatedCompany.getName());
