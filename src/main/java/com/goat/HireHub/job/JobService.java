@@ -1,5 +1,6 @@
 package com.goat.HireHub.job;
 
+import com.goat.HireHub.exception.ResourceNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 import java.util.List;
@@ -24,22 +25,20 @@ public class JobService {
     }
 
     public Job getById(Long id){
-        Optional<Job> job=jobRepository.findById(id);
-        return job.orElse(null);
+        return jobRepository.findById(id)
+                .orElseThrow(()->new ResourceNotFoundException("job",id));
     }
 
-    public boolean deleteById(Long id){
-         if(jobRepository.existsById(id)){
-              jobRepository.deleteById(id);
-              return true;
+    public void deleteById(Long id){
+         if(!jobRepository.existsById(id)){
+             throw new ResourceNotFoundException("job",id);
          }
-         return false;
+        jobRepository.deleteById(id);
     }
 
     @Transactional
     public Job updateJob(Long id,Job updatedJob){
-        Job savedJob=jobRepository.findById(id)
-                .orElseThrow(()->new RuntimeException("job not found with id "+id));
+        Job savedJob=getById(id);
 
         savedJob.setDescription(updatedJob.getDescription());
         savedJob.setTitle(updatedJob.getTitle());
@@ -51,8 +50,7 @@ public class JobService {
     @Transactional
     public Job patchJob(Long id,Job updatedJob){
 
-        Job savedJob=jobRepository.findById(id)
-                .orElseThrow(()->new RuntimeException("job not found with id "+id));
+        Job savedJob=getById(id);
 
         if(updatedJob.getSalary()!=null){
             savedJob.setSalary((updatedJob.getSalary()));
