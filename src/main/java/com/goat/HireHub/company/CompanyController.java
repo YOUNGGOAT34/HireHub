@@ -21,12 +21,8 @@ public class CompanyController {
      }
 
      @GetMapping("/{id}")
-     public ResponseEntity<?> getCompanyById(@PathVariable Long id){
-          try{
-              return ResponseEntity.ok(companyService.getCompanyById(id));
-          }catch (RuntimeException e){
-               return ResponseEntity.notFound().build();
-         }
+     public ResponseEntity<Company> getCompanyById(@PathVariable Long id){
+         return ResponseEntity.ok(companyService.getCompanyById(id));
      }
 
      @PostMapping
@@ -37,34 +33,20 @@ public class CompanyController {
      @DeleteMapping("/{id}")
 
      public ResponseEntity<Void> deleteCompany(@PathVariable Long id){
-          try{
               companyService.deleteById(id);
               return ResponseEntity.noContent().build();
-
-          } catch (RuntimeException e) {
-               return ResponseEntity.notFound().build();
-          }
      }
 
      @PutMapping("/{id}")
     public ResponseEntity<Company> updateCompany(@PathVariable Long id,@RequestBody Company updatedCompany){
-          try{
               return ResponseEntity.ok(companyService.updateCompany(id,updatedCompany));
 
-          } catch (RuntimeException e) {
-              return ResponseEntity.notFound().build();
-          }
      }
 
      @PatchMapping("/{id}")
 
-     public ResponseEntity<?> patchCompany(@PathVariable Long id,@RequestBody Company updatedCompany){
-         try{
+     public ResponseEntity<Company> patchCompany(@PathVariable Long id,@RequestBody Company updatedCompany){
              return ResponseEntity.ok(companyService.patchCompany(id,updatedCompany));
-
-         } catch (RuntimeException e) {
-             return ResponseEntity.notFound().build();
-         }
      }
 
 }
