@@ -6,9 +6,11 @@ import com.goat.HireHub.job.dto.JobRequest;
 import com.goat.HireHub.job.dto.JobResponse;
 import com.goat.HireHub.job.dto.JobUpdateRequest;
 import jakarta.validation.Valid;
+import org.hibernate.query.SortDirection;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -44,8 +46,13 @@ public class JobController {
       }
       //search
     @GetMapping("/search")
-    public Page<JobResponse> searchByTitle(@RequestParam String title,@RequestParam(defaultValue = "0")int page,@RequestParam(defaultValue = "10")int size){
-          Pageable pageable=PageRequest.of(page,size);
+    public Page<JobResponse> searchByTitle(@RequestParam String title,
+                                           @RequestParam(defaultValue = "0")int page,
+                                           @RequestParam(defaultValue = "10")int size,
+                                           @RequestParam(defaultValue = "salary")String sortBy,
+                                           @RequestParam(defaultValue = "desc")String direction){
+        Sort.Direction sortDirection=Sort.Direction.fromString(direction);
+          Pageable pageable=PageRequest.of(page,size, Sort.by(sortDirection,sortBy));
           return jobService.searchByTitle(title,pageable);
     }
 
