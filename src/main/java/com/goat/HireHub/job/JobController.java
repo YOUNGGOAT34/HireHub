@@ -15,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import java.util.Set;
 
 
 @RestController
@@ -51,6 +52,16 @@ public class JobController {
                                            @RequestParam(defaultValue = "10")int size,
                                            @RequestParam(defaultValue = "salary")String sortBy,
                                            @RequestParam(defaultValue = "desc")String direction){
+        Set<String> allowedSortFields = Set.of(
+                "title",
+                "salary"
+        );
+
+        if (!allowedSortFields.contains(sortBy)) {
+            throw new IllegalArgumentException(
+                    "Invalid sort field: " + sortBy
+            );
+        }
         Sort.Direction sortDirection=Sort.Direction.fromString(direction);
           Pageable pageable=PageRequest.of(page,size, Sort.by(sortDirection,sortBy));
           return jobService.searchByTitle(title,pageable);

@@ -51,4 +51,17 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT,
                 "The request conflicts with existing data.");
     }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ProblemDetail> handleIllegalArgument(
+            IllegalArgumentException ex) {
+
+        ProblemDetail problem =
+                ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
+
+        problem.setTitle("Invalid Request Parameter");
+        problem.setDetail(ex.getMessage());
+
+        return ResponseEntity.badRequest().body(problem);
+    }
 }
