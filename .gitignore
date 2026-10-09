@@ -28,8 +28,6 @@ target/
 build/
 !**/src/main/**/build/
 !**/src/test/**/build/
-
 src/main/java/com/goat/HireHub/config
-
 ### VS Code ###
 .vscode/

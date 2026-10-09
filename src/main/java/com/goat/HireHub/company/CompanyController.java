@@ -4,6 +4,9 @@ import com.goat.HireHub.company.dto.CompanyPatchRequest;
 import com.goat.HireHub.company.dto.CompanyRequest;
 import com.goat.HireHub.company.dto.CompanyResponse;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,14 +17,14 @@ import java.util.List;
 @RequestMapping("/companies")
 public class CompanyController {
      private final CompanyService companyService;
-
      public CompanyController(CompanyService companyService){
           this.companyService=companyService;
      }
 
      @GetMapping
-     public ResponseEntity<List<CompanyResponse>> getAllCompanies(){
-           return ResponseEntity.ok(companyService.getAllCompanies());
+     public ResponseEntity<Page<CompanyResponse>> getAllCompanies(@RequestParam(defaultValue = "0")int page, @RequestParam(defaultValue = "10")int size){
+           Pageable pageable= PageRequest.of(page,size);
+           return ResponseEntity.ok(companyService.getAllCompanies(pageable));
      }
 
      @GetMapping("/{id}")
@@ -35,7 +38,6 @@ public class CompanyController {
      }
 
      @DeleteMapping("/{id}")
-
      public ResponseEntity<Void> deleteCompany(@PathVariable Long id){
               companyService.deleteById(id);
               return ResponseEntity.noContent().build();
@@ -48,7 +50,6 @@ public class CompanyController {
      }
 
      @PatchMapping("/{id}")
-
      public ResponseEntity<CompanyResponse> patchCompany(@PathVariable Long id,@Valid @RequestBody CompanyPatchRequest updatedCompany){
              return ResponseEntity.ok(companyService.patchCompany(id,updatedCompany));
      }

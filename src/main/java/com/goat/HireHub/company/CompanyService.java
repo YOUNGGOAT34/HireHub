@@ -5,7 +5,11 @@ import com.goat.HireHub.company.dto.CompanyRequest;
 import com.goat.HireHub.company.dto.CompanyResponse;
 import com.goat.HireHub.exception.ResourceNotFoundException;
 import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
@@ -22,10 +26,8 @@ public class CompanyService {
                 .orElseThrow(()->new ResourceNotFoundException("company not found",id));
     }
 
-     public List<CompanyResponse> getAllCompanies(){
-         return companyRepository.findAll().stream()
-                 .map(CompanyResponse::from)
-                 .toList();
+     public Page<CompanyResponse> getAllCompanies( Pageable pageable){
+         return companyRepository.findAll(pageable).map(CompanyResponse::from);
      }
 
      public CompanyResponse getCompanyById(Long id){
