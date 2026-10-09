@@ -6,6 +6,9 @@ import com.goat.HireHub.job.dto.JobRequest;
 import com.goat.HireHub.job.dto.JobResponse;
 import com.goat.HireHub.job.dto.JobUpdateRequest;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -27,9 +30,11 @@ public class JobController {
     */
     @GetMapping
 
-      public ResponseEntity<List<JobResponse>> getAll(){
+      public ResponseEntity<Page<JobResponse>> getAll(@RequestParam(defaultValue = "0")int page,@RequestParam(defaultValue = "10")int size){
 
-        return ResponseEntity.ok(jobService.getAll());
+        Pageable pageable= PageRequest.of(page,size);
+
+        return ResponseEntity.ok(jobService.getAll(pageable));
       }
 
       //get a job by an id

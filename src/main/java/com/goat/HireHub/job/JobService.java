@@ -9,6 +9,8 @@ import com.goat.HireHub.job.dto.JobRequest;
 import com.goat.HireHub.job.dto.JobResponse;
 import com.goat.HireHub.job.dto.JobUpdateRequest;
 import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
@@ -25,9 +27,9 @@ public class JobService {
          this.companyRepository=companyRepository;
     }
 
-    public List<JobResponse> getAll(){
+    public Page<JobResponse> getAll(Pageable pageable){
 
-        return jobRepository.findAll().stream().map(JobResponse::from).toList();
+        return jobRepository.findAll(pageable).map(JobResponse::from);
     }
 
     public JobResponse addJob(JobRequest request){
