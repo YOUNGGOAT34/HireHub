@@ -27,6 +27,11 @@ public class JobService {
          this.companyRepository=companyRepository;
     }
 
+
+    public Page<JobResponse> searchByTitle(String title,Pageable pageable) {
+        return jobRepository.findByTitleContainingIgnoreCase(title,pageable).map(JobResponse::from);
+    }
+
     public Page<JobResponse> getAll(Pageable pageable){
 
         return jobRepository.findAll(pageable).map(JobResponse::from);

@@ -42,6 +42,12 @@ public class JobController {
       public ResponseEntity<JobResponse> getById(@PathVariable Long id){
             return ResponseEntity.ok(jobService.getById(id));
       }
+      //search
+    @GetMapping("/search")
+    public Page<JobResponse> searchByTitle(@RequestParam String title,@RequestParam(defaultValue = "0")int page,@RequestParam(defaultValue = "10")int size){
+          Pageable pageable=PageRequest.of(page,size);
+          return jobService.searchByTitle(title,pageable);
+    }
 
       @PostMapping
      public ResponseEntity<JobResponse> addJob(@Valid @RequestBody JobRequest job){
