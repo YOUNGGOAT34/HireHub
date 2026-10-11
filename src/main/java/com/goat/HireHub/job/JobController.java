@@ -6,6 +6,8 @@ import com.goat.HireHub.job.dto.JobRequest;
 import com.goat.HireHub.job.dto.JobResponse;
 import com.goat.HireHub.job.dto.JobUpdateRequest;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 import org.hibernate.query.SortDirection;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -50,11 +52,11 @@ public class JobController {
       //search
     @GetMapping("/search")
     public Page<JobResponse> searchJobs(@RequestParam(required = false) String title,
-                                           @RequestParam(defaultValue = "0")int page,
-                                           @RequestParam(defaultValue = "10")int size,
+                                           @RequestParam(defaultValue = "0") @PositiveOrZero(message = "page must be positive") int page,
+                                           @RequestParam(defaultValue = "10") @PositiveOrZero(message = "size must be a positive value") int size,
                                            @RequestParam(defaultValue = "salary")String sortBy,
-                                           @RequestParam(required = false) BigDecimal minSalary,
-                                           @RequestParam(required=false) BigDecimal maxSalary,
+                                           @RequestParam(required = false) @PositiveOrZero(message = "minimum salary must be positive") BigDecimal minSalary,
+                                           @RequestParam(required=false) @PositiveOrZero(message = "maximum salary must be positive") BigDecimal maxSalary,
                                            @RequestParam(required = false) String companyName,
                                            @RequestParam(defaultValue = "desc")String direction){
         Set<String> allowedSortFields = Set.of(
@@ -67,6 +69,13 @@ public class JobController {
                     "Invalid sort field: " + sortBy
             );
         }
+
+        if (minSalary != null && maxSalary != null && minSalary.compareTo(maxSalary) > 0){
+            throw new IllegalArgumentException(
+                    "minimum salary cannot be greater than maximum salary"
+            );
+        }
+
         Sort.Direction sortDirection=Sort.Direction.fromString(direction);
           Pageable pageable=PageRequest.of(page,size, Sort.by(sortDirection,sortBy));
           return jobService.searchJobs(title,minSalary,maxSalary,companyName,pageable);
