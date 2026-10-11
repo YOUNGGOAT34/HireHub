@@ -21,4 +21,20 @@ public class JobSpecification {
                  return criteriaBuilder.greaterThanOrEqualTo(root.get("salary"),minSalary);
            };
      }
+
+
+    public static Specification<Job> salaryAtMost(BigDecimal maxSalary){
+        return (root,query,criteriaBuilder)->{
+            if (maxSalary==null) return null;
+
+            return criteriaBuilder.greaterThanOrEqualTo(root.get("salary"),maxSalary);
+        };
+    }
+
+     public static Specification<Job> byCompany(String companyName){
+          return (root,query,criteriaBuilder)->{
+               if(companyName==null || companyName.isBlank()) return null;
+               return criteriaBuilder.equal(criteriaBuilder.lower(root.get("company").get("name")),companyName.trim().toLowerCase());
+          };
+     }
 }

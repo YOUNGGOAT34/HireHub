@@ -54,6 +54,8 @@ public class JobController {
                                            @RequestParam(defaultValue = "10")int size,
                                            @RequestParam(defaultValue = "salary")String sortBy,
                                            @RequestParam(required = false) BigDecimal minSalary,
+                                           @RequestParam(required=false) BigDecimal maxSalary,
+                                           @RequestParam(required = false) String companyName,
                                            @RequestParam(defaultValue = "desc")String direction){
         Set<String> allowedSortFields = Set.of(
                 "title",
@@ -67,7 +69,7 @@ public class JobController {
         }
         Sort.Direction sortDirection=Sort.Direction.fromString(direction);
           Pageable pageable=PageRequest.of(page,size, Sort.by(sortDirection,sortBy));
-          return jobService.searchJobs(title,minSalary,pageable);
+          return jobService.searchJobs(title,minSalary,maxSalary,companyName,pageable);
     }
 
       @PostMapping

@@ -37,14 +37,18 @@ public class JobService {
     }
 
     public Page<JobResponse> searchJobs(
-            @RequestParam(required = false) String title,
-            @RequestParam(required = false) BigDecimal minSalary,
+            String title,
+            BigDecimal minSalary,
+            BigDecimal maxSalary,
+            String companyName,
             Pageable pageable
           ){
 
         Specification<Job> jobSpecification=JobSpecification
                 .titleContains(title)
-                .and(JobSpecification.salaryAtLeast(minSalary));
+                .and(JobSpecification.salaryAtLeast(minSalary))
+                .and(JobSpecification.byCompany(companyName))
+                .and(JobSpecification.salaryAtMost(maxSalary));
 
         return jobRepository.findAll(jobSpecification,pageable).map(JobResponse::from);
 
