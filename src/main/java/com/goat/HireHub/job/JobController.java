@@ -14,6 +14,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Set;
 
@@ -47,10 +49,11 @@ public class JobController {
       }
       //search
     @GetMapping("/search")
-    public Page<JobResponse> searchByTitle(@RequestParam String title,
+    public Page<JobResponse> searchJobs(@RequestParam(required = false) String title,
                                            @RequestParam(defaultValue = "0")int page,
                                            @RequestParam(defaultValue = "10")int size,
                                            @RequestParam(defaultValue = "salary")String sortBy,
+                                           @RequestParam(required = false) BigDecimal minSalary,
                                            @RequestParam(defaultValue = "desc")String direction){
         Set<String> allowedSortFields = Set.of(
                 "title",
@@ -64,7 +67,7 @@ public class JobController {
         }
         Sort.Direction sortDirection=Sort.Direction.fromString(direction);
           Pageable pageable=PageRequest.of(page,size, Sort.by(sortDirection,sortBy));
-          return jobService.searchByTitle(title,pageable);
+          return jobService.searchJobs(title,minSalary,pageable);
     }
 
       @PostMapping

@@ -11,7 +11,11 @@ import com.goat.HireHub.job.dto.JobUpdateRequest;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -27,14 +31,24 @@ public class JobService {
          this.companyRepository=companyRepository;
     }
 
-
-    public Page<JobResponse> searchByTitle(String title,Pageable pageable) {
-        return jobRepository.findByTitleContainingIgnoreCase(title,pageable).map(JobResponse::from);
-    }
-
     public Page<JobResponse> getAll(Pageable pageable){
 
         return jobRepository.findAll(pageable).map(JobResponse::from);
+    }
+
+    public Page<JobResponse> searchJobs(
+            @RequestParam(required = false) String title,
+            @RequestParam(required = false) BigDecimal minSalary,
+            Pageable pageable
+          ){
+
+        Specification<Job> jobSpecification=JobSpecification
+                .titleContains(title)
+                .and(JobSpecification.salaryAtLeast(minSalary));
+
+        return jobRepository.findAll(jobSpecification,pageable).map(JobResponse::from);
+
+
     }
 
     public JobResponse addJob(JobRequest request){
