@@ -18,7 +18,7 @@ public class User {
     @Column(name="last_name",nullable = false)
     private String lastName;
     @Column(name="username",unique = true)
-    private String userName;
+    private String username;
     @Column(name="role",nullable = false)
     @Enumerated(EnumType.STRING)
     private Role role;
@@ -27,11 +27,12 @@ public class User {
     private String passwordHash;
     public  User(){}
 
-    public User(String email, String firstName, String lastName, Role role,String passwordHash) {
+    public User(String email, String firstName, String lastName, Role role,String passwordHash,String username) {
         this.email = email;
         this.firstName = firstName;
         this.lastName = lastName;
         this.role = role;
+        this.username=username;
         this.passwordHash=passwordHash;
     }
 
@@ -66,6 +67,16 @@ public class User {
     public void setLastName(String lastName) {
         this.lastName = lastName;
     }
+
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
 
     public Role getRole() {
         return role;

@@ -12,7 +12,7 @@ public record UserRequest(
         @NotBlank (message="last name is required") @Size(max=100,message = "last name must not exceed 100 characters") String lastName,
         @Size(max=100,message = "username must not exceed 100 characters") String username,
         @NotBlank(message="Role is required") String role,
-        @NotBlank (message="password is required") @Size(min=8,max=72,message="password must be between 8 and 16 characters")String password
+        @NotBlank (message="password is required") @Size(min=8,max=72,message="password must be between 8 and 72 characters")String password
   ) {
     @Override
     public String toString() {

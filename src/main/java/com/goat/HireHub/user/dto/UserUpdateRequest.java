@@ -20,6 +20,7 @@ public record UserUpdateRequest(
 
         @NotBlank(message = "Username cannot be empty")
         @Size(max = 100, message = "Username must not exceed 100 characters")
-        String username
+        String username,
+        @Size(min=8,max=72,message="password must be between 8 and 72 characters")String password
 
 ) { }
