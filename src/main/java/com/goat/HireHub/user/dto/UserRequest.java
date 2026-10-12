@@ -11,7 +11,7 @@ public record UserRequest(
         @NotBlank(message="email is required") @Size(max=100) @Email(message="please provide a valid email") String email,
         @NotBlank (message="last name is required") @Size(max=100,message = "last name must not exceed 100 characters") String lastName,
         @Size(max=100,message = "username must not exceed 100 characters") String username,
-        @NotNull(message="Role is required") Role role,
+        @NotBlank(message="Role is required") String role,
         @NotBlank (message="password is required") @Size(min=8,max=72,message="password must be between 8 and 16 characters")String password
   ) {
     @Override

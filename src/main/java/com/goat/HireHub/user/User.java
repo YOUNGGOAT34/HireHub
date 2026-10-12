@@ -1,5 +1,6 @@
 package com.goat.HireHub.user;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 
 
@@ -22,8 +23,8 @@ public class User {
     @Enumerated(EnumType.STRING)
     private Role role;
     @Column(name="password",nullable = false)
+    @JsonProperty(access= JsonProperty.Access.WRITE_ONLY)
     private String passwordHash;
-
     public  User(){}
 
     public User(String email, String firstName, String lastName, Role role,String passwordHash) {
@@ -76,5 +77,9 @@ public class User {
 
     public String getPassword(){
          return this.passwordHash;
+    }
+
+    public void setPasswordHash(String passwordHash){
+         this.passwordHash=passwordHash;
     }
 }
