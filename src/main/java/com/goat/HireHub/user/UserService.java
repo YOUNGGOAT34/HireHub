@@ -19,11 +19,11 @@ public class UserService {
           this.passwordEncoder=passwordEncoder;
      }
 
-     public List<UserResponse> users(){
+     public List<UserResponse> getAllUsers(){
           return userRepository.findAll().stream().map(UserResponse::from).toList();
      }
 
-     public UserResponse addUser(UserRequest userRequest){
+     public UserResponse registerUser(UserRequest userRequest){
           String email= userRequest.email().toLowerCase().trim();
           String role=userRequest.role().toUpperCase();
           Set<String> roles=Set.of("EMPLOYEE","USER");
