@@ -30,6 +30,8 @@ public class CompanyService {
          return companyRepository.findAll(pageable).map(CompanyResponse::from);
      }
 
+     public Page<CompanyResponse> searchCompany(String name,)
+
      public CompanyResponse getCompanyById(Long id){
          Company company=findOrThrow(id);
          return CompanyResponse.from(company);

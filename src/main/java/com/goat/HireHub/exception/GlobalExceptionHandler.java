@@ -66,12 +66,10 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return ResponseEntity.badRequest().body(problem);
     }
 
-
     @Override
     protected ResponseEntity<Object> handleHandlerMethodValidationException(
             HandlerMethodValidationException ex, HttpHeaders headers,
             HttpStatusCode status, WebRequest request) {
-
         Map<String, String> errors = new LinkedHashMap<>();
         ex.getParameterValidationResults().forEach(result -> {
             String paramName = result.getMethodParameter().getParameterName();
@@ -84,7 +82,6 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 HttpStatus.BAD_REQUEST, "Validation failed");
         pd.setTitle("Invalid Request Parameters");
         pd.setProperty("errors", errors);
-
         return ResponseEntity.badRequest().body(pd);
     }
 }
