@@ -19,6 +19,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/companies")
@@ -32,21 +33,25 @@ public class CompanyController {
      @GetMapping
      public ResponseEntity<Page<CompanyResponse>> getAllCompanies(@RequestParam(defaultValue = "0") @PositiveOrZero(message = "Page must be 0 or greater") int page,
                                                                   @RequestParam(defaultValue = "10") @Positive(message = "Size must be at least 1")
-                                                                  @Max(value = 100, message = "Size must not exceed 100")int size){
-           Pageable pageable= PageRequest.of(page,size);
-           return ResponseEntity.ok(companyService.getAllCompanies(pageable));
+                                                                  @Max(value = 100, message = "Size must not exceed 100")int size,
+                                                                  @RequestParam(defaultValue = "name") String sortBy,
+                                                                  @RequestParam (defaultValue = "desc") String direction){
+         validateSortField(sortBy);
+         Sort.Direction sortDirection= Sort.Direction.fromString(direction);
+         Pageable pageable=PageRequest.of(page,size,Sort.by(sortDirection,sortBy));
+         return ResponseEntity.ok(companyService.getAllCompanies(pageable));
      }
 
      @GetMapping("/search")
      public ResponseEntity<Page<CompanyResponse>> searchCompany(@RequestParam(defaultValue = "0") @PositiveOrZero(message="Page must be 0 or greater")int page,
                                                                 @RequestParam(defaultValue = "10")@Positive(message = "Size must be at least 1")int size,
                                                                 @RequestParam(defaultValue = "name") String sortBy,
-
+                                                                @RequestParam(required = false) String name,
                                                                 @RequestParam (defaultValue = "desc") String direction){
-
+         validateSortField(sortBy);
          Sort.Direction sortDirection= Sort.Direction.fromString(direction);
          Pageable pageable=PageRequest.of(page,size,Sort.by(sortDirection,sortBy));
-         return ResponseEntity.ok(companyService.getAllCompanies(pageable));
+         return ResponseEntity.ok(companyService.searchCompany(name,pageable));
      }
 
      @GetMapping("/{id}")
@@ -74,6 +79,15 @@ public class CompanyController {
      @PatchMapping("/{id}")
      public ResponseEntity<CompanyResponse> patchCompany(@PathVariable Long id,@Valid @RequestBody CompanyPatchRequest updatedCompany){
              return ResponseEntity.ok(companyService.patchCompany(id,updatedCompany));
+     }
+
+     private void validateSortField(String fieldName){
+         Set<String> allowedSortFields=Set.of("name");
+         if (!allowedSortFields.contains(fieldName)) {
+             throw new IllegalArgumentException(
+                     "Invalid sort field: " + fieldName
+             );
+         }
      }
 
 }

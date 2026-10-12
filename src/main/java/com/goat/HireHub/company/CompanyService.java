@@ -8,6 +8,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -30,7 +31,10 @@ public class CompanyService {
          return companyRepository.findAll(pageable).map(CompanyResponse::from);
      }
 
-     public Page<CompanyResponse> searchCompany(String name,)
+     public Page<CompanyResponse> searchCompany(String name,Pageable pageable){
+         Specification<Company> spec=CompanySpecification.nameContains(name);
+         return companyRepository.findAll(spec,pageable).map(CompanyResponse::from);
+     }
 
      public CompanyResponse getCompanyById(Long id){
          Company company=findOrThrow(id);

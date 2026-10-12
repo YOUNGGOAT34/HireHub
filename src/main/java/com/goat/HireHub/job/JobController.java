@@ -39,10 +39,14 @@ public class JobController {
     */
     @GetMapping
 
-      public ResponseEntity<Page<JobResponse>> getAll(@RequestParam(defaultValue = "0")int page,@RequestParam(defaultValue = "10")int size){
-
-        Pageable pageable= PageRequest.of(page,size);
-
+      public ResponseEntity<Page<JobResponse>> getAll(@RequestParam(defaultValue = "0") @PositiveOrZero(message="Page must be 0 or greater")int page,
+                                                      @RequestParam(defaultValue = "10") @PositiveOrZero(message="Size must be greater than zero") int size,
+                                                      @RequestParam(defaultValue = "desc")String direction,
+                                                      @RequestParam(defaultValue = "salary")String sortBy
+                                                      ){
+        validateSortField(sortBy);
+        Sort.Direction sortDirection=Sort.Direction.fromString(direction);
+        Pageable pageable=PageRequest.of(page,size, Sort.by(sortDirection,sortBy));
         return ResponseEntity.ok(jobService.getAll(pageable));
       }
 
@@ -61,17 +65,7 @@ public class JobController {
                                            @RequestParam(required=false) @PositiveOrZero(message = "maximum salary must be positive") BigDecimal maxSalary,
                                            @RequestParam(required = false) String companyName,
                                            @RequestParam(defaultValue = "desc")String direction){
-        Set<String> allowedSortFields = Set.of(
-                "title",
-                "salary"
-        );
-
-        if (!allowedSortFields.contains(sortBy)) {
-            throw new IllegalArgumentException(
-                    "Invalid sort field: " + sortBy
-            );
-        }
-
+        validateSortField(sortBy);
         if (minSalary != null && maxSalary != null && minSalary.compareTo(maxSalary) > 0){
             throw new IllegalArgumentException(
                     "minimum salary cannot be greater than maximum salary"
@@ -103,4 +97,16 @@ public class JobController {
       public ResponseEntity<JobResponse> patchJob(@PathVariable Long id,@Valid @RequestBody JobPatchRequest updatedJob) {
           return ResponseEntity.ok(jobService.patchJob(id, updatedJob));
       }
+
+    private void validateSortField(String fieldName){
+        Set<String> allowedSortFields = Set.of(
+                "title",
+                "salary"
+        );
+        if (!allowedSortFields.contains(fieldName)) {
+            throw new IllegalArgumentException(
+                    "Invalid sort field: " + fieldName
+            );
+        }
+    }
 }
