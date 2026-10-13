@@ -28,14 +28,11 @@ public class SecurityConfig {
 
                 // 2. Configure which endpoints are public or private
                 .authorizeHttpRequests(auth -> auth
-                        // Allow public access to all user endpoints
-                        .requestMatchers("/users/**").permitAll()
 
-                        // Allow public access to your other endpoints (seen in your Postman history)
+                        .requestMatchers("/users/**").permitAll()
+                        .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/companies/**").permitAll()
                         .requestMatchers("/jobs/**").permitAll()
-
-                        // Any other request not specified above will require logging in
                         .anyRequest().authenticated()
                 );
 
