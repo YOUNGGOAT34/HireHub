@@ -66,6 +66,27 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return ResponseEntity.badRequest().body(problem);
     }
 
+    @ExceptionHandler(jakarta.validation.ConstraintViolationException.class)
+    public ResponseEntity<Object> handleConstraintViolation(
+            jakarta.validation.ConstraintViolationException ex) {
+
+        Map<String, String> errors = new java.util.LinkedHashMap<>();
+
+        ex.getConstraintViolations().forEach(violation -> {
+            String propertyPath = violation.getPropertyPath().toString();
+            String paramName = propertyPath.substring(propertyPath.lastIndexOf('.') + 1);
+            errors.putIfAbsent(paramName, violation.getMessage());
+        });
+
+        ProblemDetail pd = ProblemDetail.forStatusAndDetail(
+                HttpStatus.BAD_REQUEST, "Validation failed");
+        pd.setTitle("Invalid Request Parameters");
+        pd.setProperty("errors", errors);
+
+        return ResponseEntity.badRequest().body(pd);
+    }
+
+
     @Override
     protected ResponseEntity<Object> handleHandlerMethodValidationException(
             HandlerMethodValidationException ex, HttpHeaders headers,
