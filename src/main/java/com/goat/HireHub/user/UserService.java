@@ -7,6 +7,8 @@ import com.goat.HireHub.user.dto.UserResponse;
 import com.goat.HireHub.user.dto.UserUpdateRequest;
 import jakarta.transaction.Transactional;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -23,8 +25,8 @@ public class UserService {
           this.passwordEncoder=passwordEncoder;
      }
 
-     public List<UserResponse> getAllUsers(){
-          return userRepository.findAll().stream().map(UserResponse::from).toList();
+     public Page<UserResponse> getAllUsers(Pageable pageable){
+          return userRepository.findAll(pageable).map(UserResponse::from);
      }
 
      public UserResponse getUserById(Long id){

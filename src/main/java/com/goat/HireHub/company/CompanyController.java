@@ -55,7 +55,7 @@ public class CompanyController {
      }
 
      @GetMapping("/{id}")
-     public ResponseEntity<CompanyResponse> getCompanyById(@PathVariable Long id){
+     public ResponseEntity<CompanyResponse> getCompanyById(@PathVariable @Positive(message="Id must be greater than zero") Long id){
          return ResponseEntity.ok(companyService.getCompanyById(id));
      }
 
@@ -65,19 +65,19 @@ public class CompanyController {
      }
 
      @DeleteMapping("/{id}")
-     public ResponseEntity<Void> deleteCompany(@PathVariable Long id){
+     public ResponseEntity<Void> deleteCompany(@PathVariable @Positive(message="Id must be greater than zero") Long id){
               companyService.deleteById(id);
               return ResponseEntity.noContent().build();
      }
 
      @PutMapping("/{id}")
-    public ResponseEntity<CompanyResponse> updateCompany(@PathVariable Long id,@Valid @RequestBody CompanyRequest updatedCompany){
+    public ResponseEntity<CompanyResponse> updateCompany(@PathVariable @Positive(message="Id must be greater than zero") Long id,@Valid @RequestBody CompanyRequest updatedCompany){
               return ResponseEntity.ok(companyService.updateCompany(id,updatedCompany));
 
      }
 
      @PatchMapping("/{id}")
-     public ResponseEntity<CompanyResponse> patchCompany(@PathVariable Long id,@Valid @RequestBody CompanyPatchRequest updatedCompany){
+     public ResponseEntity<CompanyResponse> patchCompany(@PathVariable @Positive(message="Id must be greater than zero") Long id,@Valid @RequestBody CompanyPatchRequest updatedCompany){
              return ResponseEntity.ok(companyService.patchCompany(id,updatedCompany));
      }
 
