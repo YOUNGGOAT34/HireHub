@@ -107,7 +107,7 @@ public class UserService {
      public UserResponse registerUser(UserRequest userRequest){
           String email= userRequest.email().toLowerCase().trim();
           String role=userRequest.role().toUpperCase();
-          Set<String> roles=Set.of("EMPLOYEE","CANDIDATE");
+          Set<String> roles=Set.of("EMPLOYER","CANDIDATE");
 
           if (!roles.contains(role)){
                throw new IllegalArgumentException("Unknown role "+role);
