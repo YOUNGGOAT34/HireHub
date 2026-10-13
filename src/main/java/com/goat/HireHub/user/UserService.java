@@ -95,7 +95,7 @@ public class UserService {
      public UserResponse registerUser(UserRequest userRequest){
           String email= userRequest.email().toLowerCase().trim();
           String role=userRequest.role().toUpperCase();
-          Set<String> roles=Set.of("EMPLOYEE","USER");
+          Set<String> roles=Set.of("EMPLOYEE","CANDIDATE");
 
           if (!roles.contains(role)){
                throw new IllegalArgumentException("Unknown role "+role);
@@ -109,6 +109,7 @@ public class UserService {
           user.setFirstName(userRequest.firstName());
           user.setLastName(userRequest.lastName());
           user.setRole(Role.valueOf(role));
+          user.setUsername(userRequest.username());
           user.setPasswordHash(passwordEncoder.encode(userRequest.password()));
           return  UserResponse.from(userRepository.save(user));
      }
