@@ -34,6 +34,10 @@ public class UserService {
             return UserResponse.from(user);
      }
 
+     public List<UserResponse> searchByFirstName(String firstName){
+           return userRepository.findByFirstNameContainingIgnoreCase(firstName);
+     }
+
      public void deleteById(Long id){
            if(!userRepository.existsById(id)){
                  throw new ResourceNotFoundException("user not found",id);

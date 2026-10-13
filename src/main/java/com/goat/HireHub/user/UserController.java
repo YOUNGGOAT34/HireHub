@@ -48,6 +48,11 @@ public class UserController {
            return ResponseEntity.ok(userService.getUserById(id));
       }
 
+      @GetMapping("/search")
+      public List<UserResponse> searchByFirstName(@RequestParam String firstName){
+           return userService.searchByFirstName(firstName);
+      }
+
       @DeleteMapping("/{id}")
       public ResponseEntity<Void> deleteById(@PathVariable @Positive(message="Id must be greater than zero") Long id){
           userService.deleteById(id);
