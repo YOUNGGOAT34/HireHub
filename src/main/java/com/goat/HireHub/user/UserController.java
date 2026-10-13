@@ -11,12 +11,14 @@ import jakarta.validation.constraints.PositiveOrZero;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/users")
@@ -31,8 +33,13 @@ public class UserController {
       @GetMapping
       public ResponseEntity<Page<UserResponse>> getUsers(
               @RequestParam(defaultValue = "0") @PositiveOrZero(message = "Page number has to be zero or greater") int page,
-              @RequestParam(defaultValue = "10") @Positive(message = "Page size must greater than zero") int size){
-          Pageable pageable= PageRequest.of(page,size);
+              @RequestParam(defaultValue = "10") @Positive(message = "Page size must greater than zero") int size,
+              @RequestParam(defaultValue = "firstName")String sortBy,
+              @RequestParam(defaultValue = "desc") String direction){
+
+          validateSortingField(sortBy);
+          Sort.Direction sortDirection=Sort.Direction.fromString(direction);
+          Pageable pageable= PageRequest.of(page,size,Sort.by(sortDirection,sortBy));
           return ResponseEntity.ok(userService.getAllUsers(pageable));
       }
 
@@ -59,6 +66,16 @@ public class UserController {
      @PatchMapping("/{id}")
      public   ResponseEntity<UserResponse> patchUser(@PathVariable @Positive(message="Id must be greater than zero") Long id, @RequestBody @Valid UserPatchRequest userPatchRequest){
          return ResponseEntity.ok(userService.patchUser(id,userPatchRequest));
+     }
+
+     //helpers
+     private void validateSortingField(String field){
+         Set<String> allowedSortFields=Set.of("firstName","lastName","email","username");
+         if (!allowedSortFields.contains(field)) {
+             throw new IllegalArgumentException(
+                     "Invalid sort field: " + field
+             );
+         }
      }
 
 }
