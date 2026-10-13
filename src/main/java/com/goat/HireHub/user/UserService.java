@@ -1,6 +1,7 @@
 package com.goat.HireHub.user;
 
 import com.goat.HireHub.exception.ResourceNotFoundException;
+import com.goat.HireHub.job.dto.JobResponse;
 import com.goat.HireHub.user.dto.UserPatchRequest;
 import com.goat.HireHub.user.dto.UserRequest;
 import com.goat.HireHub.user.dto.UserResponse;
@@ -9,6 +10,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -34,8 +36,13 @@ public class UserService {
             return UserResponse.from(user);
      }
 
-     public List<UserResponse> searchByFirstName(String firstName){
-           return userRepository.findByFirstNameContainingIgnoreCase(firstName);
+     public Page<UserResponse> searchUsers(String firstName,String lastName,String username,String role,Pageable pageable){
+          Specification<User> spec=UserSpecification
+                  .firstNameMatches(firstName)
+                  .and(UserSpecification.lastNameMatches(lastName))
+                  .and(UserSpecification.usernameMatches(username))
+                  .and(UserSpecification.roleEqual(role));
+           return userRepository.findAll(spec,pageable).map(UserResponse::from);
      }
 
      public void deleteById(Long id){
@@ -60,7 +67,6 @@ public class UserService {
           return UserResponse.from(savedUser);
 
      }
-
 
      @Transactional
      public UserResponse patchUser(Long id, UserPatchRequest userRequest){
