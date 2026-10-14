@@ -91,7 +91,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             org.springframework.security.authentication.BadCredentialsException ex) {
 
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
-                HttpStatus.UNAUTHORIZED, // 401 Unauthorized is correct for bad passwords
+                HttpStatus.UNAUTHORIZED, 
                 "Invalid email or password. Please try again."
         );
 
