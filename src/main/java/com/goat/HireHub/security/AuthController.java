@@ -14,9 +14,11 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthenticationManager authenticationManager;
+    private final JwtService jwtService;
 
-    public AuthController(AuthenticationManager authenticationManager) {
+    public AuthController(AuthenticationManager authenticationManager,JwtService jwtService) {
         this.authenticationManager = authenticationManager;
+        this.jwtService=jwtService;
     }
 
     @PostMapping("/login")
@@ -30,6 +32,16 @@ public class AuthController {
                                 request.password()
                         )
                 );
+
+        String token = jwtService.generateToken(
+                authentication.getName()
+        );
+
+        LoginResponse response = new LoginResponse(
+                token,
+                "Bearer",
+                jwtService.getExpirationSeconds()
+        );
 
         return ResponseEntity.ok(
                 "Authenticated successfully: " +
