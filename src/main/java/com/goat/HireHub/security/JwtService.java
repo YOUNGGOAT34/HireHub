@@ -41,6 +41,14 @@ public class JwtService {
                 .compact();
     }
 
+    private Claims extractAllClaims(String token) {
+        return Jwts.parser()
+                .verifyWith(signingKey)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
+    }
+
     public String extractEmail(String token){
          return extractAllClaims(token).getSubject();
     }
