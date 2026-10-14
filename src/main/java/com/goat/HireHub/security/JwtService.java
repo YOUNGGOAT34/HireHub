@@ -3,7 +3,9 @@ package com.goat.HireHub.security;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -37,6 +39,21 @@ public class JwtService {
                 .expiration(expiration)
                 .signWith(signingKey)
                 .compact();
+    }
+
+    public String extractEmail(String token){
+         return extractAllClaims(token).getSubject();
+    }
+
+    public boolean isTokenValid(String token, UserDetails userDetails) {
+        try {
+            Claims claims = extractAllClaims(token);
+
+            return claims.getSubject().equals(userDetails.getUsername())
+                    && claims.getExpiration().after(new Date());
+        } catch (JwtException | IllegalArgumentException e) {
+            return false;
+        }
     }
 
     public long getExpirationSeconds() {

@@ -22,7 +22,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(
+    public ResponseEntity<LoginResponse> login(
             @Valid @RequestBody LoginRequest request) {
 
         Authentication authentication =
@@ -44,8 +44,7 @@ public class AuthController {
         );
 
         return ResponseEntity.ok(
-                "Authenticated successfully: " +
-                        authentication.getName()
+                response
         );
     }
 }
