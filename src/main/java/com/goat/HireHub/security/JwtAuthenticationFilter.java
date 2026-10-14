@@ -47,7 +47,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         final String email;
 
         try {
-            email = jwtService.extractUsername(token);
+            email = jwtService.extractEmail(token);
         } catch (io.jsonwebtoken.JwtException | IllegalArgumentException e) {
             filterChain.doFilter(request, response);
             return;
