@@ -1,3 +1,4 @@
+
 package com.goat.HireHub.security;
 
 public record LoginResponse(
