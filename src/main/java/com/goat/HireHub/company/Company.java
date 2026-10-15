@@ -18,12 +18,13 @@ public class Company {
      private String name;
      @Column(name="company_description")
      private String description;
-     @OneToMany(mappedBy = "company")
+     @OneToMany(mappedBy = "company",cascade = CascadeType.ALL, orphanRemoval =true)
      private List<Job> jobs;
-     protected Company(){}
 
-     @OneToMany(mappedBy = "company", fetch = FetchType.LAZY)
-     private List<User> employees;
+     @OneToMany(mappedBy = "company", cascade = CascadeType.ALL, orphanRemoval = true)
+     private List<CompanyMembership> memberships;
+
+     protected Company(){}
 
      public Company(String name,String description){
            this.description=description;

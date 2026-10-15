@@ -46,18 +46,13 @@ public class CompanyService {
          return CompanyResponse.from(company);
      }
 
+     @Transactional
      public void deleteById(Long id){
-         Company company=findOrThrow(id);
-         User currentUser=securityUtils.getCurrentUser();
-         CompanyMembership membership=findMemberShipOrThrow(currentUser.getId(), id);
-
-         if(membership.getRole() != Role.ADMIN){
-             throw new org.springframework.security.access.AccessDeniedException(
-                     "Access Denied: Only a company admin can delete this company."
-             );
-         }
+         authorizeAccess(id);
+         companyRepository.deleteById(id);
      }
 
+     @Transactional
      public CompanyResponse addCompany(CompanyRequest company){
          User currentUser=securityUtils.getCurrentUser();
          Company newCompany=new Company();
@@ -71,7 +66,8 @@ public class CompanyService {
 
      @Transactional
      public CompanyResponse updateCompany(Long id,CompanyRequest updatedCompany){
-          Company savedCompany=findOrThrow(id);
+         Company savedCompany=authorizeAccess(id);
+
           savedCompany.setDescription(updatedCompany.description());
           savedCompany.setName(updatedCompany.name());
           return CompanyResponse.from(savedCompany);
@@ -79,8 +75,7 @@ public class CompanyService {
 
      @Transactional
      public  CompanyResponse patchCompany(Long id, CompanyPatchRequest updatedCompany){
-         Company savedCompany=findOrThrow(id);
-
+         Company savedCompany=authorizeAccess(id);
          if (updatedCompany.name()!=null){
               savedCompany.setName(updatedCompany.name());
          }
@@ -102,5 +97,19 @@ public class CompanyService {
         return companyMembershipRepository.findByUserIdAndCompanyId(userId,companyId)
                 .orElseThrow(()-> new org.springframework.security.access.AccessDeniedException(
                         "Access Denied: You do not belong to this company."));
+    }
+
+    private Company authorizeAccess(Long id){
+        Company company=findOrThrow(id);
+        User currentUser=securityUtils.getCurrentUser();
+        CompanyMembership membership=findMemberShipOrThrow(currentUser.getId(), id);
+
+        if(membership.getRole() != Role.ADMIN){
+            throw new org.springframework.security.access.AccessDeniedException(
+                    "Access Denied: Only a company admin can delete this company."
+            );
+        }
+
+        return company;
     }
 }
