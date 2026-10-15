@@ -1,8 +1,6 @@
 package com.goat.HireHub.company;
 
-import com.goat.HireHub.company.dto.CompanyPatchRequest;
-import com.goat.HireHub.company.dto.CompanyRequest;
-import com.goat.HireHub.company.dto.CompanyResponse;
+import com.goat.HireHub.company.dto.*;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -61,6 +59,14 @@ public class CompanyController {
      @PostMapping
     public ResponseEntity<CompanyResponse> addCompany(@Valid @RequestBody CompanyRequest company){
           return ResponseEntity.status(HttpStatus.CREATED).body(companyService.addCompany(company));
+     }
+
+     @PostMapping("/{id}/members")
+     public ResponseEntity<CompanyMemberResponse> addMember(
+             @PathVariable @Positive(message ="company id has to be greater than zero")Long id,
+             @Valid @RequestBody MemberInviteRequest request){
+
+          return ResponseEntity.status(HttpStatus.CREATED).body(companyService.addMember(id,request.email(),request.role()));
      }
 
      @DeleteMapping("/{id}")

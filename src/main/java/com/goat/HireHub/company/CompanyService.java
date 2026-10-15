@@ -1,5 +1,6 @@
 package com.goat.HireHub.company;
 
+import com.goat.HireHub.company.dto.CompanyMemberResponse;
 import com.goat.HireHub.company.dto.CompanyPatchRequest;
 import com.goat.HireHub.company.dto.CompanyRequest;
 import com.goat.HireHub.company.dto.CompanyResponse;
@@ -22,13 +23,16 @@ public class CompanyService {
      private final CompanyRepository companyRepository;
      private final CompanyMembershipRepository companyMembershipRepository;
      private final SecurityUtils securityUtils;
+     private final UserRepository userRepository;
 
      public CompanyService(CompanyRepository companyRepository,
                            CompanyMembershipRepository companyMembershipRepository,
-                           SecurityUtils securityUtils){
+                           SecurityUtils securityUtils,
+                           UserRepository userRepository){
           this.companyRepository=companyRepository;
           this.companyMembershipRepository=companyMembershipRepository;
           this.securityUtils=securityUtils;
+          this.userRepository=userRepository;
      }
 
 
@@ -85,6 +89,20 @@ public class CompanyService {
          }
 
          return CompanyResponse.from(savedCompany);
+     }
+
+     @Transactional
+     public CompanyMemberResponse addMember(Long companyId, String email, Role role){
+            Company company=authorizeAccess(companyId);
+            User targetUser=userRepository.findByEmailIgnoreCase(email)
+                            .orElseThrow(()->new ResourceNotFoundException("user"));
+            boolean isMember=companyMembershipRepository.findByUserIdAndCompanyId(companyId, targetUser.getId()).isPresent();
+            if(isMember){
+                 throw new IllegalArgumentException(email+"is already a member of this company");
+            }
+
+            CompanyMembership companyMembership=new CompanyMembership(targetUser,company,role);
+            return CompanyMemberResponse.from(companyMembershipRepository.save(companyMembership));
      }
 
 

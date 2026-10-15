@@ -47,6 +47,7 @@ public class JobService {
             BigDecimal minSalary,
             BigDecimal maxSalary,
             String companyName,
+            Long companyId,
             Pageable pageable
           ){
 
@@ -54,7 +55,8 @@ public class JobService {
                 .titleContains(title)
                 .and(JobSpecification.salaryAtLeast(minSalary))
                 .and(JobSpecification.byCompany(companyName))
-                .and(JobSpecification.salaryAtMost(maxSalary));
+                .and(JobSpecification.salaryAtMost(maxSalary))
+                .and(JobSpecification.byCompanyId(companyId));
 
         return jobRepository.findAll(jobSpecification,pageable).map(JobResponse::from);
 

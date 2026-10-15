@@ -37,4 +37,12 @@ public class JobSpecification {
                return criteriaBuilder.equal(criteriaBuilder.lower(root.get("company").get("name")),companyName.trim().toLowerCase());
           };
      }
+
+    public static Specification<Job> byCompanyId(Long companyId) {
+         return (root, query, criteriaBuilder) ->{
+               if(companyId==null) return null;
+               return criteriaBuilder.equal(root.get("company").get("id"),companyId);
+         };
+
+    }
 }

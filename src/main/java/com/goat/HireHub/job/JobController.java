@@ -64,6 +64,7 @@ public class JobController {
                                            @RequestParam(required = false) @PositiveOrZero(message = "minimum salary must be positive") BigDecimal minSalary,
                                            @RequestParam(required=false) @PositiveOrZero(message = "maximum salary must be positive") BigDecimal maxSalary,
                                            @RequestParam(required = false) String companyName,
+                                           @RequestParam(required = false) @Positive(message = "company id must be greater than zero") Long companyId,
                                            @RequestParam(defaultValue = "desc")String direction){
         validateSortField(sortBy);
         if (minSalary != null && maxSalary != null && minSalary.compareTo(maxSalary) > 0){
@@ -74,7 +75,7 @@ public class JobController {
 
         Sort.Direction sortDirection=Sort.Direction.fromString(direction);
           Pageable pageable=PageRequest.of(page,size, Sort.by(sortDirection,sortBy));
-          return jobService.searchJobs(title,minSalary,maxSalary,companyName,pageable);
+          return jobService.searchJobs(title,minSalary,maxSalary,companyName,companyId,pageable);
     }
 
       @PostMapping
