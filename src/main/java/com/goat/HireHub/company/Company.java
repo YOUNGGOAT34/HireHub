@@ -20,7 +20,6 @@ public class Company {
      private String description;
      @OneToMany(mappedBy = "company",cascade = CascadeType.ALL, orphanRemoval =true)
      private List<Job> jobs;
-
      @OneToMany(mappedBy = "company", cascade = CascadeType.ALL, orphanRemoval = true)
      private List<CompanyMembership> memberships;
 

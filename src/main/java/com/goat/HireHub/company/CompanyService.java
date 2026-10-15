@@ -88,15 +88,15 @@ public class CompanyService {
      }
 
 
-    private Company findOrThrow(Long id){
+    public Company findOrThrow(Long id){
         return companyRepository.findById(id)
-                .orElseThrow(()->new ResourceNotFoundException("company not found",id));
+                .orElseThrow(()->new ResourceNotFoundException("company",id));
     }
 
-    private CompanyMembership findMemberShipOrThrow(Long userId,Long companyId){
+    public CompanyMembership findMemberShipOrThrow(Long userId,Long companyId){
         return companyMembershipRepository.findByUserIdAndCompanyId(userId,companyId)
                 .orElseThrow(()-> new org.springframework.security.access.AccessDeniedException(
-                        "Access Denied: You do not belong to this company."));
+                        "Access Denied: You do not work for this company."));
     }
 
     private Company authorizeAccess(Long id){

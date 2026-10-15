@@ -1,13 +1,14 @@
 package com.goat.HireHub.job;
 
-import com.goat.HireHub.company.Company;
-import com.goat.HireHub.company.CompanyRepository;
+import com.goat.HireHub.company.*;
 import com.goat.HireHub.company.dto.CompanyResponse;
 import com.goat.HireHub.exception.ResourceNotFoundException;
 import com.goat.HireHub.job.dto.JobPatchRequest;
 import com.goat.HireHub.job.dto.JobRequest;
 import com.goat.HireHub.job.dto.JobResponse;
 import com.goat.HireHub.job.dto.JobUpdateRequest;
+import com.goat.HireHub.security.SecurityUtils;
+import com.goat.HireHub.user.User;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -24,11 +25,16 @@ import java.util.Optional;
 public class JobService {
 
     private final JobRepository jobRepository;
-    private final CompanyRepository companyRepository;
+    private final SecurityUtils securityUtils;
+    private final CompanyService companyService;
 
-    public JobService(JobRepository jobRep,CompanyRepository companyRepository){
+
+    public JobService(JobRepository jobRep,
+                      SecurityUtils securityUtils,
+                      CompanyService companyService){
          this.jobRepository=jobRep;
-         this.companyRepository=companyRepository;
+         this.securityUtils=securityUtils;
+         this.companyService=companyService;
     }
 
     public Page<JobResponse> getAll(Pageable pageable){
@@ -55,9 +61,9 @@ public class JobService {
 
     }
 
+    @Transactional
     public JobResponse addJob(JobRequest request){
-        Company company=companyRepository.findById(request.companyId())
-                .orElseThrow(()->new ResourceNotFoundException("company", request.companyId()));
+        Company company=authorizeAccess(request.companyId());
         Job job=new Job();
         job.setTitle(request.title());
         job.setDescription(request.description());
@@ -75,16 +81,18 @@ public class JobService {
             return JobResponse.from(findOrThrow(id));
     }
 
+    @Transactional
     public void deleteById(Long id){
-         if(!jobRepository.existsById(id)){
-             throw new ResourceNotFoundException("job",id);
-         }
+         Job savedJob=findOrThrow(id);
+         authorizeAccess(savedJob.getCompany().getId());
         jobRepository.deleteById(id);
     }
 
     @Transactional
     public JobResponse updateJob(Long id, JobUpdateRequest updatedJob){
+
         Job savedJob=findOrThrow(id);
+        authorizeAccess(savedJob.getCompany().getId());
         savedJob.setDescription(updatedJob.description());
         savedJob.setTitle(updatedJob.title());
         savedJob.setSalary(updatedJob.salary());
@@ -96,7 +104,7 @@ public class JobService {
     public JobResponse patchJob(Long id, JobPatchRequest updatedJob){
 
         Job savedJob=findOrThrow(id);
-
+        authorizeAccess(savedJob.getCompany().getId());
         if(updatedJob.salary()!=null){
             savedJob.setSalary((updatedJob.salary()));
         }
@@ -110,6 +118,21 @@ public class JobService {
         }
 
         return JobResponse.from(savedJob);
+    }
+
+
+    private Company authorizeAccess(Long id){
+        Company company=companyService.findOrThrow(id);
+        User currentUser=securityUtils.getCurrentUser();
+        CompanyMembership membership=companyService.findMemberShipOrThrow(currentUser.getId(), id);
+
+        if(membership.getRole() != Role.ADMIN && membership.getRole()!=Role.RECRUITER){
+            throw new org.springframework.security.access.AccessDeniedException(
+                    "Access Denied: Only a company recruiters and admin can post or modify jobs belonging to that company."
+            );
+        }
+
+        return company;
     }
 
 }
