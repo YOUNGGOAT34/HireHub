@@ -56,6 +56,12 @@ public class CompanyController {
          return ResponseEntity.ok(companyService.getCompanyById(id));
      }
 
+     @GetMapping("/{id}/members")
+     public ResponseEntity<Page<CompanyMemberResponse>> getAllMembers(@PathVariable @Positive(message = "company id must be greater than 0") Long id){
+           Pageable pageable=PageRequest.of(0,10);
+           return ResponseEntity.ok(companyService.getMembers(id,pageable));
+     }
+
      @PostMapping
     public ResponseEntity<CompanyResponse> addCompany(@Valid @RequestBody CompanyRequest company){
           return ResponseEntity.status(HttpStatus.CREATED).body(companyService.addCompany(company));

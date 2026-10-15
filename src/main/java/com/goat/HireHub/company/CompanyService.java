@@ -56,6 +56,11 @@ public class CompanyService {
          companyRepository.deleteById(id);
      }
 
+     public Page<CompanyMemberResponse> getMembers(Long id,Pageable pageable){
+           findOrThrow(id);
+           return companyMembershipRepository.findMembershipsByCompanyId(id,pageable).map(CompanyMemberResponse::from);
+     }
+
      @Transactional
      public CompanyResponse addCompany(CompanyRequest company){
          User currentUser=securityUtils.getCurrentUser();
