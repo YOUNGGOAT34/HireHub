@@ -66,6 +66,16 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return ResponseEntity.badRequest().body(problem);
     }
 
+
+    @ExceptionHandler(ConflictException.class)
+    public ProblemDetail handleConflictException(ConflictException e){
+        ProblemDetail problem= ProblemDetail.forStatus(HttpStatus.CONFLICT);
+        problem.setTitle("conflict");
+        problem.setDetail(e.getMessage());
+        return problem;
+    }
+
+
     @ExceptionHandler(jakarta.validation.ConstraintViolationException.class)
     public ResponseEntity<Object> handleConstraintViolation(
             jakarta.validation.ConstraintViolationException ex) {
@@ -114,6 +124,8 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(problemDetail);
     }
+
+
 
 
     @Override

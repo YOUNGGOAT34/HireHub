@@ -4,6 +4,7 @@ import com.goat.HireHub.company.dto.CompanyMemberResponse;
 import com.goat.HireHub.company.dto.CompanyPatchRequest;
 import com.goat.HireHub.company.dto.CompanyRequest;
 import com.goat.HireHub.company.dto.CompanyResponse;
+import com.goat.HireHub.exception.ConflictException;
 import com.goat.HireHub.exception.ResourceNotFoundException;
 import com.goat.HireHub.security.SecurityUtils;
 import com.goat.HireHub.user.User;
@@ -101,9 +102,9 @@ public class CompanyService {
             Company company=authorizeAccess(companyId);
             User targetUser=userRepository.findByEmailIgnoreCase(email)
                             .orElseThrow(()->new ResourceNotFoundException("user"));
-            boolean isMember=companyMembershipRepository.findByUserIdAndCompanyId(companyId, targetUser.getId()).isPresent();
+            boolean isMember=companyMembershipRepository.findByUserIdAndCompanyId(targetUser.getId(),companyId).isPresent();
             if(isMember){
-                 throw new IllegalArgumentException(email+"is already a member of this company");
+                 throw new ConflictException(email+"is already a member of this company");
             }
 
             CompanyMembership companyMembership=new CompanyMembership(targetUser,company,role);

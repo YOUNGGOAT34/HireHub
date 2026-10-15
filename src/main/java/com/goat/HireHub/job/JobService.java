@@ -87,7 +87,7 @@ public class JobService {
     public void deleteById(Long id){
          Job savedJob=findOrThrow(id);
          authorizeAccess(savedJob.getCompany().getId());
-        jobRepository.deleteById(id);
+        jobRepository.delete(savedJob);
     }
 
     @Transactional

@@ -1,6 +1,7 @@
 package com.goat.HireHub.user;
 
 import com.goat.HireHub.company.Role;
+import com.goat.HireHub.exception.ConflictException;
 import com.goat.HireHub.exception.ResourceNotFoundException;
 import com.goat.HireHub.user.dto.UserPatchRequest;
 import com.goat.HireHub.user.dto.UserRequest;
@@ -56,7 +57,7 @@ public class UserService {
           User savedUser=getById(id);
           String email=userRequest.email().toLowerCase().trim();
           if (!savedUser.getEmail().equals(email) && findByEmail(email)){
-               throw new DataIntegrityViolationException("This email address is already taken by another account");
+               throw new ConflictException("This email address is already taken by another account");
           }
           savedUser.setLastName(userRequest.lastName());
           savedUser.setFirstName(userRequest.firstName());
@@ -74,7 +75,7 @@ public class UserService {
           if (userRequest.email()!=null){
                String email=userRequest.email().toLowerCase().trim();
                if (!savedUser.getEmail().equals(email) && findByEmail(email)){
-                    throw new DataIntegrityViolationException("This email address is already taken by another account");
+                    throw new ConflictException("This email address is already taken by another account");
                }
 
                savedUser.setEmail(email);
@@ -107,7 +108,7 @@ public class UserService {
           String email= userRequest.email().toLowerCase().trim();
 
           if(findByEmail(email)){
-                throw new DataIntegrityViolationException("An account with this email already exists");
+                throw new ConflictException("An account with this email already exists");
           }
           User user=new User();
           user.setEmail(email);
