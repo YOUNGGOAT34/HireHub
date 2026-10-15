@@ -34,8 +34,7 @@ public class CompanyController {
      public ResponseEntity<Page<CompanyResponse>> getAllCompanies(@RequestParam(defaultValue = "0") @PositiveOrZero(message = "Page must be 0 or greater") int page,
                                                                   @RequestParam(defaultValue = "10") @Positive(message = "Size must be at least 1")
                                                                   @Max(value = 100, message = "Size must not exceed 100")int size,
-                                                                  @RequestParam(defaultValue = "name") String sortBy,
-                                                                  @RequestParam (defaultValue = "desc") String direction){
+                                                                  @RequestParam(defaultValue = "name") String sortBy, @RequestParam (defaultValue = "desc") String direction){
          validateSortField(sortBy);
          Sort.Direction sortDirection= Sort.Direction.fromString(direction);
          Pageable pageable=PageRequest.of(page,size,Sort.by(sortDirection,sortBy));

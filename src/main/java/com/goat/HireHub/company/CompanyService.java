@@ -51,6 +51,7 @@ public class CompanyService {
      }
 
      public CompanyResponse addCompany(CompanyRequest company){
+
          Company saved=new Company();
          saved.setName(company.name());
          saved.setDescription(company.description());

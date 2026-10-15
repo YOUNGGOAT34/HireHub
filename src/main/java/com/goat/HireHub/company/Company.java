@@ -1,6 +1,7 @@
 package com.goat.HireHub.company;
 
 import com.goat.HireHub.job.Job;
+import com.goat.HireHub.user.User;
 import jakarta.persistence.*;
 
 import java.util.List;
@@ -19,8 +20,10 @@ public class Company {
      private String description;
      @OneToMany(mappedBy = "company")
      private List<Job> jobs;
-
      protected Company(){}
+
+     @OneToMany(mappedBy = "company", fetch = FetchType.LAZY)
+     private List<User> employees;
 
      public Company(String name,String description){
            this.description=description;

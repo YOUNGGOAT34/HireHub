@@ -1,6 +1,7 @@
 package com.goat.HireHub.user;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.goat.HireHub.company.Company;
 import jakarta.persistence.*;
 
 
@@ -9,6 +10,7 @@ import jakarta.persistence.*;
 public class User {
 
     @Id
+    @Column(name="user_id")
     @GeneratedValue(strategy=GenerationType.SEQUENCE)
     private Long id;
     @Column(name="email",nullable = false,unique = true)
@@ -22,6 +24,9 @@ public class User {
     @Column(name="role",nullable = false)
     @Enumerated(EnumType.STRING)
     private Role role;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "company_id")
+    private Company company;
     @Column(name="password",nullable = false)
     @JsonProperty(access= JsonProperty.Access.WRITE_ONLY)
     private String passwordHash;
