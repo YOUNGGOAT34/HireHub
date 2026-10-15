@@ -52,11 +52,10 @@ public class UserController {
       public ResponseEntity<Page<UserResponse>> searchByFirstName(@RequestParam(required = false) String firstName,
                                                   @RequestParam(required = false) String lastName,
                                                   @RequestParam(required = false) String username,
-                                                  @RequestParam(required = false) String role,
                                                   @RequestParam(defaultValue = "0") @PositiveOrZero(message = "page number must be zero or greater")int page,
                                                   @RequestParam(defaultValue = "10") @Positive(message = "size must be greater than zero")int size){
           Pageable pageable=PageRequest.of(page,size);
-           return ResponseEntity.ok(userService.searchUsers(firstName,lastName,username,role,pageable));
+           return ResponseEntity.ok(userService.searchUsers(firstName,lastName,username,pageable));
       }
 
       @DeleteMapping("/{id}")

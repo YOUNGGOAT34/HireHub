@@ -1,7 +1,6 @@
 package com.goat.HireHub.company;
 
 import com.goat.HireHub.user.User;
-import com.goat.HireHub.user.Role;
 import jakarta.persistence.*;
 
 @Entity

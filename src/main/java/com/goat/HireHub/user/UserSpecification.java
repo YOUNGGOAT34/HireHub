@@ -29,11 +29,4 @@ public class UserSpecification {
 
     }
 
-    public static Specification<User> roleEqual(String role){
-        return (root,query,criteriaBuilder)->{
-            if(role==null || role.isBlank()) return null;
-
-            return criteriaBuilder.equal(criteriaBuilder.lower(root.get("role")),role.toLowerCase());
-        };
-    }
 }

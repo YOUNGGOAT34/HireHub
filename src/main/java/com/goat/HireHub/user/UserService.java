@@ -1,7 +1,7 @@
 package com.goat.HireHub.user;
 
+import com.goat.HireHub.company.Role;
 import com.goat.HireHub.exception.ResourceNotFoundException;
-import com.goat.HireHub.job.dto.JobResponse;
 import com.goat.HireHub.user.dto.UserPatchRequest;
 import com.goat.HireHub.user.dto.UserRequest;
 import com.goat.HireHub.user.dto.UserResponse;
@@ -14,7 +14,6 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Set;
 
 @Service
@@ -36,12 +35,12 @@ public class UserService {
             return UserResponse.from(user);
      }
 
-     public Page<UserResponse> searchUsers(String firstName,String lastName,String username,String role,Pageable pageable){
+     public Page<UserResponse> searchUsers(String firstName,String lastName,String username,Pageable pageable){
           Specification<User> spec=UserSpecification
                   .firstNameMatches(firstName)
                   .and(UserSpecification.lastNameMatches(lastName))
-                  .and(UserSpecification.usernameMatches(username))
-                  .and(UserSpecification.roleEqual(role));
+                  .and(UserSpecification.usernameMatches(username));
+
            return userRepository.findAll(spec,pageable).map(UserResponse::from);
      }
 
@@ -106,12 +105,6 @@ public class UserService {
 
      public UserResponse registerUser(UserRequest userRequest){
           String email= userRequest.email().toLowerCase().trim();
-          String role=userRequest.role().toUpperCase();
-          Set<String> roles=Set.of("EMPLOYER","CANDIDATE");
-
-          if (!roles.contains(role)){
-               throw new IllegalArgumentException("Unknown role "+role);
-          }
 
           if(findByEmail(email)){
                 throw new DataIntegrityViolationException("An account with this email already exists");
@@ -120,7 +113,6 @@ public class UserService {
           user.setEmail(email);
           user.setFirstName(userRequest.firstName());
           user.setLastName(userRequest.lastName());
-          user.setRole(Role.valueOf(role));
           user.setUsername(userRequest.username());
           user.setPasswordHash(passwordEncoder.encode(userRequest.password()));
           return  UserResponse.from(userRepository.save(user));

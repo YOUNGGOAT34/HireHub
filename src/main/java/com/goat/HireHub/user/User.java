@@ -21,22 +21,15 @@ public class User {
     private String lastName;
     @Column(name="username",unique = true)
     private String username;
-    @Column(name="role",nullable = false)
-    @Enumerated(EnumType.STRING)
-    private Role role;
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "company_id")
-    private Company company;
     @Column(name="password",nullable = false)
     @JsonProperty(access= JsonProperty.Access.WRITE_ONLY)
     private String passwordHash;
     public  User(){}
 
-    public User(String email, String firstName, String lastName, Role role,String passwordHash,String username) {
+    public User(String email, String firstName, String lastName,String passwordHash,String username) {
         this.email = email;
         this.firstName = firstName;
         this.lastName = lastName;
-        this.role = role;
         this.username=username;
         this.passwordHash=passwordHash;
     }
@@ -80,15 +73,6 @@ public class User {
 
     public String getUsername() {
         return username;
-    }
-
-
-    public Role getRole() {
-        return role;
-    }
-
-    public void setRole(Role role) {
-        this.role = role;
     }
 
     public String getPassword(){

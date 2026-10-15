@@ -4,6 +4,9 @@ import com.goat.HireHub.company.dto.CompanyPatchRequest;
 import com.goat.HireHub.company.dto.CompanyRequest;
 import com.goat.HireHub.company.dto.CompanyResponse;
 import com.goat.HireHub.exception.ResourceNotFoundException;
+import com.goat.HireHub.security.SecurityUtils;
+import com.goat.HireHub.user.User;
+import com.goat.HireHub.user.UserRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -17,15 +20,17 @@ import java.util.List;
 @Service
 public class CompanyService {
      private final CompanyRepository companyRepository;
+     private final CompanyMembershipRepository companyMembershipRepository;
+     private final SecurityUtils securityUtils;
 
-     public CompanyService(CompanyRepository companyRepository){
+     public CompanyService(CompanyRepository companyRepository,
+                           CompanyMembershipRepository companyMembershipRepository,
+                           SecurityUtils securityUtils){
           this.companyRepository=companyRepository;
+          this.companyMembershipRepository=companyMembershipRepository;
+          this.securityUtils=securityUtils;
      }
 
-    private Company findOrThrow(Long id){
-        return companyRepository.findById(id)
-                .orElseThrow(()->new ResourceNotFoundException("company not found",id));
-    }
 
      public Page<CompanyResponse> getAllCompanies( Pageable pageable){
          return companyRepository.findAll(pageable).map(CompanyResponse::from);
@@ -42,27 +47,31 @@ public class CompanyService {
      }
 
      public void deleteById(Long id){
-          if(companyRepository.existsById(id)){
-              companyRepository.deleteById(id);
-              return;
-          }
+         Company company=findOrThrow(id);
+         User currentUser=securityUtils.getCurrentUser();
+         CompanyMembership membership=findMemberShipOrThrow(currentUser.getId(), id);
 
-          throw new ResourceNotFoundException("company not found",id);
+         if(membership.getRole() != Role.ADMIN){
+             throw new org.springframework.security.access.AccessDeniedException(
+                     "Access Denied: Only a company admin can delete this company."
+             );
+         }
      }
 
      public CompanyResponse addCompany(CompanyRequest company){
-
-         Company saved=new Company();
-         saved.setName(company.name());
-         saved.setDescription(company.description());
-
-          return CompanyResponse.from(companyRepository.save(saved));
+         User currentUser=securityUtils.getCurrentUser();
+         Company newCompany=new Company();
+         newCompany.setName(company.name());
+         newCompany.setDescription(company.description());
+         Company savedCompany=companyRepository.save(newCompany);
+         CompanyMembership companyMembership=new CompanyMembership(currentUser,savedCompany,Role.ADMIN);
+         companyMembershipRepository.save(companyMembership);
+         return CompanyResponse.from(savedCompany);
      }
 
      @Transactional
      public CompanyResponse updateCompany(Long id,CompanyRequest updatedCompany){
           Company savedCompany=findOrThrow(id);
-
           savedCompany.setDescription(updatedCompany.description());
           savedCompany.setName(updatedCompany.name());
           return CompanyResponse.from(savedCompany);
@@ -82,4 +91,16 @@ public class CompanyService {
 
          return CompanyResponse.from(savedCompany);
      }
+
+
+    private Company findOrThrow(Long id){
+        return companyRepository.findById(id)
+                .orElseThrow(()->new ResourceNotFoundException("company not found",id));
+    }
+
+    private CompanyMembership findMemberShipOrThrow(Long userId,Long companyId){
+        return companyMembershipRepository.findByUserIdAndCompanyId(userId,companyId)
+                .orElseThrow(()-> new org.springframework.security.access.AccessDeniedException(
+                        "Access Denied: You do not belong to this company."));
+    }
 }
