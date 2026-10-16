@@ -24,6 +24,10 @@ public class User {
     @Column(name="password",nullable = false)
     @JsonProperty(access= JsonProperty.Access.WRITE_ONLY)
     private String passwordHash;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private CandidateProfile candidateProfile;
+
     public  User(){}
 
     public User(String email, String firstName, String lastName,String passwordHash,String username) {
@@ -81,5 +85,13 @@ public class User {
 
     public void setPasswordHash(String passwordHash){
          this.passwordHash=passwordHash;
+    }
+
+    public CandidateProfile getCandidateProfile() {
+        return candidateProfile;
+    }
+
+    public void setCandidateProfile(CandidateProfile candidateProfile) {
+        this.candidateProfile = candidateProfile;
     }
 }
