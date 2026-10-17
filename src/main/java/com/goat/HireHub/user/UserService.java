@@ -13,6 +13,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Set;
 
 @Service
@@ -140,6 +141,12 @@ public class UserService {
 
      public ExperienceResponse addExperience(ExperienceRequest request){
            User user=securityUtils.getCurrentUser();
+           CandidateProfile profile=user.getCandidateProfile();
+
+           if (profile== null) {
+               throw new IllegalStateException("Candidate profile is not initialized for this user.");
+          }
+
             Experience experience=new Experience();
             experience.setJobTitle(request.jobTitle());
             experience.setCurrent(request.isCurrent());
@@ -147,9 +154,35 @@ public class UserService {
             experience.setEndDate(request.endDate());
             experience.setCompanyNameRaw(request.companyName());
             experience.setDescription(request.description());
-            experience.setCandidateProfile(user.getCandidateProfile());
+            experience.setCandidateProfile(profile);
 
             return ExperienceResponse.from(experienceRepository.save(experience));
+     }
+
+
+     public List<ExperienceResponse> getAllExperiencesByUserId(Long userId){
+           return experienceRepository.findByCandidateProfileId(userId).stream().map(ExperienceResponse::from).toList();
+     }
+
+     public void deleteExperienceById(Long id){
+           Experience experience=findOrThrow(id);
+           User loggedInUser=securityUtils.getCurrentUser();
+           Long experienceOwnerProfileId=experience.getCandidateProfile().getId();
+           Long currentUserProfileId=loggedInUser.getCandidateProfile().getId();
+
+           if (!currentUserProfileId.equals(experienceOwnerProfileId)){
+                throw new org.springframework.security.access.AccessDeniedException(
+                        "You do not have permission to delete this experience record."
+                );
+           }
+
+           experienceRepository.delete(experience);
+     }
+
+
+     private Experience findOrThrow(Long experienceId){
+          return experienceRepository.findById(experienceId)
+                  .orElseThrow(()->new ResourceNotFoundException("experience",experienceId));
      }
 
 }

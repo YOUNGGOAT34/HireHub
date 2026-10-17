@@ -13,6 +13,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 import java.util.Set;
 
 @RestController
@@ -75,8 +77,22 @@ public class UserController {
 
     //experience endpoints
     @PostMapping("/me/experience")
-    public ResponseEntity<ExperienceResponse> addExperience(@RequestBody ExperienceRequest experienceRequest){
-        return ResponseEntity.ok(userService.addExperience(experienceRequest));
+    public ResponseEntity<ExperienceResponse> addExperience(
+            @RequestBody @Valid ExperienceRequest experienceRequest){
+        return ResponseEntity.status(HttpStatus.CREATED).body(userService.addExperience(experienceRequest));
+    }
+
+    @GetMapping("/{id}/experiences")
+    public ResponseEntity<List<ExperienceResponse>> getUserExperiences(
+            @PathVariable @Positive(message = "Id must be greater than zero") Long id) {
+        List<ExperienceResponse> responses = userService.getAllExperiencesByUserId(id);
+        return ResponseEntity.ok(responses);
+    }
+
+    @DeleteMapping("/me/experiences/{id}")
+    public ResponseEntity<Void> deleteExperience(@PathVariable @Positive(message = "Id must be greater than zero") Long id){
+             userService.deleteExperienceById(id);
+             return ResponseEntity.noContent().build();
     }
 
      //helpers
