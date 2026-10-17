@@ -1,10 +1,7 @@
 package com.goat.HireHub.user;
 
 
-import com.goat.HireHub.user.dto.UserPatchRequest;
-import com.goat.HireHub.user.dto.UserRequest;
-import com.goat.HireHub.user.dto.UserResponse;
-import com.goat.HireHub.user.dto.UserUpdateRequest;
+import com.goat.HireHub.user.dto.*;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
@@ -16,8 +13,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 import java.util.Set;
 
 @RestController
@@ -78,6 +73,12 @@ public class UserController {
          return ResponseEntity.ok(userService.patchUser(id,userPatchRequest));
      }
 
+    //experience endpoints
+    @PostMapping("/me/experience")
+    public ResponseEntity<ExperienceResponse> addExperience(@RequestBody ExperienceRequest experienceRequest){
+        return ResponseEntity.ok(userService.addExperience(experienceRequest));
+    }
+
      //helpers
      private void validateSortingField(String field){
          Set<String> allowedSortFields=Set.of("firstName","lastName","email","username");
@@ -87,5 +88,7 @@ public class UserController {
              );
          }
      }
+
+
 
 }

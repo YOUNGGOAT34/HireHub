@@ -3,10 +3,8 @@ package com.goat.HireHub.user;
 import com.goat.HireHub.company.Role;
 import com.goat.HireHub.exception.ConflictException;
 import com.goat.HireHub.exception.ResourceNotFoundException;
-import com.goat.HireHub.user.dto.UserPatchRequest;
-import com.goat.HireHub.user.dto.UserRequest;
-import com.goat.HireHub.user.dto.UserResponse;
-import com.goat.HireHub.user.dto.UserUpdateRequest;
+import com.goat.HireHub.security.SecurityUtils;
+import com.goat.HireHub.user.dto.*;
 import jakarta.transaction.Transactional;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
@@ -21,11 +19,20 @@ import java.util.Set;
 public class UserService {
      private final UserRepository userRepository;
      private final PasswordEncoder passwordEncoder;
+     private final ExperienceRepository experienceRepository;
+     private final SecurityUtils securityUtils;
 
-     public UserService(UserRepository userRepository,PasswordEncoder passwordEncoder){
+     public UserService(UserRepository userRepository,
+                        PasswordEncoder passwordEncoder,
+                        ExperienceRepository experienceRepository,
+                        SecurityUtils securityUtils){
           this.userRepository=userRepository;
           this.passwordEncoder=passwordEncoder;
+          this.experienceRepository=experienceRepository;
+          this.securityUtils=securityUtils;
      }
+
+     //users
 
      public Page<UserResponse> getAllUsers(Pageable pageable){
           return userRepository.findAll(pageable).map(UserResponse::from);
@@ -128,5 +135,21 @@ public class UserService {
                    .orElseThrow(()->new ResourceNotFoundException("user not found",id));
      }
 
+
+     //experience
+
+     public ExperienceResponse addExperience(ExperienceRequest request){
+           User user=securityUtils.getCurrentUser();
+            Experience experience=new Experience();
+            experience.setJobTitle(request.jobTitle());
+            experience.setCurrent(request.isCurrent());
+            experience.setStartDate(request.startDate());
+            experience.setEndDate(request.endDate());
+            experience.setCompanyNameRaw(request.companyName());
+            experience.setDescription(request.description());
+            experience.setCandidateProfile(user.getCandidateProfile());
+
+            return ExperienceResponse.from(experienceRepository.save(experience));
+     }
 
 }
