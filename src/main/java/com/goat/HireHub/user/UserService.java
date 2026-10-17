@@ -165,24 +165,44 @@ public class UserService {
      }
 
      public void deleteExperienceById(Long id){
-           Experience experience=findOrThrow(id);
-           User loggedInUser=securityUtils.getCurrentUser();
-           Long experienceOwnerProfileId=experience.getCandidateProfile().getId();
-           Long currentUserProfileId=loggedInUser.getCandidateProfile().getId();
-
-           if (!currentUserProfileId.equals(experienceOwnerProfileId)){
-                throw new org.springframework.security.access.AccessDeniedException(
-                        "You do not have permission to delete this experience record."
-                );
-           }
-
+           Experience experience=authorizeAction(id,"delete");
            experienceRepository.delete(experience);
      }
 
+     @Transactional
+     public ExperienceResponse updateExperience(Long id,ExperienceRequest request){
+              Experience savedExperience=authorizeAction(id,"update");
+               savedExperience.setJobTitle(request.jobTitle());
+               savedExperience.setCurrent(request.isCurrent());
+               savedExperience.setStartDate(request.startDate());
+               savedExperience.setEndDate(request.endDate());
+               savedExperience.setCompanyNameRaw(request.companyName());
+               savedExperience.setDescription(request.description());
+
+               return ExperienceResponse.from(savedExperience);
+
+     }
 
      private Experience findOrThrow(Long experienceId){
           return experienceRepository.findById(experienceId)
                   .orElseThrow(()->new ResourceNotFoundException("experience",experienceId));
      }
+
+     private Experience authorizeAction(Long id,String action){
+          Experience experience=findOrThrow(id);
+          User loggedInUser=securityUtils.getCurrentUser();
+          Long experienceOwnerProfileId=experience.getCandidateProfile().getId();
+          Long currentUserProfileId=loggedInUser.getCandidateProfile().getId();
+
+          if (!currentUserProfileId.equals(experienceOwnerProfileId)){
+               throw new org.springframework.security.access.AccessDeniedException(
+                       "You do not have permission to "+action+" this experience record."
+               );
+          }
+
+          return experience;
+     }
+
+
 
 }

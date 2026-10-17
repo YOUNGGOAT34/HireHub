@@ -95,6 +95,11 @@ public class UserController {
              return ResponseEntity.noContent().build();
     }
 
+    @PutMapping("/me/experiences/{id}")
+    public ResponseEntity<ExperienceResponse> updateExperience(@PathVariable @Positive(message = "id must be greater than zero")Long id,@RequestBody @Valid ExperienceRequest request){
+           return ResponseEntity.ok(userService.updateExperience(id,request));
+    }
+
      //helpers
      private void validateSortingField(String field){
          Set<String> allowedSortFields=Set.of("firstName","lastName","email","username");
