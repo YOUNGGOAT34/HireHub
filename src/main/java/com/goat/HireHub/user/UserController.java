@@ -100,6 +100,34 @@ public class UserController {
            return ResponseEntity.ok(userService.updateExperience(id,request));
     }
 
+    //education
+
+    @PostMapping("/me/educations")
+    public ResponseEntity<EducationResponse> addEducation(@RequestBody @Valid EducationRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(userService.addEducation(request));
+    }
+
+    @PutMapping("/me/educations/{id}")
+    public ResponseEntity<EducationResponse> updateEducation(
+            @PathVariable @Positive(message = "Id must be greater than zero") Long id,
+            @RequestBody @Valid EducationRequest request) {
+        return ResponseEntity.ok(userService.updateEducation(id, request));
+    }
+
+    @DeleteMapping("/me/educations/{id}")
+    public ResponseEntity<Void> deleteEducation(
+            @PathVariable @Positive(message = "Id must be greater than zero") Long id) {
+        userService.deleteEducationSecurely(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{id}/educations")
+    public ResponseEntity<List<EducationResponse>> getUserEducations(
+            @PathVariable @Positive(message = "Id must be greater than zero") Long id) {
+
+        return ResponseEntity.ok(userService.getAllEducationsById(id));
+    }
+
      //helpers
      private void validateSortingField(String field){
          Set<String> allowedSortFields=Set.of("firstName","lastName","email","username");
@@ -109,6 +137,7 @@ public class UserController {
              );
          }
      }
+
 
 
 

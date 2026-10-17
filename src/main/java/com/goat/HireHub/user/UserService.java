@@ -22,19 +22,21 @@ public class UserService {
      private final PasswordEncoder passwordEncoder;
      private final ExperienceRepository experienceRepository;
      private final SecurityUtils securityUtils;
+     private final EducationRepository educationRepository;
 
      public UserService(UserRepository userRepository,
                         PasswordEncoder passwordEncoder,
                         ExperienceRepository experienceRepository,
+                        EducationRepository educationRepository,
                         SecurityUtils securityUtils){
           this.userRepository=userRepository;
           this.passwordEncoder=passwordEncoder;
           this.experienceRepository=experienceRepository;
+          this.educationRepository=educationRepository;
           this.securityUtils=securityUtils;
      }
 
      //users
-
      public Page<UserResponse> getAllUsers(Pageable pageable){
           return userRepository.findAll(pageable).map(UserResponse::from);
      }
@@ -183,6 +185,65 @@ public class UserService {
 
      }
 
+     @Transactional
+     public List<EducationResponse> getAllEducationsById(Long id){
+
+          return educationRepository.findByCandidateProfileId(id).stream()
+                  .map(EducationResponse::from)
+                  .toList();
+     }
+     
+     //education
+     @Transactional
+     public EducationResponse addEducation(EducationRequest request) {
+          User loggedInUser = securityUtils.getCurrentUser();
+          CandidateProfile profile = loggedInUser.getCandidateProfile();
+
+          if (profile == null) {
+               throw new IllegalStateException("Candidate profile is not initialized for this user account.");
+          }
+          Education education = getEducation(request, profile);
+          return EducationResponse.from(educationRepository.save(education));
+     }
+
+     @Transactional
+     public EducationResponse updateEducation(Long educationId, EducationRequest request) {
+
+          Education savedEducation = authorizeEducationAction(educationId, "update");
+
+          savedEducation.setInstitutionName(request.institutionName());
+          savedEducation.setDegreeType(request.degreeType());
+          savedEducation.setFieldOfStudy(request.fieldOfStudy());
+          savedEducation.setStartDate(request.startDate());
+          savedEducation.setEndDate(request.endDate());
+          savedEducation.setCurrent(request.isCurrent());
+          savedEducation.setActivitiesAndSocieties(request.activitiesAndSocieties());
+
+          return EducationResponse.from(savedEducation);
+     }
+
+
+     @Transactional
+     public void deleteEducationSecurely(Long educationId) {
+          Education education = authorizeEducationAction(educationId, "delete");
+          educationRepository.delete(education);
+     }
+
+
+
+     private static Education getEducation(EducationRequest request, CandidateProfile profile) {
+          Education education = new Education();
+          education.setInstitutionName(request.institutionName());
+          education.setDegreeType(request.degreeType());
+          education.setFieldOfStudy(request.fieldOfStudy());
+          education.setStartDate(request.startDate());
+          education.setEndDate(request.endDate());
+          education.setCurrent(request.isCurrent());
+          education.setActivitiesAndSocieties(request.activitiesAndSocieties());
+          education.setCandidateProfile(profile); // Safe foreign key binding
+          return education;
+     }
+
      private Experience findOrThrow(Long experienceId){
           return experienceRepository.findById(experienceId)
                   .orElseThrow(()->new ResourceNotFoundException("experience",experienceId));
@@ -201,6 +262,22 @@ public class UserService {
           }
 
           return experience;
+     }
+
+     private Education authorizeEducationAction(Long id, String action) {
+          Education education = educationRepository.findById(id)
+                  .orElseThrow(() -> new RuntimeException("Education timeline record not found with id: " + id));
+
+          User loggedInUser = securityUtils.getCurrentUser();
+          Long ownerProfileId = education.getCandidateProfile().getId();
+          Long currentUserId = loggedInUser.getCandidateProfile().getId();
+
+          if (!currentUserId.equals(ownerProfileId)) {
+               throw new org.springframework.security.access.AccessDeniedException(
+                       "You do not have permission to " + action + " this education record."
+               );
+          }
+          return education;
      }
 
 
