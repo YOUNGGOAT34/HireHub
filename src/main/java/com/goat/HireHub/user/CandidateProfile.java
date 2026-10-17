@@ -27,7 +27,10 @@ public class CandidateProfile {
     @Column(name = "search_status")
     private String searchStatus; // e.g., "ACTIVELY_LOOKING", "NOT_LOOKING"
 
-    // A profile can have many past/present job experiences
+    @OneToMany(mappedBy = "candidateProfile", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Education> educations = new java.util.ArrayList<>();
+
+
     @OneToMany(mappedBy = "candidateProfile", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Experience> experiences = new ArrayList<>();
 
@@ -54,4 +57,6 @@ public class CandidateProfile {
     public void setSearchStatus(String searchStatus) { this.searchStatus = searchStatus; }
     public List<Experience> getExperiences() { return experiences; }
     public void setExperiences(List<Experience> experiences) { this.experiences = experiences; }
+    public List<Education> getEducations() { return educations; }
+    public void setEducations(List<Education> educations) { this.educations = educations; }
 }
