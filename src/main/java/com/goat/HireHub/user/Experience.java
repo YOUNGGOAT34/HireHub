@@ -10,6 +10,7 @@ public class Experience {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @Column(name="experience_id")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)

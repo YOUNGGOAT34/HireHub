@@ -6,10 +6,11 @@ import java.util.List;
 
 @Entity
 @Table(name = "candidate_profiles")
+
 public class CandidateProfile {
 
     @Id
-    @Column(name = "user_id")
+    @Column(name = "profile_id")
     private Long id;
 
     @OneToOne
