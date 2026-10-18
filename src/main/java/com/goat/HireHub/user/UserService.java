@@ -160,7 +160,7 @@ public class UserService {
      }
 
      @Transactional
-     public ProfileSummaryResponse updateMainProfile(String headline, String summary, String searchStatus) {
+     public ProfileSummaryResponse updateMainProfile(String headline, String summary, SearchStatus searchStatus) {
           User loggedInUser = securityUtils.getCurrentUser();
           CandidateProfile profile = loggedInUser.getCandidateProfile();
 
@@ -182,15 +182,7 @@ public class UserService {
      @Transactional
      public ExperienceResponse addExperience(ExperienceRequest request){
            User user=securityUtils.getCurrentUser();
-           CandidateProfile profile=user.getCandidateProfile();
-
-           if (profile== null) {
-                profile = new CandidateProfile();
-                profile.setUser(user);
-                profile.setSearchStatus("OPEN_TO_WORK");
-                profile.setHeadline("Software Professional");
-          }
-
+           CandidateProfile profile=getOrCreateCandidateProfile(user);
             Experience experience=new Experience();
             experience.setJobTitle(request.jobTitle());
             experience.setCurrent(request.isCurrent());
@@ -358,7 +350,7 @@ public class UserService {
 
      private Education authorizeEducationAction(Long id, String action) {
           Education education = educationRepository.findById(id)
-                  .orElseThrow(() -> new RuntimeException("Education timeline record not found with id: " + id));
+                  .orElseThrow(() -> new ResourceNotFoundException("Education timeline record not found with id: " + id));
 
           User loggedInUser = securityUtils.getCurrentUser();
           Long ownerProfileId = education.getCandidateProfile().getId();

@@ -1,5 +1,7 @@
 package com.goat.HireHub.user.dto;
 
+import com.goat.HireHub.user.SearchStatus;
+
 import java.util.List;
 
 public record FullProfileResponse(
@@ -10,7 +12,7 @@ public record FullProfileResponse(
         String username,
         String headline,
         String summary,
-        String searchStatus,
+        SearchStatus searchStatus,
         List<ExperienceResponse> experiences,
         List<EducationResponse> educations
 ) {}

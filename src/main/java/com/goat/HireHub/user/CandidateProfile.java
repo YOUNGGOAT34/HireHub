@@ -25,6 +25,7 @@ public class CandidateProfile {
     @Column(name = "summary", columnDefinition = "TEXT")
     private String summary;  // The "About Me" section
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "search_status")
     private SearchStatus searchStatus; // e.g., "ACTIVELY_LOOKING", "NOT_LOOKING"
 
