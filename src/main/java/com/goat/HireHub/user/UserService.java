@@ -178,15 +178,17 @@ public class UserService {
      }
 
 
-
      //experience
-
+     @Transactional
      public ExperienceResponse addExperience(ExperienceRequest request){
            User user=securityUtils.getCurrentUser();
            CandidateProfile profile=user.getCandidateProfile();
 
            if (profile== null) {
-               throw new IllegalStateException("Candidate profile is not initialized for this user.");
+                profile = new CandidateProfile();
+                profile.setUser(user);
+                profile.setSearchStatus("OPEN_TO_WORK");
+                profile.setHeadline("Software Professional");
           }
 
             Experience experience=new Experience();
@@ -197,13 +199,14 @@ public class UserService {
             experience.setCompanyNameRaw(request.companyName());
             experience.setDescription(request.description());
             experience.setCandidateProfile(profile);
-
             return ExperienceResponse.from(experienceRepository.save(experience));
      }
 
 
      public List<ExperienceResponse> getAllExperiencesByUserId(Long userId){
-           return experienceRepository.findByCandidateProfileId(userId).stream().map(ExperienceResponse::from).toList();
+           return experienceRepository.findByCandidateProfileId(userId).stream()
+                   .sorted((a, b) -> b.getStartDate().compareTo(a.getStartDate()))
+                   .map(ExperienceResponse::from).toList();
      }
 
      public void deleteExperienceById(Long id){
@@ -229,6 +232,7 @@ public class UserService {
      public List<EducationResponse> getAllEducationsById(Long id){
 
           return educationRepository.findByCandidateProfileId(id).stream()
+                  .sorted((a,b)->b.getStartDate().compareTo(a.getStartDate()))
                   .map(EducationResponse::from)
                   .toList();
      }
@@ -240,7 +244,11 @@ public class UserService {
           CandidateProfile profile = loggedInUser.getCandidateProfile();
 
           if (profile == null) {
-               throw new IllegalStateException("Candidate profile is not initialized for this user account.");
+               profile = new CandidateProfile();
+               profile.setUser(loggedInUser);
+               profile.setSearchStatus("OPEN_TO_WORK");
+               profile.setHeadline("Software Professional");
+               userRepository.save(loggedInUser);
           }
           Education education = getEducation(request, profile);
           return EducationResponse.from(educationRepository.save(education));
@@ -268,8 +276,6 @@ public class UserService {
           Education education = authorizeEducationAction(educationId, "delete");
           educationRepository.delete(education);
      }
-
-
 
      private static Education getEducation(EducationRequest request, CandidateProfile profile) {
           Education education = new Education();
@@ -319,10 +325,6 @@ public class UserService {
           }
           return education;
      }
-
-
-
-
 
 
 }

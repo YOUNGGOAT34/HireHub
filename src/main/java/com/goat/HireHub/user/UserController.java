@@ -75,6 +75,23 @@ public class UserController {
          return ResponseEntity.ok(userService.patchUser(id,userPatchRequest));
      }
 
+     //profile endpoints
+
+     @GetMapping("/{id}/profile")
+     public ResponseEntity<FullProfileResponse> getPublicProfile(
+             @PathVariable @Positive(message = "Id must be greater than zero") Long id) {
+         return ResponseEntity.ok(userService.getFullProfileByUserId(id));
+     }
+
+    @PutMapping("/me/profile")
+    public ResponseEntity<ProfileSummaryResponse> updateMyProfile(
+            @RequestParam(required = false) String headline,
+            @RequestParam(required = false) String summary,
+            @RequestParam(required = false) String searchStatus) {
+        ProfileSummaryResponse response = userService.updateMainProfile(headline, summary, searchStatus);
+        return ResponseEntity.ok(response);
+    }
+
     //experience endpoints
     @PostMapping("/me/experience")
     public ResponseEntity<ExperienceResponse> addExperience(
