@@ -3,6 +3,7 @@ package com.goat.HireHub.user;
 import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "candidate_profiles")
@@ -34,6 +35,14 @@ public class CandidateProfile {
     @OneToMany(mappedBy = "candidateProfile", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Experience> experiences = new ArrayList<>();
 
+    @ManyToMany
+    @JoinTable(
+            name = "profile_skills",
+            joinColumns = @JoinColumn(name = "profile_id"),
+            inverseJoinColumns = @JoinColumn(name = "skill_id")
+    )
+    private Set<Skill> skills = new java.util.HashSet<>();
+
 
     public CandidateProfile() {}
 
@@ -59,4 +68,6 @@ public class CandidateProfile {
     public void setExperiences(List<Experience> experiences) { this.experiences = experiences; }
     public List<Education> getEducations() { return educations; }
     public void setEducations(List<Education> educations) { this.educations = educations; }
+    public Set<Skill> getSkills() { return skills; }
+    public void setSkills(Set<Skill> skills) { this.skills = skills; }
 }

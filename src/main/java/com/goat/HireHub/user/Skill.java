@@ -9,7 +9,7 @@ public class Skill {
       @GeneratedValue(strategy = GenerationType.SEQUENCE)
       @Column(name="skill_id")
       private Long id;
-      @Column(name="skill_name")
+      @Column(name="skill_name",nullable = false,unique = true)
       private String name;
 
       public Skill(){}
