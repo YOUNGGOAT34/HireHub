@@ -138,6 +138,46 @@ public class UserService {
                    .orElseThrow(()->new ResourceNotFoundException("user not found",id));
      }
 
+     //profile
+     @Transactional
+     public FullProfileResponse getFullProfileByUserId(Long userId) {
+          User user = userRepository.findById(userId)
+                  .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
+
+          CandidateProfile profile = user.getCandidateProfile();
+          List<ExperienceResponse> expList = (profile != null)
+                  ? profile.getExperiences().stream().map(ExperienceResponse::from).toList() : List.of();
+          List<EducationResponse> eduList = (profile != null)
+                  ? profile.getEducations().stream().map(EducationResponse::from).toList() : List.of();
+
+          return new FullProfileResponse(
+                  user.getId(), user.getFirstName(), user.getLastName(), user.getEmail(), user.getUsername(),
+                  (profile != null) ? profile.getHeadline() : null,
+                  (profile != null) ? profile.getSummary() : null,
+                  (profile != null) ? profile.getSearchStatus() : null,
+                  expList, eduList
+          );
+     }
+
+     @Transactional
+     public ProfileSummaryResponse updateMainProfile(String headline, String summary, String searchStatus) {
+          User loggedInUser = securityUtils.getCurrentUser();
+          CandidateProfile profile = loggedInUser.getCandidateProfile();
+
+          if (profile == null) {
+               profile = new CandidateProfile(loggedInUser, headline, summary, searchStatus);
+               loggedInUser.setCandidateProfile(profile);
+          } else {
+               profile.setHeadline(headline);
+               profile.setSummary(summary);
+               profile.setSearchStatus(searchStatus);
+          }
+
+          userRepository.save(loggedInUser);
+          return new ProfileSummaryResponse(profile.getId(), profile.getHeadline(), profile.getSummary(), profile.getSearchStatus());
+     }
+
+
 
      //experience
 
@@ -279,6 +319,9 @@ public class UserService {
           }
           return education;
      }
+
+
+
 
 
 

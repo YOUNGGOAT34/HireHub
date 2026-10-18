@@ -11,6 +11,6 @@ public record FullProfileResponse(
         String headline,
         String summary,
         String searchStatus,
-        List<ExperienceResponse> experiences
-//        List<EducationResponse> educations
+        List<ExperienceResponse> experiences,
+        List<EducationResponse> educations
 ) {}
