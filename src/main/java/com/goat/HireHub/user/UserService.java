@@ -1,12 +1,10 @@
 package com.goat.HireHub.user;
 
-import com.goat.HireHub.company.Role;
 import com.goat.HireHub.exception.ConflictException;
 import com.goat.HireHub.exception.ResourceNotFoundException;
 import com.goat.HireHub.security.SecurityUtils;
 import com.goat.HireHub.user.dto.*;
 import jakarta.transaction.Transactional;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -14,7 +12,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Set;
 
 @Service
 public class UserService {
@@ -294,7 +291,18 @@ public class UserService {
      }
 
      //skills
-     public SkillResponse addSkill(SkillRequest skillRequest){
+     public List<SkillResponse> getSkillsByProfileId(Long userId){
+          if (!userRepository.existsById(userId)) {
+               throw new ResourceNotFoundException("User not found with id", userId);
+          }
+
+          return skillRepository.findAllByProfileId(userId)
+                  .stream()
+                  .map(SkillResponse::from)
+                  .sorted((a, b) -> a.name().compareToIgnoreCase(b.name()))
+                  .toList();
+     }
+     public SkillResponse addSkillToProfile(SkillRequest skillRequest){
 
           User loggedInUser = securityUtils.getCurrentUser();
           CandidateProfile profile = loggedInUser.getCandidateProfile();
@@ -312,11 +320,15 @@ public class UserService {
 
           Skill skill = skillRepository.findByNameIgnoreCase(cleanSkillName)
                   .orElseGet(() -> skillRepository.save(new Skill(cleanSkillName)));
+
+          if (profile.getSkills().contains(skill)) {
+               throw new ConflictException("You have already added the skill '" + cleanSkillName + "' to your profile.");
+          }
           profile.getSkills().add(skill);
              return SkillResponse.from(skillRepository.save(skill));
      }
 
-     public void removeSkill(Long skillId){
+     public void removeSkillFromProfile(Long skillId){
           User loggedInUser = securityUtils.getCurrentUser();
           CandidateProfile profile = loggedInUser.getCandidateProfile();
 

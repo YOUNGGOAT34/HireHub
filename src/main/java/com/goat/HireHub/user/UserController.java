@@ -146,9 +146,22 @@ public class UserController {
     }
 
     //skills
+
+    @GetMapping("/{id}/skills")
+    public ResponseEntity<List<SkillResponse>> getUserSkills(
+            @PathVariable @Positive(message = "Id must be greater than zero") Long id) {
+        return ResponseEntity.ok(userService.getSkillsByProfileId(id));
+    }
+
     @PostMapping("/me/skills")
-    public  ResponseEntity<SkillResponse> addSkill(@RequestBody @Valid SkillRequest request){
-           return ResponseEntity.status(HttpStatus.CREATED).body(userService.addSkill(request));
+    public  ResponseEntity<SkillResponse> addSkillToProfile(@RequestBody @Valid SkillRequest request){
+           return ResponseEntity.status(HttpStatus.CREATED).body(userService.addSkillToProfile(request));
+    }
+
+    @DeleteMapping("/me/skills/{id}")
+    public ResponseEntity<Void> removeSkillFromProfile(@PathVariable @Positive(message = "id must be greater than zero")Long id){
+           userService.removeSkillFromProfile(id);
+           return ResponseEntity.noContent().build();
     }
 
      //helpers
