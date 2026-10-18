@@ -26,7 +26,7 @@ public class CandidateProfile {
     private String summary;  // The "About Me" section
 
     @Column(name = "search_status")
-    private String searchStatus; // e.g., "ACTIVELY_LOOKING", "NOT_LOOKING"
+    private SearchStatus searchStatus; // e.g., "ACTIVELY_LOOKING", "NOT_LOOKING"
 
     @OneToMany(mappedBy = "candidateProfile", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Education> educations = new java.util.ArrayList<>();
@@ -46,7 +46,7 @@ public class CandidateProfile {
 
     public CandidateProfile() {}
 
-    public CandidateProfile(User user, String headline, String summary, String searchStatus) {
+    public CandidateProfile(User user, String headline, String summary, SearchStatus searchStatus) {
         this.user = user;
         this.headline = headline;
         this.summary = summary;
@@ -62,8 +62,8 @@ public class CandidateProfile {
     public void setHeadline(String headline) { this.headline = headline; }
     public String getSummary() { return summary; }
     public void setSummary(String summary) { this.summary = summary; }
-    public String getSearchStatus() { return searchStatus; }
-    public void setSearchStatus(String searchStatus) { this.searchStatus = searchStatus; }
+    public SearchStatus getSearchStatus() { return searchStatus; }
+    public void setSearchStatus(SearchStatus searchStatus) { this.searchStatus = searchStatus; }
     public List<Experience> getExperiences() { return experiences; }
     public void setExperiences(List<Experience> experiences) { this.experiences = experiences; }
     public List<Education> getEducations() { return educations; }

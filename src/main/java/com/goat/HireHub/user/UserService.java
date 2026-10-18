@@ -241,15 +241,7 @@ public class UserService {
      @Transactional
      public EducationResponse addEducation(EducationRequest request) {
           User loggedInUser = securityUtils.getCurrentUser();
-          CandidateProfile profile = loggedInUser.getCandidateProfile();
-
-          if (profile == null) {
-               profile = new CandidateProfile();
-               profile.setUser(loggedInUser);
-               profile.setSearchStatus("OPEN_TO_WORK");
-               profile.setHeadline("Software Professional");
-               userRepository.save(loggedInUser);
-          }
+          CandidateProfile profile = getOrCreateCandidateProfile(loggedInUser);
           Education education = getEducation(request, profile);
           return EducationResponse.from(educationRepository.save(education));
      }
@@ -286,7 +278,7 @@ public class UserService {
           education.setEndDate(request.endDate());
           education.setCurrent(request.isCurrent());
           education.setActivitiesAndSocieties(request.activitiesAndSocieties());
-          education.setCandidateProfile(profile); // Safe foreign key binding
+          education.setCandidateProfile(profile);
           return education;
      }
 
@@ -305,16 +297,7 @@ public class UserService {
      public SkillResponse addSkillToProfile(SkillRequest skillRequest){
 
           User loggedInUser = securityUtils.getCurrentUser();
-          CandidateProfile profile = loggedInUser.getCandidateProfile();
-
-          if (profile == null) {
-               profile = new CandidateProfile();
-               profile.setUser(loggedInUser);
-               profile.setSearchStatus("OPEN_TO_WORK");
-               profile.setHeadline("Software Professional");
-               loggedInUser.setCandidateProfile(profile);
-               userRepository.save(loggedInUser);
-          }
+          CandidateProfile profile = getOrCreateCandidateProfile(loggedInUser);
 
           String cleanSkillName=skillRequest.name().trim();
 
@@ -392,6 +375,26 @@ public class UserService {
      private Skill findOrThrow(String name){
            return skillRepository.findByNameIgnoreCase(name)
                    .orElseThrow(()->new ResourceNotFoundException("skill"));
+     }
+
+
+     private CandidateProfile getOrCreateCandidateProfile(User user) {
+          CandidateProfile profile = user.getCandidateProfile();
+
+          if (profile != null) {
+               return profile;
+          }
+
+          profile = new CandidateProfile();
+          profile.setUser(user);
+          profile.setSearchStatus(SearchStatus.OPEN_TO_WORK);
+          profile.setHeadline("Software Professional");
+
+          user.setCandidateProfile(profile);
+
+          userRepository.save(user);
+
+          return profile;
      }
 
 
