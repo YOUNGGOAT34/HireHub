@@ -145,6 +145,12 @@ public class UserController {
         return ResponseEntity.ok(userService.getAllEducationsById(id));
     }
 
+    //skills
+    @PostMapping("/me/skills")
+    public  ResponseEntity<SkillResponse> addSkill(@RequestBody @Valid SkillRequest request){
+           return ResponseEntity.status(HttpStatus.CREATED).body(userService.addSkill(request));
+    }
+
      //helpers
      private void validateSortingField(String field){
          Set<String> allowedSortFields=Set.of("firstName","lastName","email","username");

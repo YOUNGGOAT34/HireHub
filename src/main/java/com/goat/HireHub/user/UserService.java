@@ -23,17 +23,20 @@ public class UserService {
      private final ExperienceRepository experienceRepository;
      private final SecurityUtils securityUtils;
      private final EducationRepository educationRepository;
+     private final SkillRepository skillRepository;
 
      public UserService(UserRepository userRepository,
                         PasswordEncoder passwordEncoder,
                         ExperienceRepository experienceRepository,
                         EducationRepository educationRepository,
-                        SecurityUtils securityUtils){
+                        SecurityUtils securityUtils,
+                        SkillRepository skillRepository){
           this.userRepository=userRepository;
           this.passwordEncoder=passwordEncoder;
           this.experienceRepository=experienceRepository;
           this.educationRepository=educationRepository;
           this.securityUtils=securityUtils;
+          this.skillRepository=skillRepository;
      }
 
      //users
@@ -290,6 +293,44 @@ public class UserService {
           return education;
      }
 
+     //skills
+     public SkillResponse addSkill(SkillRequest skillRequest){
+
+          User loggedInUser = securityUtils.getCurrentUser();
+          CandidateProfile profile = loggedInUser.getCandidateProfile();
+
+          if (profile == null) {
+               profile = new CandidateProfile();
+               profile.setUser(loggedInUser);
+               profile.setSearchStatus("OPEN_TO_WORK");
+               profile.setHeadline("Software Professional");
+               loggedInUser.setCandidateProfile(profile);
+               userRepository.save(loggedInUser);
+          }
+
+          String cleanSkillName=skillRequest.name().trim();
+
+          Skill skill = skillRepository.findByNameIgnoreCase(cleanSkillName)
+                  .orElseGet(() -> skillRepository.save(new Skill(cleanSkillName)));
+          profile.getSkills().add(skill);
+             return SkillResponse.from(skillRepository.save(skill));
+     }
+
+     public void removeSkill(Long skillId){
+          User loggedInUser = securityUtils.getCurrentUser();
+          CandidateProfile profile = loggedInUser.getCandidateProfile();
+
+          if (profile == null) {
+               throw new ResourceNotFoundException("Profile not found for current session user.");
+          }
+
+          Skill skill = skillRepository.findById(skillId)
+                  .orElseThrow(() -> new ResourceNotFoundException("Skill record not found in system taxonomy registry", skillId));
+
+          profile.getSkills().remove(skill);
+     }
+
+
      private Experience findOrThrow(Long experienceId){
           return experienceRepository.findById(experienceId)
                   .orElseThrow(()->new ResourceNotFoundException("experience",experienceId));
@@ -324,6 +365,11 @@ public class UserService {
                );
           }
           return education;
+     }
+
+     private Skill findOrThrow(String name){
+           return skillRepository.findByNameIgnoreCase(name)
+                   .orElseThrow(()->new ResourceNotFoundException("skill"));
      }
 
 
