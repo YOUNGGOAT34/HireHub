@@ -12,6 +12,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class UserService {
@@ -55,16 +56,16 @@ public class UserService {
            return userRepository.findAll(spec,pageable).map(UserResponse::from);
      }
 
-     public void deleteById(Long id){
-           if(!userRepository.existsById(id)){
-                 throw new ResourceNotFoundException("user not found",id);
-           }
-           userRepository.deleteById(id);
+     @Transactional
+     public void deleteUserById(Long id){
+           User user= authorizeSelfAction(id,"delete");
+
+           userRepository.delete(user);
      }
 
      @Transactional
      public UserResponse updateUser(Long id, UserUpdateRequest userRequest){
-          User savedUser=getById(id);
+          User savedUser= authorizeSelfAction(id,"update");
           String email=userRequest.email().toLowerCase().trim();
           if (!savedUser.getEmail().equals(email) && findByEmail(email)){
                throw new ConflictException("This email address is already taken by another account");
@@ -80,8 +81,7 @@ public class UserService {
 
      @Transactional
      public UserResponse patchUser(Long id, UserPatchRequest userRequest){
-          User savedUser=getById(id);
-
+          User savedUser= authorizeSelfAction(id,"patch");
           if (userRequest.email()!=null){
                String email=userRequest.email().toLowerCase().trim();
                if (!savedUser.getEmail().equals(email) && findByEmail(email)){
@@ -210,13 +210,13 @@ public class UserService {
      }
 
      public void deleteExperienceById(Long id){
-           Experience experience=authorizeAction(id,"delete");
+           Experience experience= authorizeExperienceAction(id,"delete");
            experienceRepository.delete(experience);
      }
 
      @Transactional
      public ExperienceResponse updateExperience(Long id,ExperienceRequest request){
-              Experience savedExperience=authorizeAction(id,"update");
+              Experience savedExperience= authorizeExperienceAction(id,"update");
                savedExperience.setJobTitle(request.jobTitle());
                savedExperience.setCurrent(request.isCurrent());
                savedExperience.setStartDate(request.startDate());
@@ -348,7 +348,17 @@ public class UserService {
                   .orElseThrow(()->new ResourceNotFoundException("experience",experienceId));
      }
 
-     private Experience authorizeAction(Long id,String action){
+     private User authorizeSelfAction(Long userId, String action){
+          User loggedInUser=securityUtils.getCurrentUser();
+          if(!Objects.equals(loggedInUser.getId(), userId)){
+               throw new org.springframework.security.access.AccessDeniedException(
+                       "You do not have permission to "+action+" this user."
+               );
+          }
+          return loggedInUser;
+     }
+
+     private Experience authorizeExperienceAction(Long id, String action){
           Experience experience=findOrThrow(id);
           User loggedInUser=securityUtils.getCurrentUser();
           Long experienceOwnerProfileId=experience.getCandidateProfile().getId();

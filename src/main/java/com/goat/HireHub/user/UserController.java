@@ -57,7 +57,7 @@ public class UserController {
 
       @DeleteMapping("/{id}")
       public ResponseEntity<Void> deleteById(@PathVariable @Positive(message="Id must be greater than zero") Long id){
-          userService.deleteById(id);
+          userService.deleteUserById(id);
           return ResponseEntity.noContent().build();
       }
 
