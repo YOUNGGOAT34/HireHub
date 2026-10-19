@@ -14,6 +14,7 @@ import com.goat.HireHub.user.User;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
@@ -209,6 +210,31 @@ class JobServiceTest {
         assertEquals(BigDecimal.valueOf(130000), savedJob.getSalary());
     }
 
+    @Test
+    void updateJob_AsNormalEmployeeInsideCompany_ThrowsAccessDenied() {
+
+        JobUpdateRequest updateRequest = new JobUpdateRequest("New Title", "New Description", BigDecimal.valueOf(60000));
+        Company company = mock(Company.class);
+        when(company.getId()).thenReturn(1L);
+
+        Job savedJob = mock(Job.class);
+        when(savedJob.getCompany()).thenReturn(company);
+        when(jobRepository.findById(5L)).thenReturn(Optional.of(savedJob));
+
+        User user = mock(User.class);
+        when(user.getId()).thenReturn(42L);
+        when(securityUtils.getCurrentUser()).thenReturn(user);
+
+        CompanyMembership companyMembership = mock(CompanyMembership.class);
+        when(companyMembership.getRole()).thenReturn(Role.EMPLOYEE);
+
+        when(companyService.findOrThrow(1L)).thenReturn(company);
+        when(companyService.findMemberShipOrThrow(42L, 1L)).thenReturn(companyMembership);
+
+        assertThrows(AccessDeniedException.class, () -> jobService.updateJob(5L, updateRequest));
+        verify(savedJob, never()).setTitle(anyString());
+    }
+
 
     @ParameterizedTest
     @EnumSource(value = Role.class, names = {"ADMIN", "RECRUITER"})
@@ -237,6 +263,67 @@ class JobServiceTest {
 
         assertEquals("Preserved Original Title", savedJob.getTitle());
         assertEquals("Patched Description", savedJob.getDescription());
+    }
+
+
+    @Test
+    void patchJob_AsNormalEmployeeInsideCompany_ThrowsAccessDenied() {
+
+        JobPatchRequest patchRequest = new JobPatchRequest("New Title", null, null);
+        Company company = mock(Company.class);
+        when(company.getId()).thenReturn(1L);
+
+        Job savedJob = mock(Job.class);
+        when(savedJob.getCompany()).thenReturn(company);
+        when(jobRepository.findById(5L)).thenReturn(Optional.of(savedJob));
+
+        User user = mock(User.class);
+        when(user.getId()).thenReturn(42L);
+        when(securityUtils.getCurrentUser()).thenReturn(user);
+
+        CompanyMembership companyMembership = mock(CompanyMembership.class);
+        when(companyMembership.getRole()).thenReturn(Role.EMPLOYEE);
+
+        when(companyService.findOrThrow(1L)).thenReturn(company);
+        when(companyService.findMemberShipOrThrow(42L, 1L)).thenReturn(companyMembership);
+
+        assertThrows(AccessDeniedException.class, () -> jobService.patchJob(5L, patchRequest));
+        verify(savedJob, never()).setTitle(anyString());
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "UPDATE",
+            "PATCH"
+    })
+    void modifyJob_AsCompleteOutsider_ThrowsAccessDenied(String actionType) {
+
+        Company company = mock(Company.class);
+        when(company.getId()).thenReturn(1L);
+
+        Job savedJob = mock(Job.class);
+        when(savedJob.getCompany()).thenReturn(company);
+        when(jobRepository.findById(5L)).thenReturn(Optional.of(savedJob));
+
+        User user = mock(User.class);
+        when(user.getId()).thenReturn(999L);
+        when(securityUtils.getCurrentUser()).thenReturn(user);
+
+        when(companyService.findOrThrow(1L)).thenReturn(company);
+
+        when(companyService.findMemberShipOrThrow(999L, 1L))
+                .thenThrow(new AccessDeniedException("User has no records tied to this company"));
+
+
+        if ("UPDATE".equals(actionType)) {
+            JobUpdateRequest req = new JobUpdateRequest("Title", "Desc", BigDecimal.valueOf(50000));
+            assertThrows(AccessDeniedException.class, () -> jobService.updateJob(5L, req));
+        } else {
+            JobPatchRequest req = new JobPatchRequest("Title", null, null);
+            assertThrows(AccessDeniedException.class, () -> jobService.patchJob(5L, req));
+        }
+
+        verify(savedJob, never()).setTitle(anyString());
     }
 
     /*
