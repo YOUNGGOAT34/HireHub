@@ -5,6 +5,7 @@ import com.goat.HireHub.company.CompanyMembership;
 import com.goat.HireHub.company.CompanyService;
 import com.goat.HireHub.company.Role;
 import com.goat.HireHub.exception.ResourceNotFoundException;
+import com.goat.HireHub.job.dto.JobResponse;
 import com.goat.HireHub.security.SecurityUtils;
 import com.goat.HireHub.user.User;
 import org.junit.jupiter.api.Test;
@@ -16,11 +17,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.access.AccessDeniedException;
 
+import java.math.BigDecimal;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+
 
 @ExtendWith(MockitoExtension.class)
 class JobServiceTest {
@@ -33,6 +35,36 @@ class JobServiceTest {
 
      @InjectMocks
     JobService jobService;
+
+     //get by id tests
+
+     @Test
+     void getJobById_WhenJobDoesNotExist_throwsNotFound(){
+           when(jobRepository.findById(99L)).thenReturn(Optional.empty());
+           assertThrows(ResourceNotFoundException.class,()->jobService.getById(99L));
+     }
+
+    @Test
+    void getById_HappyPath_ReturnsJobResponseWithRightFields() {
+        Company company = mock(Company.class);
+        when(company.getId()).thenReturn(10L);
+
+        Job job = mock(Job.class);
+        when(job.getId()).thenReturn(5L);
+        when(job.getTitle()).thenReturn("QA Engineer");
+        when(job.getDescription()).thenReturn("Testing frameworks");
+        when(job.getSalary()).thenReturn(BigDecimal.valueOf(80000));
+        when(job.getCompany()).thenReturn(company);
+
+        when(jobRepository.findById(5L)).thenReturn(Optional.of(job));
+
+        JobResponse response = jobService.getById(5L);
+
+        assertNotNull(response);
+        assertEquals(5L, response.id());
+        assertEquals("QA Engineer", response.title());
+        assertEquals(BigDecimal.valueOf(80000), response.salary());
+    }
 
      @Test
     void getById_WhenJobDoesNotExist_throwsNotFound(){
