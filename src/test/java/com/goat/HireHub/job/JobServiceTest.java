@@ -328,8 +328,19 @@ class JobServiceTest {
 
     /*
     *  Delete job tests
+    * you cannot delete a job if you are not a member of the company that posted that job
+    * you cannot delete a job if you are a member of the company that posted job if you have no authorization
     * */
 
+    @Test
+    void deleteById_WhenJobDoesNotExist_ThrowsResourceNotFoundException() {
+        Long nonExistentJobId = 99L;
+        when(jobRepository.findById(nonExistentJobId)).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class, () -> jobService.deleteById(nonExistentJobId));
+        verify(companyService, never()).findOrThrow(any());
+        verify(jobRepository, never()).delete(any(Job.class));
+    }
 
      @Test
 
@@ -395,7 +406,5 @@ class JobServiceTest {
 
         return job;
     }
-
-
 
 }
