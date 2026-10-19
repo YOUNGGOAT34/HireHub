@@ -74,10 +74,7 @@ public class JobService {
         return JobResponse.from(jobRepository.save(job));
     }
 
-    private Job findOrThrow(Long id){
-        return jobRepository.findById(id)
-                .orElseThrow(()->new ResourceNotFoundException("job",id));
-    }
+
 
     public JobResponse getById(Long id){
             return JobResponse.from(findOrThrow(id));
@@ -127,7 +124,6 @@ public class JobService {
         Company company=companyService.findOrThrow(id);
         User currentUser=securityUtils.getCurrentUser();
         CompanyMembership membership=companyService.findMemberShipOrThrow(currentUser.getId(), id);
-
         if(membership.getRole() != Role.ADMIN && membership.getRole()!=Role.RECRUITER){
             throw new org.springframework.security.access.AccessDeniedException(
                     "Access Denied: Only a company recruiters and admin can post or modify jobs belonging to that company."
@@ -135,6 +131,11 @@ public class JobService {
         }
 
         return company;
+    }
+
+    private Job findOrThrow(Long id){
+        return jobRepository.findById(id)
+                .orElseThrow(()->new ResourceNotFoundException("job",id));
     }
 
 }
