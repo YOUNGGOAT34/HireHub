@@ -23,7 +23,7 @@ public class Company {
      @OneToMany(mappedBy = "company", cascade = CascadeType.ALL, orphanRemoval = true)
      private List<CompanyMembership> memberships;
 
-     protected Company(){}
+     public Company(){}
 
      public Company(String name,String description){
            this.description=description;
