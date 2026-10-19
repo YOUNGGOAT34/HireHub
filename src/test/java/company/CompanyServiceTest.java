@@ -4,6 +4,7 @@ import com.goat.HireHub.company.*;
 import com.goat.HireHub.company.dto.CompanyPatchRequest;
 import com.goat.HireHub.company.dto.CompanyRequest;
 import com.goat.HireHub.company.dto.CompanyResponse;
+import com.goat.HireHub.exception.ConflictException;
 import com.goat.HireHub.exception.ResourceNotFoundException;
 import com.goat.HireHub.security.SecurityUtils;
 import com.goat.HireHub.user.User;
@@ -125,7 +126,7 @@ class CompanyServiceTest {
 
     @ParameterizedTest
     @CsvSource({
-            "MEMBER",
+            "EMPLOYEE",
             "RECRUITER"
     })
     void patchCompany_AsNonAdminRole_ThrowsAccessDenied(String roleName) {
@@ -137,6 +138,62 @@ class CompanyServiceTest {
         assertNotEquals("New Name", company.getName()); // Confirms state preservation
     }
 
+
+    //add member workflow tests
+    @Test
+    void addMember_AsAdminAndNewUser_SavesMembershipSuccessfully() {
+        Company company = givenCompanyWithUserRole(Role.ADMIN);
+        User targetUser = mock(User.class);
+        when(targetUser.getId()).thenReturn(200L);
+
+        when(userRepository.findByEmailIgnoreCase("invitee@hub.com")).thenReturn(Optional.of(targetUser));
+        when(companyMembershipRepository.findByUserIdAndCompanyId(200L, 1L)).thenReturn(Optional.empty());
+
+        when(companyMembershipRepository.save(any(CompanyMembership.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        companyService.addMember(1L, "invitee@hub.com", Role.RECRUITER);
+
+        ArgumentCaptor<CompanyMembership> membershipCaptor = ArgumentCaptor.forClass(CompanyMembership.class);
+        verify(companyMembershipRepository, times(1)).save(membershipCaptor.capture());
+
+        CompanyMembership savedMembership = membershipCaptor.getValue();
+        assertEquals(targetUser, savedMembership.getUser());
+        assertEquals(company, savedMembership.getCompany());
+        assertEquals(Role.RECRUITER, savedMembership.getRole());
+    }
+
+    @Test
+    void addMember_WhenTargetUserAlreadyMember_ThrowsConflictException() {
+        givenCompanyWithUserRole(Role.ADMIN);
+        User targetUser = mock(User.class);
+        when(targetUser.getId()).thenReturn(200L);
+        CompanyMembership existingMembership = mock(CompanyMembership.class);
+
+        when(userRepository.findByEmailIgnoreCase("duplicate@hub.com")).thenReturn(Optional.of(targetUser));
+        when(companyMembershipRepository.findByUserIdAndCompanyId(200L, 1L)).thenReturn(Optional.of(existingMembership));
+
+        assertThrows(ConflictException.class, () ->
+                companyService.addMember(1L, "duplicate@hub.com", Role.RECRUITER)
+        );
+
+        verify(companyMembershipRepository, times(0)).save(any(CompanyMembership.class));
+    }
+// Arrange: Set up a company where the logged-in user is NOT an admin (e.g., RECRUITER, EMPLOYEE)
+
+    @ParameterizedTest
+    @EnumSource(value = Role.class, names = {"ADMIN"}, mode = EnumSource.Mode.EXCLUDE)
+    void addMember_AsNonAdminRole_ThrowsAccessDenied(Role nonAdminRole) {
+
+        givenCompanyWithUserRole(nonAdminRole);
+
+        assertThrows(AccessDeniedException.class, () ->
+                companyService.addMember(1L, "newuser@hub.com", Role.EMPLOYEE)
+        );
+
+        verify(userRepository, never()).findByEmailIgnoreCase(anyString());
+        verify(companyMembershipRepository, never()).save(any(CompanyMembership.class));
+    }
 
 
     private Company givenCompanyWithUserRole(Role role) {
