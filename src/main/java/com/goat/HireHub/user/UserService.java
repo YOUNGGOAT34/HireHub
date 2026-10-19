@@ -286,6 +286,7 @@ public class UserService {
                   .sorted((a, b) -> a.name().compareToIgnoreCase(b.name()))
                   .toList();
      }
+     @Transactional
      public SkillResponse addSkillToProfile(SkillRequest skillRequest){
 
           User loggedInUser = securityUtils.getCurrentUser();

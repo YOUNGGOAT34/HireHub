@@ -87,7 +87,7 @@ public class UserController {
     public ResponseEntity<ProfileSummaryResponse> updateMyProfile(
             @RequestParam(required = false) String headline,
             @RequestParam(required = false) String summary,
-            @RequestParam(required = false) String searchStatus) {
+            @RequestParam(required = false) SearchStatus searchStatus) {
         ProfileSummaryResponse response = userService.updateMainProfile(headline, summary, searchStatus);
         return ResponseEntity.ok(response);
     }
