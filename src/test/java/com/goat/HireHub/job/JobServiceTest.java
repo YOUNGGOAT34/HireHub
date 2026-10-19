@@ -1,18 +1,16 @@
-package job;
-
+package com.goat.HireHub.job;
 
 import com.goat.HireHub.company.Company;
 import com.goat.HireHub.company.CompanyMembership;
 import com.goat.HireHub.company.CompanyService;
 import com.goat.HireHub.company.Role;
 import com.goat.HireHub.exception.ResourceNotFoundException;
-import com.goat.HireHub.job.Job;
-import com.goat.HireHub.job.JobRepository;
-import com.goat.HireHub.job.JobService;
 import com.goat.HireHub.security.SecurityUtils;
 import com.goat.HireHub.user.User;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -68,47 +66,28 @@ class JobServiceTest {
 
      }
 
-     @Test
-    void deleteById_WhenUserInCompanyButNotAdminOrRecruiter_throwsAccessDenied(){
-
-          Company company=mock(Company.class);
-          when(company.getId()).thenReturn(1L);
-          Job job=mock(Job.class);
-          when(job.getCompany()).thenReturn(company);
-          when(jobRepository.findById(1L)).thenReturn(Optional.of(job));
-
-          CompanyMembership companyMembership=mock(CompanyMembership.class);
-          when(companyMembership.getRole()).thenReturn(Role.EMPLOYEE);
-
-          User user=mock(User.class);
-          when(user.getId()).thenReturn(1L);
-          when(securityUtils.getCurrentUser()).thenReturn(user);
-          when(companyService.findOrThrow(1L)).thenReturn(company);
-          when(companyService.findMemberShipOrThrow(1L,1L)).thenReturn(companyMembership);
-
+     @ParameterizedTest
+     @EnumSource(value=Role.class,names={"ADMIN","RECRUITER"},mode=EnumSource.Mode.EXCLUDE)
+    void deleteById_WhenUserInCompanyButNotAdminOrRecruiter_throwsAccessDenied(Role role){
+          Job job=givenJobInCompanyWhereUserHasRole(role);
          assertThrows(AccessDeniedException.class,()->jobService.deleteById(1L));
-
          verify(jobRepository,never()).deleteById(any());
          verify(jobRepository,never()).delete(job);
 
      }
 
-     @Test
-    void deleteById_WhenUserInCompanyAndISAdmin_DeletesSuccessfully(){
-
-          setUpAdminOrRecruiter(Role.ADMIN);
-
-     }
 
 
-    @Test
-    void deleteById_WhenUserInCompanyAndISRecruiter_DeletesSuccessfully(){
-
-        setUpAdminOrRecruiter(Role.RECRUITER);
+    @ParameterizedTest
+    @EnumSource(value=Role.class,names={"ADMIN","RECRUITER"})
+    void deleteById_WhenUserInCompanyAndISRecruiterOrAdmin_DeletesSuccessfully(Role role){
+        Job job=givenJobInCompanyWhereUserHasRole(role);
+        assertDoesNotThrow(()->jobService.deleteById(1L));
+        verify(jobRepository,times(1)).delete(job);
 
     }
 
-    void setUpAdminOrRecruiter(Role role){
+    Job givenJobInCompanyWhereUserHasRole(Role role){
         Company company=mock(Company.class);
         when(company.getId()).thenReturn(1L);
         Job job=mock(Job.class);
@@ -125,8 +104,7 @@ class JobServiceTest {
 
         when(companyService.findMemberShipOrThrow(1L,1L)).thenReturn(companyMembership);
 
-        assertDoesNotThrow(()->jobService.deleteById(1L));
-        verify(jobRepository,times(1)).delete(job);
+        return job;
     }
 
 
