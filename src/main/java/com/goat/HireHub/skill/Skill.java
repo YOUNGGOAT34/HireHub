@@ -1,4 +1,4 @@
-package com.goat.HireHub.user;
+package com.goat.HireHub.skill;
 
 import jakarta.persistence.*;
 

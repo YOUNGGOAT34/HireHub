@@ -1,8 +1,8 @@
 package com.goat.HireHub.user;
 
 
-import com.goat.HireHub.education.dto.EducationRequest;
-import com.goat.HireHub.education.dto.EducationResponse;
+import com.goat.HireHub.skill.dto.SkillRequest;
+import com.goat.HireHub.skill.dto.SkillResponse;
 import com.goat.HireHub.user.dto.*;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
@@ -80,26 +80,6 @@ public class UserController {
 
 
 
-
-
-    //skills
-
-    @GetMapping("/{id}/skills")
-    public ResponseEntity<List<SkillResponse>> getUserSkills(
-            @PathVariable @Positive(message = "Id must be greater than zero") Long id) {
-        return ResponseEntity.ok(userService.getSkillsByProfileId(id));
-    }
-
-    @PostMapping("/me/skills")
-    public  ResponseEntity<SkillResponse> addSkillToProfile(@RequestBody @Valid SkillRequest request){
-           return ResponseEntity.status(HttpStatus.CREATED).body(userService.addSkillToProfile(request));
-    }
-
-    @DeleteMapping("/me/skills/{id}")
-    public ResponseEntity<Void> removeSkillFromProfile(@PathVariable @Positive(message = "id must be greater than zero")Long id){
-           userService.removeSkillFromProfile(id);
-           return ResponseEntity.noContent().build();
-    }
 
      //helpers
      private void validateSortingField(String field){

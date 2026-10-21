@@ -1,7 +1,5 @@
-package com.goat.HireHub.experience;
+package com.goat.HireHub.education;
 
-import com.goat.HireHub.education.Education;
-import com.goat.HireHub.education.EducationRepository;
 import com.goat.HireHub.education.dto.EducationRequest;
 import com.goat.HireHub.education.dto.EducationResponse;
 import com.goat.HireHub.exception.ResourceNotFoundException;

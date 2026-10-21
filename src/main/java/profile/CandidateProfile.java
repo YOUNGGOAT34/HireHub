@@ -2,6 +2,7 @@ package profile;
 
 import com.goat.HireHub.education.Education;
 import com.goat.HireHub.experience.Experience;
+import com.goat.HireHub.skill.Skill;
 import com.goat.HireHub.user.*;
 import jakarta.persistence.*;
 import java.util.ArrayList;

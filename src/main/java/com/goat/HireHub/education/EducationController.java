@@ -1,4 +1,4 @@
-package com.goat.HireHub.experience;
+package com.goat.HireHub.education;
 
 import com.goat.HireHub.education.dto.EducationRequest;
 import com.goat.HireHub.education.dto.EducationResponse;

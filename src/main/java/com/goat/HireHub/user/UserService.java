@@ -1,13 +1,14 @@
 package com.goat.HireHub.user;
 
-import com.goat.HireHub.education.Education;
 import com.goat.HireHub.education.EducationRepository;
-import com.goat.HireHub.education.dto.EducationRequest;
-import com.goat.HireHub.education.dto.EducationResponse;
 import com.goat.HireHub.exception.ConflictException;
 import com.goat.HireHub.exception.ResourceNotFoundException;
 import com.goat.HireHub.experience.ExperienceRepository;
 import com.goat.HireHub.security.SecurityUtils;
+import com.goat.HireHub.skill.Skill;
+import com.goat.HireHub.skill.SkillRepository;
+import com.goat.HireHub.skill.dto.SkillRequest;
+import com.goat.HireHub.skill.dto.SkillResponse;
 import com.goat.HireHub.user.dto.*;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
@@ -145,60 +146,13 @@ public class UserService {
 
 
 
-     //skills
-     @Transactional
-     public List<SkillResponse> getSkillsByProfileId(Long userId){
-          if (!userRepository.existsById(userId)) {
-               throw new ResourceNotFoundException("User not found with id", userId);
-          }
 
-          return skillRepository.findAllByProfileId(userId)
-                  .stream()
-                  .map(SkillResponse::from)
-                  .sorted((a, b) -> a.name().compareToIgnoreCase(b.name()))
-                  .toList();
-     }
-     @Transactional
-     public SkillResponse addSkillToProfile(SkillRequest skillRequest){
-
-          User loggedInUser = securityUtils.getCurrentUser();
-          CandidateProfile profile = getOrCreateCandidateProfile(loggedInUser);
-
-          String cleanSkillName=skillRequest.name().trim();
-
-          Skill skill = skillRepository.findByNameIgnoreCase(cleanSkillName)
-                  .orElseGet(() -> skillRepository.save(new Skill(cleanSkillName)));
-
-          if (profile.getSkills().contains(skill)) {
-               throw new ConflictException("You have already added the skill '" + cleanSkillName + "' to your profile.");
-          }
-          profile.getSkills().add(skill);
-             return SkillResponse.from(skillRepository.save(skill));
-     }
-
-     public void removeSkillFromProfile(Long skillId){
-          User loggedInUser = securityUtils.getCurrentUser();
-          CandidateProfile profile = loggedInUser.getCandidateProfile();
-
-          if (profile == null) {
-               throw new ResourceNotFoundException("Profile not found for current session user.");
-          }
-
-          Skill skill = skillRepository.findById(skillId)
-                  .orElseThrow(() -> new ResourceNotFoundException("Skill record not found in system taxonomy registry", skillId));
-
-          profile.getSkills().remove(skill);
-     }
 
 
 
      private User getCurrentUser(){
           return securityUtils.getCurrentUser();
      }
-
-
-
-
 
 
 
