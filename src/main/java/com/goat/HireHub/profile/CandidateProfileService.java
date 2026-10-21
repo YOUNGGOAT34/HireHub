@@ -19,10 +19,12 @@ import java.util.List;
 public class CandidateProfileService {
     private final UserRepository userRepository;
     private final SecurityUtils securityUtils;
+    private final CandidateProfileRepository candidateProfileRepository;
 
-    public CandidateProfileService(UserRepository userRepository,SecurityUtils securityUtils){
+    public CandidateProfileService(UserRepository userRepository,SecurityUtils securityUtils,CandidateProfileRepository candidateProfileRepository){
         this.userRepository=userRepository;
         this.securityUtils=securityUtils;
+        this.candidateProfileRepository=candidateProfileRepository;
     }
     //profile
     @Transactional
@@ -63,23 +65,18 @@ public class CandidateProfileService {
         return new ProfileSummaryResponse(profile.getId(), profile.getHeadline(), profile.getSummary(), profile.getSearchStatus());
     }
 
-    public CandidateProfile getOrCreateCandidateProfile(User user) {
-        CandidateProfile profile = user.getCandidateProfile();
 
-        if (profile != null) {
-            return profile;
+        @Transactional
+        public CandidateProfile getOrCreateCandidateProfile(User user) {
+            return candidateProfileRepository.findById(user.getId())
+                    .orElseGet(() -> {
+                        CandidateProfile p = new CandidateProfile();
+                        p.setUser(user);
+                        p.setSearchStatus(SearchStatus.OPEN_TO_WORK);
+                        p.setHeadline("Software Professional");
+                        return candidateProfileRepository.save(p);
+                    });
         }
 
-        profile = new CandidateProfile();
-        profile.setUser(user);
-        profile.setSearchStatus(SearchStatus.OPEN_TO_WORK);
-        profile.setHeadline("Software Professional");
-
-        user.setCandidateProfile(profile);
-
-        userRepository.save(user);
-
-        return profile;
-    }
 
 }

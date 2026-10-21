@@ -8,6 +8,7 @@ import com.goat.HireHub.experience.dto.ExperienceResponse;
 import jakarta.transaction.Transactional;
 import com.goat.HireHub.profile.CandidateProfile;
 import com.goat.HireHub.profile.CandidateProfileService;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -26,7 +27,7 @@ public class ExperienceService {
          this.candidateProfileService=candidateProfileService;
     }
 
-    //experience
+
     @Transactional
     public ExperienceResponse addExperience(ExperienceRequest request){
         User user=securityUtils.getCurrentUser();
@@ -72,13 +73,11 @@ public class ExperienceService {
     private Experience authorizeExperienceAction(Long id, String action){
         Experience experience=findOrThrow(id);
         User loggedInUser=securityUtils.getCurrentUser();
-        Long experienceOwnerProfileId=experience.getCandidateProfile().getId();
-        Long currentUserProfileId=loggedInUser.getCandidateProfile().getId();
+        CandidateProfile profile=loggedInUser.getCandidateProfile();
 
-        if (!currentUserProfileId.equals(experienceOwnerProfileId)){
-            throw new org.springframework.security.access.AccessDeniedException(
-                    "You do not have permission to "+action+" this experience record."
-            );
+        if (profile== null || !profile.getId().equals(experience.getCandidateProfile().getId())) {
+            throw new AccessDeniedException(
+                    "You do not have permission to " + action + " this experience record.");
         }
 
         return experience;
