@@ -2,7 +2,7 @@ package profile.dto;
 
 import com.goat.HireHub.experience.dto.ExperienceResponse;
 import com.goat.HireHub.user.SearchStatus;
-import com.goat.HireHub.user.dto.EducationResponse;
+import com.goat.HireHub.education.dto.EducationResponse;
 
 import java.util.List;
 

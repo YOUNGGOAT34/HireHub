@@ -1,4 +1,4 @@
-package com.goat.HireHub.user.dto;
+package com.goat.HireHub.education.dto;
 
 import com.goat.HireHub.education.Education;
 import java.time.LocalDate;

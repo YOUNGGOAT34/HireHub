@@ -1,12 +1,12 @@
 package profile;
 
+import com.goat.HireHub.education.dto.EducationResponse;
 import com.goat.HireHub.exception.ResourceNotFoundException;
 import com.goat.HireHub.experience.dto.ExperienceResponse;
 import com.goat.HireHub.security.SecurityUtils;
 import com.goat.HireHub.user.SearchStatus;
 import com.goat.HireHub.user.User;
 import com.goat.HireHub.user.UserRepository;
-import com.goat.HireHub.user.dto.*;
 import jakarta.transaction.Transactional;
 import profile.dto.FullProfileResponse;
 import profile.dto.ProfileSummaryResponse;

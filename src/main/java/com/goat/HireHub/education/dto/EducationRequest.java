@@ -1,4 +1,4 @@
-package com.goat.HireHub.user.dto;
+package com.goat.HireHub.education.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
