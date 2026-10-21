@@ -77,30 +77,6 @@ public class UserController {
 
 
 
-    //experience endpoints
-    @PostMapping("/me/experiences")
-    public ResponseEntity<ExperienceResponse> addExperience(
-            @RequestBody @Valid ExperienceRequest experienceRequest){
-        return ResponseEntity.status(HttpStatus.CREATED).body(userService.addExperience(experienceRequest));
-    }
-
-    @GetMapping("/{id}/experiences")
-    public ResponseEntity<List<ExperienceResponse>> getUserExperiences(
-            @PathVariable @Positive(message = "Id must be greater than zero") Long id) {
-        List<ExperienceResponse> responses = userService.getAllExperiencesByUserId(id);
-        return ResponseEntity.ok(responses);
-    }
-
-    @DeleteMapping("/me/experiences/{id}")
-    public ResponseEntity<Void> deleteExperience(@PathVariable @Positive(message = "Id must be greater than zero") Long id){
-             userService.deleteExperienceById(id);
-             return ResponseEntity.noContent().build();
-    }
-
-    @PutMapping("/me/experiences/{id}")
-    public ResponseEntity<ExperienceResponse> updateExperience(@PathVariable @Positive(message = "id must be greater than zero")Long id,@RequestBody @Valid ExperienceRequest request){
-           return ResponseEntity.ok(userService.updateExperience(id,request));
-    }
 
     //education
 

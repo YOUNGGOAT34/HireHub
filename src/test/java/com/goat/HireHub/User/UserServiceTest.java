@@ -1,5 +1,7 @@
 package com.goat.HireHub.User;
 
+import com.goat.HireHub.education.EducationRepository;
+import com.goat.HireHub.experience.ExperienceRepository;
 import com.goat.HireHub.security.SecurityUtils;
 import com.goat.HireHub.user.*;
 import org.junit.jupiter.api.BeforeEach;

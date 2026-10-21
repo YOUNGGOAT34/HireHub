@@ -1,6 +1,6 @@
 package com.goat.HireHub.user.dto;
 
-import com.goat.HireHub.user.Education;
+import com.goat.HireHub.education.Education;
 import java.time.LocalDate;
 
 public record EducationResponse(

@@ -1,6 +1,6 @@
-package com.goat.HireHub.user.dto;
+package com.goat.HireHub.experience.dto;
 
-import com.goat.HireHub.user.Experience;
+import com.goat.HireHub.experience.Experience;
 
 import java.time.LocalDate;
 

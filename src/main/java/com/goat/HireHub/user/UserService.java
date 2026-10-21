@@ -1,7 +1,10 @@
 package com.goat.HireHub.user;
 
+import com.goat.HireHub.education.Education;
+import com.goat.HireHub.education.EducationRepository;
 import com.goat.HireHub.exception.ConflictException;
 import com.goat.HireHub.exception.ResourceNotFoundException;
+import com.goat.HireHub.experience.ExperienceRepository;
 import com.goat.HireHub.security.SecurityUtils;
 import com.goat.HireHub.user.dto.*;
 import jakarta.transaction.Transactional;
@@ -138,48 +141,14 @@ public class UserService {
      }
 
 
-
-     //experience
+     
+     //education
      @Transactional
-     public ExperienceResponse addExperience(ExperienceRequest request){
-           User user=securityUtils.getCurrentUser();
-           CandidateProfile profile=getOrCreateCandidateProfile(user);
-            Experience experience=new Experience();
-            experience.setJobTitle(request.jobTitle());
-            experience.setCurrent(request.isCurrent());
-            experience.setStartDate(request.startDate());
-            experience.setEndDate(request.endDate());
-            experience.setCompanyNameRaw(request.companyName());
-            experience.setDescription(request.description());
-            experience.setCandidateProfile(profile);
-            return ExperienceResponse.from(experienceRepository.save(experience));
-     }
-
-
-     public List<ExperienceResponse> getAllExperiencesByUserId(Long userId){
-           return experienceRepository.findByCandidateProfileId(userId).stream()
-                   .sorted((a, b) -> b.getStartDate().compareTo(a.getStartDate()))
-                   .map(ExperienceResponse::from).toList();
-     }
-
-     @Transactional
-     public void deleteExperienceById(Long id){
-           Experience experience= authorizeExperienceAction(id,"delete");
-           experienceRepository.delete(experience);
-     }
-
-     @Transactional
-     public ExperienceResponse updateExperience(Long id,ExperienceRequest request){
-              Experience savedExperience= authorizeExperienceAction(id,"update");
-               savedExperience.setJobTitle(request.jobTitle());
-               savedExperience.setCurrent(request.isCurrent());
-               savedExperience.setStartDate(request.startDate());
-               savedExperience.setEndDate(request.endDate());
-               savedExperience.setCompanyNameRaw(request.companyName());
-               savedExperience.setDescription(request.description());
-
-               return ExperienceResponse.from(savedExperience);
-
+     public EducationResponse addEducation(EducationRequest request) {
+          User loggedInUser = securityUtils.getCurrentUser();
+          CandidateProfile profile = getOrCreateCandidateProfile(loggedInUser);
+          Education education = getEducation(request, profile);
+          return EducationResponse.from(educationRepository.save(education));
      }
 
      @Transactional
@@ -189,15 +158,6 @@ public class UserService {
                   .sorted((a,b)->b.getStartDate().compareTo(a.getStartDate()))
                   .map(EducationResponse::from)
                   .toList();
-     }
-     
-     //education
-     @Transactional
-     public EducationResponse addEducation(EducationRequest request) {
-          User loggedInUser = securityUtils.getCurrentUser();
-          CandidateProfile profile = getOrCreateCandidateProfile(loggedInUser);
-          Education education = getEducation(request, profile);
-          return EducationResponse.from(educationRepository.save(education));
      }
 
      @Transactional
@@ -282,29 +242,12 @@ public class UserService {
      }
 
 
-     private Experience findOrThrow(Long experienceId){
-          return experienceRepository.findById(experienceId)
-                  .orElseThrow(()->new ResourceNotFoundException("experience",experienceId));
-     }
 
      private User getCurrentUser(){
           return securityUtils.getCurrentUser();
      }
 
-     private Experience authorizeExperienceAction(Long id, String action){
-          Experience experience=findOrThrow(id);
-          User loggedInUser=securityUtils.getCurrentUser();
-          Long experienceOwnerProfileId=experience.getCandidateProfile().getId();
-          Long currentUserProfileId=loggedInUser.getCandidateProfile().getId();
 
-          if (!currentUserProfileId.equals(experienceOwnerProfileId)){
-               throw new org.springframework.security.access.AccessDeniedException(
-                       "You do not have permission to "+action+" this experience record."
-               );
-          }
-
-          return experience;
-     }
 
      private Education authorizeEducationAction(Long id, String action) {
           Education education = educationRepository.findById(id)
@@ -322,24 +265,7 @@ public class UserService {
           return education;
      }
 
-     private CandidateProfile getOrCreateCandidateProfile(User user) {
-          CandidateProfile profile = user.getCandidateProfile();
 
-          if (profile != null) {
-               return profile;
-          }
-
-          profile = new CandidateProfile();
-          profile.setUser(user);
-          profile.setSearchStatus(SearchStatus.OPEN_TO_WORK);
-          profile.setHeadline("Software Professional");
-
-          user.setCandidateProfile(profile);
-
-          userRepository.save(user);
-
-          return profile;
-     }
 
 
 }

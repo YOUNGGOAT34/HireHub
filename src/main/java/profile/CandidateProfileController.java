@@ -1,8 +1,8 @@
 package profile;
 
-import com.goat.HireHub.user.dto.FullProfileResponse;
-import com.goat.HireHub.user.dto.ProfileSummaryResponse;
-import com.goat.HireHub.user.dto.ProfileSummaryUpdateRequest;
+import profile.dto.FullProfileResponse;
+import profile.dto.ProfileSummaryResponse;
+import profile.dto.ProfileSummaryUpdateRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import org.springframework.http.ResponseEntity;

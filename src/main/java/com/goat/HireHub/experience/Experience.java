@@ -1,4 +1,4 @@
-package com.goat.HireHub.user;
+package com.goat.HireHub.experience;
 
 import com.goat.HireHub.company.Company;
 import jakarta.persistence.*;

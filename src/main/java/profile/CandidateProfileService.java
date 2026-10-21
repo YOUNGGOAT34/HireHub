@@ -1,11 +1,16 @@
 package profile;
 
 import com.goat.HireHub.exception.ResourceNotFoundException;
+import com.goat.HireHub.experience.dto.ExperienceResponse;
 import com.goat.HireHub.security.SecurityUtils;
+import com.goat.HireHub.user.SearchStatus;
 import com.goat.HireHub.user.User;
 import com.goat.HireHub.user.UserRepository;
 import com.goat.HireHub.user.dto.*;
 import jakarta.transaction.Transactional;
+import profile.dto.FullProfileResponse;
+import profile.dto.ProfileSummaryResponse;
+import profile.dto.ProfileSummaryUpdateRequest;
 
 import java.util.List;
 
@@ -54,6 +59,25 @@ public class CandidateProfileService {
 
         userRepository.save(loggedInUser);
         return new ProfileSummaryResponse(profile.getId(), profile.getHeadline(), profile.getSummary(), profile.getSearchStatus());
+    }
+
+    public CandidateProfile getOrCreateCandidateProfile(User user) {
+        CandidateProfile profile = user.getCandidateProfile();
+
+        if (profile != null) {
+            return profile;
+        }
+
+        profile = new CandidateProfile();
+        profile.setUser(user);
+        profile.setSearchStatus(SearchStatus.OPEN_TO_WORK);
+        profile.setHeadline("Software Professional");
+
+        user.setCandidateProfile(profile);
+
+        userRepository.save(user);
+
+        return profile;
     }
 
 }

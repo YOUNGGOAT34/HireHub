@@ -1,4 +1,4 @@
-package com.goat.HireHub.user;
+package com.goat.HireHub.education;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
