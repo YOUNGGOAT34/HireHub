@@ -2,6 +2,8 @@ package com.goat.HireHub.user;
 
 import com.goat.HireHub.company.Company;
 import jakarta.persistence.*;
+import profile.CandidateProfile;
+
 import java.time.LocalDate;
 
 @Entity

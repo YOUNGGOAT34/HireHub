@@ -10,9 +10,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import profile.CandidateProfile;
 
 import java.util.List;
-import java.util.Objects;
 
 @Service
 public class UserService {
@@ -134,47 +134,9 @@ public class UserService {
 
      private User getById(Long id){
            return userRepository.findById(id)
-                   .orElseThrow(()->new ResourceNotFoundException("user not found",id));
+                   .orElseThrow(()->new ResourceNotFoundException("user",id));
      }
 
-     //profile
-     @Transactional
-     public FullProfileResponse getFullProfileByUserId(Long userId) {
-          User user = userRepository.findById(userId)
-                  .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
-
-          CandidateProfile profile = user.getCandidateProfile();
-          List<ExperienceResponse> expList = (profile != null)
-                  ? profile.getExperiences().stream().map(ExperienceResponse::from).toList() : List.of();
-          List<EducationResponse> eduList = (profile != null)
-                  ? profile.getEducations().stream().map(EducationResponse::from).toList() : List.of();
-
-          return new FullProfileResponse(
-                  user.getId(), user.getFirstName(), user.getLastName(), user.getEmail(), user.getUsername(),
-                  (profile != null) ? profile.getHeadline() : null,
-                  (profile != null) ? profile.getSummary() : null,
-                  (profile != null) ? profile.getSearchStatus() : null,
-                  expList, eduList
-          );
-     }
-
-     @Transactional
-     public ProfileSummaryResponse updateMainProfile(ProfileSummaryUpdateRequest request) {
-          User loggedInUser = securityUtils.getCurrentUser();
-          CandidateProfile profile = loggedInUser.getCandidateProfile();
-
-          if (profile == null) {
-               profile = new CandidateProfile(loggedInUser, request.headline(), request.summary(), request.searchStatus());
-               loggedInUser.setCandidateProfile(profile);
-          } else {
-               profile.setHeadline(request.headline());
-               profile.setSummary(request.headline());
-               profile.setSearchStatus(request.searchStatus());
-          }
-
-          userRepository.save(loggedInUser);
-          return new ProfileSummaryResponse(profile.getId(), profile.getHeadline(), profile.getSummary(), profile.getSearchStatus());
-     }
 
 
      //experience
@@ -200,6 +162,7 @@ public class UserService {
                    .map(ExperienceResponse::from).toList();
      }
 
+     @Transactional
      public void deleteExperienceById(Long id){
            Experience experience= authorizeExperienceAction(id,"delete");
            experienceRepository.delete(experience);
@@ -255,7 +218,7 @@ public class UserService {
 
 
      @Transactional
-     public void deleteEducationSecurely(Long educationId) {
+     public void deleteEducation(Long educationId) {
           Education education = authorizeEducationAction(educationId, "delete");
           educationRepository.delete(education);
      }
@@ -274,6 +237,7 @@ public class UserService {
      }
 
      //skills
+     @Transactional
      public List<SkillResponse> getSkillsByProfileId(Long userId){
           if (!userRepository.existsById(userId)) {
                throw new ResourceNotFoundException("User not found with id", userId);
@@ -357,12 +321,6 @@ public class UserService {
           }
           return education;
      }
-
-     private Skill findOrThrow(String name){
-           return skillRepository.findByNameIgnoreCase(name)
-                   .orElseThrow(()->new ResourceNotFoundException("skill"));
-     }
-
 
      private CandidateProfile getOrCreateCandidateProfile(User user) {
           CandidateProfile profile = user.getCandidateProfile();

@@ -1,5 +1,6 @@
-package com.goat.HireHub.user;
+package profile;
 
+import com.goat.HireHub.user.*;
 import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;

@@ -6,6 +6,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import profile.CandidateProfile;
 
 import java.util.ArrayList;
 

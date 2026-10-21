@@ -75,20 +75,7 @@ public class UserController {
          return ResponseEntity.ok(userService.patchUser(userPatchRequest));
      }
 
-     //profile endpoints
 
-     @GetMapping("/{id}/profile")
-     public ResponseEntity<FullProfileResponse> getPublicProfile(
-             @PathVariable @Positive(message = "Id must be greater than zero") Long id) {
-         return ResponseEntity.ok(userService.getFullProfileByUserId(id));
-     }
-
-    @PutMapping("/me/profile")
-    public ResponseEntity<ProfileSummaryResponse> updateMyProfile(
-            @RequestBody @Valid ProfileSummaryUpdateRequest request) {
-        ProfileSummaryResponse response = userService.updateMainProfile(request);
-        return ResponseEntity.ok(response);
-    }
 
     //experience endpoints
     @PostMapping("/me/experiences")
@@ -132,7 +119,7 @@ public class UserController {
     @DeleteMapping("/me/educations/{id}")
     public ResponseEntity<Void> deleteEducation(
             @PathVariable @Positive(message = "Id must be greater than zero") Long id) {
-        userService.deleteEducationSecurely(id);
+        userService.deleteEducation(id);
         return ResponseEntity.noContent().build();
     }
 
