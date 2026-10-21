@@ -45,9 +45,7 @@ public class EducationService {
 
     @Transactional
     public EducationResponse updateEducation(Long educationId, EducationRequest request) {
-
         Education savedEducation = authorizeEducationAction(educationId, "update");
-
         savedEducation.setInstitutionName(request.institutionName());
         savedEducation.setDegreeType(request.degreeType());
         savedEducation.setFieldOfStudy(request.fieldOfStudy());
@@ -55,7 +53,6 @@ public class EducationService {
         savedEducation.setEndDate(request.endDate());
         savedEducation.setCurrent(request.isCurrent());
         savedEducation.setActivitiesAndSocieties(request.activitiesAndSocieties());
-
         return EducationResponse.from(savedEducation);
     }
 
@@ -84,10 +81,9 @@ public class EducationService {
                 .orElseThrow(() -> new ResourceNotFoundException("Education timeline record not found with id: " + id));
 
         User loggedInUser = securityUtils.getCurrentUser();
-        Long ownerProfileId = education.getCandidateProfile().getId();
-        Long currentUserId = loggedInUser.getCandidateProfile().getId();
+        CandidateProfile loggedInProfile = loggedInUser.getCandidateProfile();
 
-        if (!currentUserId.equals(ownerProfileId)) {
+        if (loggedInProfile==null || !loggedInProfile.getId().equals(education.getCandidateProfile().getId())) {
             throw new org.springframework.security.access.AccessDeniedException(
                     "You do not have permission to " + action + " this education record."
             );
