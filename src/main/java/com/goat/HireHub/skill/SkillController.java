@@ -39,3 +39,4 @@ public class SkillController {
         return ResponseEntity.noContent().build();
     }
 }
+

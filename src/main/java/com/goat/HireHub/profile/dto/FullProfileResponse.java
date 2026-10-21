@@ -1,4 +1,4 @@
-package profile.dto;
+package com.goat.HireHub.profile.dto;
 
 import com.goat.HireHub.experience.dto.ExperienceResponse;
 import com.goat.HireHub.user.SearchStatus;

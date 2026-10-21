@@ -98,7 +98,7 @@ class JobServiceTest {
                 .thenThrow(new AccessDeniedException("not a member"));
 
         assertThrows(AccessDeniedException.class, () -> jobService.addJob(request));
-        verify(jobRepository, never()).save(any(Job.class));
+        verify(jobRepository, never()).save(any());
     }
 
     @ParameterizedTest
@@ -148,7 +148,7 @@ class JobServiceTest {
         when(membership.getRole()).thenReturn(Role.EMPLOYEE);
 
         assertThrows(AccessDeniedException.class, () -> jobService.addJob(request));
-        verify(jobRepository, never()).save(any(Job.class));
+        verify(jobRepository, never()).save(any());
     }
 
     /*

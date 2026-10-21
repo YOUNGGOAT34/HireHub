@@ -1,4 +1,4 @@
-package profile;
+package com.goat.HireHub.profile;
 
 import com.goat.HireHub.education.dto.EducationResponse;
 import com.goat.HireHub.exception.ResourceNotFoundException;
@@ -8,12 +8,14 @@ import com.goat.HireHub.user.SearchStatus;
 import com.goat.HireHub.user.User;
 import com.goat.HireHub.user.UserRepository;
 import jakarta.transaction.Transactional;
-import profile.dto.FullProfileResponse;
-import profile.dto.ProfileSummaryResponse;
-import profile.dto.ProfileSummaryUpdateRequest;
+import com.goat.HireHub.profile.dto.FullProfileResponse;
+import com.goat.HireHub.profile.dto.ProfileSummaryResponse;
+import com.goat.HireHub.profile.dto.ProfileSummaryUpdateRequest;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Service
 public class CandidateProfileService {
     private final UserRepository userRepository;
     private final SecurityUtils securityUtils;

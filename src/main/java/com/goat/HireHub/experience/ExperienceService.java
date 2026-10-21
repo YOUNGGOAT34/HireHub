@@ -6,11 +6,13 @@ import com.goat.HireHub.user.User;
 import com.goat.HireHub.experience.dto.ExperienceRequest;
 import com.goat.HireHub.experience.dto.ExperienceResponse;
 import jakarta.transaction.Transactional;
-import profile.CandidateProfile;
-import profile.CandidateProfileService;
+import com.goat.HireHub.profile.CandidateProfile;
+import com.goat.HireHub.profile.CandidateProfileService;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Service
 public class ExperienceService {
 
     private final ExperienceRepository experienceRepository;

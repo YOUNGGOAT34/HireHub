@@ -2,7 +2,7 @@ package com.goat.HireHub.experience;
 
 import com.goat.HireHub.company.Company;
 import jakarta.persistence.*;
-import profile.CandidateProfile;
+import com.goat.HireHub.profile.CandidateProfile;
 
 import java.time.LocalDate;
 

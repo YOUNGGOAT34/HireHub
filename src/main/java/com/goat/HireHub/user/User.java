@@ -2,7 +2,7 @@ package com.goat.HireHub.user;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
-import profile.CandidateProfile;
+import com.goat.HireHub.profile.CandidateProfile;
 
 
 @Entity

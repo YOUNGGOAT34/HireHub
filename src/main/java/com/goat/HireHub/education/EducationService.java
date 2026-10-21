@@ -6,11 +6,13 @@ import com.goat.HireHub.exception.ResourceNotFoundException;
 import com.goat.HireHub.security.SecurityUtils;
 import com.goat.HireHub.user.User;
 import jakarta.transaction.Transactional;
-import profile.CandidateProfile;
-import profile.CandidateProfileService;
+import com.goat.HireHub.profile.CandidateProfile;
+import com.goat.HireHub.profile.CandidateProfileService;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Service
 public class EducationService {
 
     private final SecurityUtils securityUtils;

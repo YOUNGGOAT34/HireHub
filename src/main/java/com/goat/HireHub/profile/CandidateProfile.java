@@ -1,4 +1,4 @@
-package profile;
+package com.goat.HireHub.profile;
 
 import com.goat.HireHub.education.Education;
 import com.goat.HireHub.experience.Experience;
