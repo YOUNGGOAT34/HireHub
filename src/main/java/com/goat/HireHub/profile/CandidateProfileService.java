@@ -50,18 +50,10 @@ public class CandidateProfileService {
     @Transactional
     public ProfileSummaryResponse updateMainProfile(ProfileSummaryUpdateRequest request) {
         User loggedInUser = securityUtils.getCurrentUser();
-        CandidateProfile profile = loggedInUser.getCandidateProfile();
-
-        if (profile == null) {
-            profile = new CandidateProfile(loggedInUser, request.headline(), request.summary(), request.searchStatus());
-            loggedInUser.setCandidateProfile(profile);
-        } else {
-            profile.setHeadline(request.headline());
-            profile.setSummary(request.summary());
-            profile.setSearchStatus(request.searchStatus());
-        }
-
-        userRepository.save(loggedInUser);
+        CandidateProfile profile = getOrCreateCandidateProfile(loggedInUser);
+        profile.setSummary(request.summary());
+        profile.setHeadline(request.headline());
+        profile.setSearchStatus(request.searchStatus());
         return new ProfileSummaryResponse(profile.getId(), profile.getHeadline(), profile.getSummary(), profile.getSearchStatus());
     }
 
