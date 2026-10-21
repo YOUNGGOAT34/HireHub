@@ -37,4 +37,14 @@ public class Skill {
     public void setName(String name) {
         this.name = name;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        return o instanceof Skill s && name != null && name.equalsIgnoreCase(s.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return name == null ? 0 : name.toLowerCase().hashCode();
+    }
 }

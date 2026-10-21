@@ -11,12 +11,11 @@ import java.util.Set;
 public class CandidateProfile {
 
     @Id
-    @Column(name = "profile_id")
     private Long id;
 
     @OneToOne
     @MapsId
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "profile_id")
     private User user;
 
     @Column(name = "headline")

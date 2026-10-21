@@ -57,15 +57,14 @@ public class UserService {
      }
 
      @Transactional
-     public void deleteUserById(Long id){
-           User user= authorizeSelfAction(id,"delete");
-
+     public void deleteUserById(){
+           User user= getCurrentUser();
            userRepository.delete(user);
      }
 
      @Transactional
-     public UserResponse updateUser(Long id, UserUpdateRequest userRequest){
-          User savedUser= authorizeSelfAction(id,"update");
+     public UserResponse updateUser(UserUpdateRequest userRequest){
+          User savedUser= getCurrentUser();
           String email=userRequest.email().toLowerCase().trim();
           if (!savedUser.getEmail().equals(email) && findByEmail(email)){
                throw new ConflictException("This email address is already taken by another account");
@@ -80,8 +79,8 @@ public class UserService {
      }
 
      @Transactional
-     public UserResponse patchUser(Long id, UserPatchRequest userRequest){
-          User savedUser= authorizeSelfAction(id,"patch");
+     public UserResponse patchUser(UserPatchRequest userRequest){
+          User savedUser= getCurrentUser();
           if (userRequest.email()!=null){
                String email=userRequest.email().toLowerCase().trim();
                if (!savedUser.getEmail().equals(email) && findByEmail(email)){
@@ -160,17 +159,17 @@ public class UserService {
      }
 
      @Transactional
-     public ProfileSummaryResponse updateMainProfile(String headline, String summary, SearchStatus searchStatus) {
+     public ProfileSummaryResponse updateMainProfile(ProfileSummaryUpdateRequest request) {
           User loggedInUser = securityUtils.getCurrentUser();
           CandidateProfile profile = loggedInUser.getCandidateProfile();
 
           if (profile == null) {
-               profile = new CandidateProfile(loggedInUser, headline, summary, searchStatus);
+               profile = new CandidateProfile(loggedInUser, request.headline(), request.summary(), request.searchStatus());
                loggedInUser.setCandidateProfile(profile);
           } else {
-               profile.setHeadline(headline);
-               profile.setSummary(summary);
-               profile.setSearchStatus(searchStatus);
+               profile.setHeadline(request.headline());
+               profile.setSummary(request.headline());
+               profile.setSearchStatus(request.searchStatus());
           }
 
           userRepository.save(loggedInUser);
@@ -324,14 +323,8 @@ public class UserService {
                   .orElseThrow(()->new ResourceNotFoundException("experience",experienceId));
      }
 
-     private User authorizeSelfAction(Long userId, String action){
-          User loggedInUser=securityUtils.getCurrentUser();
-          if(!Objects.equals(loggedInUser.getId(), userId)){
-               throw new org.springframework.security.access.AccessDeniedException(
-                       "You do not have permission to "+action+" this user."
-               );
-          }
-          return loggedInUser;
+     private User getCurrentUser(){
+          return securityUtils.getCurrentUser();
      }
 
      private Experience authorizeExperienceAction(Long id, String action){

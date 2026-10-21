@@ -5,6 +5,7 @@ import com.goat.HireHub.user.dto.*;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
+import jakarta.validation.constraints.Size;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -35,8 +36,7 @@ public class UserController {
               @RequestParam(defaultValue = "desc") String direction){
 
           validateSortingField(sortBy);
-          Sort.Direction sortDirection=Sort.Direction.fromString(direction);
-          Pageable pageable= PageRequest.of(page,size,Sort.by(sortDirection,sortBy));
+          Pageable pageable= PageRequest.of(page,size,Sort.by(validateSortDirection(direction),sortBy));
           return ResponseEntity.ok(userService.getAllUsers(pageable));
       }
 
@@ -46,18 +46,18 @@ public class UserController {
       }
 
       @GetMapping("/search")
-      public ResponseEntity<Page<UserResponse>> searchByFirstName(@RequestParam(required = false) String firstName,
+      public ResponseEntity<Page<UserResponse>> searchUsers(@RequestParam(required = false) String firstName,
                                                   @RequestParam(required = false) String lastName,
                                                   @RequestParam(required = false) String username,
                                                   @RequestParam(defaultValue = "0") @PositiveOrZero(message = "page number must be zero or greater")int page,
-                                                  @RequestParam(defaultValue = "10") @Positive(message = "size must be greater than zero")int size){
+                                                  @RequestParam(defaultValue = "10") @Size(max =50) @Positive(message = "size must be greater than zero")int size){
           Pageable pageable=PageRequest.of(page,size);
            return ResponseEntity.ok(userService.searchUsers(firstName,lastName,username,pageable));
       }
 
-      @DeleteMapping("/{id}")
-      public ResponseEntity<Void> deleteById(@PathVariable @Positive(message="Id must be greater than zero") Long id){
-          userService.deleteUserById(id);
+      @DeleteMapping("/me")
+      public ResponseEntity<Void> deleteById(){
+          userService.deleteUserById();
           return ResponseEntity.noContent().build();
       }
 
@@ -66,13 +66,13 @@ public class UserController {
            return ResponseEntity.status(HttpStatus.CREATED).body(userService.registerUser(userRequest));
       }
 
-     @PutMapping("/{id}")
-    public   ResponseEntity<UserResponse> updateUser(@PathVariable @Positive(message="Id must be greater than zero") Long id, @RequestBody @Valid UserUpdateRequest userUpdateRequest){
-           return ResponseEntity.ok(userService.updateUser(id,userUpdateRequest));
+     @PutMapping("/me")
+    public   ResponseEntity<UserResponse> updateUser(@RequestBody @Valid UserUpdateRequest userUpdateRequest){
+           return ResponseEntity.ok(userService.updateUser(userUpdateRequest));
      }
-     @PatchMapping("/{id}")
-     public   ResponseEntity<UserResponse> patchUser(@PathVariable @Positive(message="Id must be greater than zero") Long id, @RequestBody @Valid UserPatchRequest userPatchRequest){
-         return ResponseEntity.ok(userService.patchUser(id,userPatchRequest));
+     @PatchMapping("/me")
+     public   ResponseEntity<UserResponse> patchUser(@RequestBody @Valid UserPatchRequest userPatchRequest){
+         return ResponseEntity.ok(userService.patchUser(userPatchRequest));
      }
 
      //profile endpoints
@@ -85,15 +85,13 @@ public class UserController {
 
     @PutMapping("/me/profile")
     public ResponseEntity<ProfileSummaryResponse> updateMyProfile(
-            @RequestParam(required = false) String headline,
-            @RequestParam(required = false) String summary,
-            @RequestParam(required = false) SearchStatus searchStatus) {
-        ProfileSummaryResponse response = userService.updateMainProfile(headline, summary, searchStatus);
+            @RequestBody @Valid ProfileSummaryUpdateRequest request) {
+        ProfileSummaryResponse response = userService.updateMainProfile(request);
         return ResponseEntity.ok(response);
     }
 
     //experience endpoints
-    @PostMapping("/me/experience")
+    @PostMapping("/me/experiences")
     public ResponseEntity<ExperienceResponse> addExperience(
             @RequestBody @Valid ExperienceRequest experienceRequest){
         return ResponseEntity.status(HttpStatus.CREATED).body(userService.addExperience(experienceRequest));
@@ -175,6 +173,7 @@ public class UserController {
      }
 
 
-
-
+     private Sort.Direction validateSortDirection(String direction){
+         return Sort.Direction.fromOptionalString(direction).orElseThrow(() -> new IllegalArgumentException("direction must be asc or desc"));
+     }
 }

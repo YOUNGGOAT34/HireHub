@@ -1,4 +1,4 @@
-package company;
+package com.goat.HireHub.company;
 
 import com.goat.HireHub.company.*;
 import com.goat.HireHub.company.dto.CompanyPatchRequest;
