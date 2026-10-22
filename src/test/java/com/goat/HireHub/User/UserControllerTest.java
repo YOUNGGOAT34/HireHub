@@ -371,6 +371,19 @@ class UserControllerTest extends ControllerBase {
                 .andExpect(status().isConflict());
     }
 
+    //security
+    @ParameterizedTest
+    @ValueSource(strings = {"/users/5"})
+    void modifyingAnotherUserById_isNotAllowed(String url) throws Exception {
+        mockMvc.perform(delete(url)).andExpect(status().isMethodNotAllowed());
+        mockMvc.perform(put(url).contentType(MediaType.APPLICATION_JSON).content(VALID_UPDATE))
+                .andExpect(status().isMethodNotAllowed());
+        mockMvc.perform(patch(url).contentType(MediaType.APPLICATION_JSON).content("{}"))
+                .andExpect(status().isMethodNotAllowed());
+
+        verifyNoInteractions(userService);
+    }
+
 
     //helpers
 
