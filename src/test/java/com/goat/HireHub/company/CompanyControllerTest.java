@@ -1,6 +1,7 @@
 package com.goat.HireHub.company;
 
 import com.goat.HireHub.ControllerBase;
+import com.goat.HireHub.company.dto.CompanyRequest;
 import com.goat.HireHub.company.dto.CompanyResponse;
 import com.goat.HireHub.exception.BadRequestException;
 import org.junit.jupiter.api.Test;
@@ -10,6 +11,7 @@ import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.data.domain.*;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -19,8 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 
 @WebMvcTest(CompanyController.class)
@@ -157,6 +158,90 @@ class CompanyControllerTest extends ControllerBase{
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.detail").value("bad things"));
     }
+
+    //happy paths
+
+    @Test
+    void getById_whenFound_returns200WithCompany() throws Exception {
+        when(companyService.getCompanyById(1L)).thenReturn(sampleCompany(1L, "Safaricom"));
+        mockMvc.perform(get("/companies/1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.name").value("Safaricom"));
+    }
+
+    @Test
+    void addCompany_validBody_returns201AndPassesValuesToService() throws Exception {
+        when(companyService.addCompany(any(CompanyRequest.class)))
+                .thenReturn(sampleCompany(10L, "Safaricom"));
+
+        mockMvc.perform(post("/companies")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(VALID_COMPANY))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").value(10));
+
+        ArgumentCaptor<CompanyRequest> captor = ArgumentCaptor.forClass(CompanyRequest.class);
+        verify(companyService).addCompany(captor.capture());
+        assertEquals("Safaricom", captor.getValue().name());
+        assertEquals("Telecom company", captor.getValue().description());
+    }
+
+    @Test
+    void updateCompany_validBody_returns200() throws Exception {
+        when(companyService.updateCompany(eq(5L), any())).thenReturn(sampleCompany(5L, "Safaricom"));
+
+        mockMvc.perform(put("/companies/5")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(VALID_COMPANY))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("Safaricom"));
+    }
+
+    @Test
+    void patchCompany_onlyOneFieldSent_returns200() throws Exception {
+        when(companyService.patchCompany(eq(5L), any())).thenReturn(sampleCompany(5L, "New Name"));
+
+        mockMvc.perform(patch("/companies/5")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"name":"New Name"}
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("New Name"));
+    }
+
+    @Test
+    void deleteCompany_whenAllowed_returns204WithEmptyBody() throws Exception {
+        mockMvc.perform(delete("/companies/5"))
+                .andExpect(status().isNoContent())
+                .andExpect(content().string(""));
+
+        verify(companyService).deleteById(5L);
+    }
+
+    @Test
+    void getMembers_returns200() throws Exception {
+        when(companyService.getMembers(eq(1L), any(Pageable.class))).thenReturn(Page.empty());
+
+        mockMvc.perform(get("/companies/1/members"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content").isEmpty());
+    }
+
+    @Test
+    void addMember_validBody_returns201AndPassesValuesToService() throws Exception {
+        mockMvc.perform(post("/companies/1/members")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(VALID_INVITE))
+                .andExpect(status().isCreated());
+
+        verify(companyService).addMember(1L, "jane@x.com", Role.RECRUITER);
+    }
+
+
+
+
 
     private CompanyResponse sampleCompany(Long id, String name) {
         return new CompanyResponse(id, name, "Telecom company");
