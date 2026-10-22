@@ -1,6 +1,7 @@
 package com.goat.HireHub.job;
 import com.goat.HireHub.ControllerBase;
 import com.goat.HireHub.exception.ResourceNotFoundException;
+import com.goat.HireHub.job.dto.JobRequest;
 import com.goat.HireHub.job.dto.JobResponse;
 import com.goat.HireHub.security.JwtService;
 import com.goat.HireHub.security.SecurityConfig;
@@ -27,8 +28,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(JobController.class)
 class JobControllerTest extends ControllerBase {
@@ -36,6 +36,14 @@ class JobControllerTest extends ControllerBase {
     MockMvc mockMvc;
       @MockitoBean
       JobService jobService;
+
+    private static final String VALID_CREATE = """
+            {"title":"Java Developer","description":"Build APIs","salary":50000,"companyId":1}
+            """;
+    private static final String VALID_UPDATE = """
+            {"title":"Senior Java Developer","description":"Lead APIs","salary":80000}
+            """;
+
 
 
     @ParameterizedTest
@@ -166,6 +174,80 @@ class JobControllerTest extends ControllerBase {
 
 
 
+
+    @Test
+    void search_noResults_returns200WithEmptyContent() throws Exception {
+        when(jobService.searchJobs(any(), any(), any(), any(), any(), any(Pageable.class)))
+                .thenReturn(Page.empty());
+
+        mockMvc.perform(get("/jobs/search").param("title", "nothing-matches"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content").isEmpty());
+    }
+
+
+
+
+    @Test
+    void getById_whenFound_returns200WithJob() throws Exception {
+        when(jobService.getById(1L)).thenReturn(sampleJob(1L, "Java Dev"));
+
+        mockMvc.perform(get("/jobs/1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.title").value("Java Dev"))
+                .andExpect(jsonPath("$.companyName").value("Safaricom"));
+    }
+
+    @Test
+    void addJob_validBody_returns201AndPassesValuesToService() throws Exception {
+        when(jobService.addJob(any(JobRequest.class))).thenReturn(sampleJob(10L, "Java Developer"));
+
+        mockMvc.perform(post("/jobs")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(VALID_CREATE))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").value(10))
+                .andExpect(jsonPath("$.title").value("Java Developer"));
+
+        ArgumentCaptor<JobRequest> captor = ArgumentCaptor.forClass(JobRequest.class);
+        verify(jobService).addJob(captor.capture());
+        assertEquals("Java Developer", captor.getValue().title());
+        assertEquals(1L, captor.getValue().companyId());
+    }
+
+    @Test
+    void updateJob_validBody_returns200() throws Exception {
+        when(jobService.updateJob(eq(5L), any())).thenReturn(sampleJob(5L, "Senior Java Developer"));
+
+        mockMvc.perform(put("/jobs/5")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(VALID_UPDATE))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.title").value("Senior Java Developer"));
+    }
+
+    @Test
+    void patchJob_onlyOneFieldSent_returns200() throws Exception {
+        when(jobService.patchJob(eq(5L), any())).thenReturn(sampleJob(5L, "New Title"));
+
+        mockMvc.perform(patch("/jobs/5")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"title":"New Title"}
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.title").value("New Title"));
+    }
+
+    @Test
+    void deleteJob_whenAllowed_returns204WithEmptyBody() throws Exception {
+        mockMvc.perform(delete("/jobs/5"))
+                .andExpect(status().isNoContent())
+                .andExpect(content().string(""));
+
+        verify(jobService).deleteById(5L);
+    }
 
 
 
