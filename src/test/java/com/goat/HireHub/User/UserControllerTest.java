@@ -1,6 +1,9 @@
 package com.goat.HireHub.User;
 
 import com.goat.HireHub.ControllerBase;
+import com.goat.HireHub.exception.BadRequestException;
+import com.goat.HireHub.exception.ConflictException;
+import com.goat.HireHub.exception.ResourceNotFoundException;
 import com.goat.HireHub.user.User;
 import com.goat.HireHub.user.UserController;
 import com.goat.HireHub.user.UserService;
@@ -321,6 +324,52 @@ class UserControllerTest extends ControllerBase {
     }
 
 
+    //missing resources and conflicts
+
+    @Test
+    void getUserById_whenMissing_returns404() throws Exception {
+        when(userService.getUserById(99L)).thenThrow(new ResourceNotFoundException("User", 99L));
+
+        mockMvc.perform(get("/users/99"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.detail").value("User not found with id 99"));
+    }
+
+    @Test
+    void registerUser_whenEmailTaken_returns409() throws Exception {
+        when(userService.registerUser(any(UserRequest.class)))
+                .thenThrow(new ConflictException("An account with this email already exists"));
+
+        mockMvc.perform(post("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(VALID_REGISTER))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.detail").value("An account with this email already exists"));
+    }
+
+    @Test
+    void updateMe_whenEmailTaken_returns409() throws Exception {
+        when(userService.updateUser(any()))
+                .thenThrow(new ConflictException("This email address is already taken by another account"));
+
+        mockMvc.perform(put("/users/me")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(VALID_UPDATE))
+                .andExpect(status().isConflict());
+    }
+
+    @Test
+    void patchMe_whenEmailTaken_returns409() throws Exception {
+        when(userService.patchUser(any()))
+                .thenThrow(new ConflictException("This email address is already taken by another account"));
+
+        mockMvc.perform(patch("/users/me")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"email":"taken@x.com"}
+                                """))
+                .andExpect(status().isConflict());
+    }
 
 
     //helpers
