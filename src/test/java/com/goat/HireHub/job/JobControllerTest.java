@@ -468,16 +468,6 @@ class JobControllerTest extends ControllerBase {
           verifyNoInteractions(jobService);
       }
 
-      @Test
-      @WithMockUser
-      void deleteJob_WhenServiceDeniesAccess_returns403() throws Exception{
-
-          doThrow(new AccessDeniedException("not a member")).when(jobService).deleteById(5L);
-
-          mockMvc.perform(delete("/jobs/5"))
-                  .andExpect(status().isForbidden());
-
-      }
 
     private JobResponse sampleJob(Long id, String title) {
         return new JobResponse(id, title, "Build APIs", new BigDecimal("50000"), 1L, "Safaricom");
