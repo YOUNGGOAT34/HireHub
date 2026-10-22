@@ -4,6 +4,7 @@ import com.goat.HireHub.ControllerBase;
 import com.goat.HireHub.company.dto.CompanyRequest;
 import com.goat.HireHub.company.dto.CompanyResponse;
 import com.goat.HireHub.exception.BadRequestException;
+import com.goat.HireHub.exception.ConflictException;
 import com.goat.HireHub.exception.ResourceNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -430,6 +431,21 @@ class CompanyControllerTest extends ControllerBase{
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(VALID_INVITE))
                 .andExpect(status().isNotFound());
+    }
+
+
+    //conflicts
+
+    @Test
+    void addMember_whenAlreadyMember_returns409() throws Exception {
+        when(companyService.addMember(eq(1L), any(), any()))
+                .thenThrow(new ConflictException("jane@x.com is already a member of this company"));
+
+        mockMvc.perform(post("/companies/1/members")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(VALID_INVITE))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.detail").value("jane@x.com is already a member of this company"));
     }
 
 
