@@ -4,6 +4,7 @@ import com.goat.HireHub.ControllerBase;
 import com.goat.HireHub.user.User;
 import com.goat.HireHub.user.UserController;
 import com.goat.HireHub.user.UserService;
+import com.goat.HireHub.user.dto.UserRequest;
 import com.goat.HireHub.user.dto.UserResponse;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -12,6 +13,7 @@ import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.data.domain.*;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -21,8 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(UserController.class)
 class UserControllerTest extends ControllerBase {
@@ -148,6 +149,72 @@ class UserControllerTest extends ControllerBase {
                 .andExpect(jsonPath("$.content").isEmpty());
     }
 
+    //happy path
+
+    @Test
+    void getUserById_whenFound_returns200WithoutPassword() throws Exception {
+        when(userService.getUserById(1L)).thenReturn(sampleUser(1L, "Kim"));
+
+        mockMvc.perform(get("/users/1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.email").value("kim@x.com"))
+                .andExpect(jsonPath("$.password").doesNotExist())
+                .andExpect(jsonPath("$.passwordHash").doesNotExist());
+    }
+
+    @Test
+    void registerUser_validBody_returns201AndPassesValuesToService() throws Exception {
+        when(userService.registerUser(any(UserRequest.class))).thenReturn(sampleUser(10L, "Kim"));
+
+        mockMvc.perform(post("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(VALID_REGISTER))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").value(10))
+                .andExpect(jsonPath("$.password").doesNotExist())
+                .andExpect(jsonPath("$.passwordHash").doesNotExist());
+
+        ArgumentCaptor<UserRequest> captor = ArgumentCaptor.forClass(UserRequest.class);
+        verify(userService).registerUser(captor.capture());
+        assertEquals("kim@x.com", captor.getValue().email());
+        assertEquals("Kim", captor.getValue().firstName());
+    }
+
+    @Test
+    void updateMe_validBody_returns200() throws Exception {
+        when(userService.updateUser(any())).thenReturn(sampleUser(1L, "Kim"));
+
+        mockMvc.perform(put("/users/me")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(VALID_UPDATE))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.email").value("kim@x.com"));
+    }
+
+    @Test
+    void patchMe_onlyOneFieldSent_returns200() throws Exception {
+        when(userService.patchUser(any())).thenReturn(sampleUser(1L, "Amina"));
+
+        mockMvc.perform(patch("/users/me")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"firstName":"Amina"}
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.firstName").value("Amina"));
+    }
+
+    @Test
+    void deleteMe_returns204WithEmptyBody() throws Exception {
+        mockMvc.perform(delete("/users/me"))
+                .andExpect(status().isNoContent())
+                .andExpect(content().string(""));
+
+        verify(userService).deleteUserById();
+    }
+
+
     //helpers
 
     private UserResponse sampleUser(Long id, String firstName) {
@@ -159,8 +226,6 @@ class UserControllerTest extends ControllerBase {
         u.setUsername("kim");
         return UserResponse.from(u);
     }
-
-
 
 
 }
