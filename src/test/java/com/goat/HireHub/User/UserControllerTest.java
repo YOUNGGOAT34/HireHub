@@ -384,6 +384,26 @@ class UserControllerTest extends ControllerBase {
         verifyNoInteractions(userService);
     }
 
+    //wrong methods and types
+
+    @ParameterizedTest
+    @ValueSource(strings = {"/users/0", "/users/-1", "/users/abc"})
+    void getUserById_withBadId_returns400(String url) throws Exception {
+        mockMvc.perform(get(url))
+                .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(userService);
+    }
+
+    @Test
+    void deleteWithoutMe_returns405() throws Exception {
+        mockMvc.perform(delete("/users"))
+                .andExpect(status().isMethodNotAllowed());
+
+        verifyNoInteractions(userService);
+    }
+
+
 
     //helpers
 
