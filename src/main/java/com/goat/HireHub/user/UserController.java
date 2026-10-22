@@ -2,10 +2,9 @@ package com.goat.HireHub.user;
 
 
 import com.goat.HireHub.exception.BadRequestException;
-import com.goat.HireHub.skill.dto.SkillRequest;
-import com.goat.HireHub.skill.dto.SkillResponse;
 import com.goat.HireHub.user.dto.*;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
@@ -17,8 +16,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 import java.util.Set;
 
 @RestController
@@ -53,7 +50,7 @@ public class UserController {
                                                   @RequestParam(required = false) String lastName,
                                                   @RequestParam(required = false) String username,
                                                   @RequestParam(defaultValue = "0") @PositiveOrZero(message = "page number must be zero or greater")int page,
-                                                  @RequestParam(defaultValue = "10") @Size(max =50) @Positive(message = "size must be greater than zero")int size){
+                                                  @RequestParam(defaultValue = "10") @Max(value =50) @Positive(message = "size must be greater than zero")int size){
           Pageable pageable=PageRequest.of(page,size);
            return ResponseEntity.ok(userService.searchUsers(firstName,lastName,username,pageable));
       }
@@ -77,9 +74,6 @@ public class UserController {
      public   ResponseEntity<UserResponse> patchUser(@RequestBody @Valid UserPatchRequest userPatchRequest){
          return ResponseEntity.ok(userService.patchUser(userPatchRequest));
      }
-
-
-
 
 
      //helpers
