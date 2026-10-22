@@ -42,7 +42,9 @@ public class CompanyController {
 
      @GetMapping("/search")
      public ResponseEntity<Page<CompanyResponse>> searchCompany(@RequestParam(defaultValue = "0") @PositiveOrZero(message="Page must be 0 or greater")int page,
-                                                                @RequestParam(defaultValue = "10")@Positive(message = "Size must be at least 1")int size,
+                                                                @RequestParam(defaultValue = "10")
+                                                                @Max(value=50,message = "size cannot exceed 50")
+                                                                @Positive(message = "Size must be at least 1")int size,
                                                                 @RequestParam(defaultValue = "name") String sortBy,
                                                                 @RequestParam(required = false) String name,
                                                                 @RequestParam (defaultValue = "desc") String direction){
@@ -100,6 +102,16 @@ public class CompanyController {
                      "Invalid sort field: " + fieldName
              );
          }
+     }
+
+     private Sort.Direction validateSortDirection(String direction){
+         Set<String> allowedSortFields=Set.of("desc","asc");
+         if (!allowedSortFields.contains(direction)) {
+             throw new BadRequestException(
+                     "Invalid sort field: " + direction
+             );
+         }
+         return Sort.Direction.fromString(direction);
      }
 
 }
