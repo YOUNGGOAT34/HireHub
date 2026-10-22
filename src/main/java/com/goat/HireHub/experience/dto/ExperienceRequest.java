@@ -1,5 +1,6 @@
 package com.goat.HireHub.experience.dto;
 
+import com.goat.HireHub.exception.BadRequestException;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -30,19 +31,19 @@ public record ExperienceRequest(
 
     public ExperienceRequest{
           if(isCurrent!=null && isCurrent && endDate!=null){
-              throw new IllegalArgumentException("an experience marked as current cannot have an end date");
+              throw new BadRequestException("an experience marked as current cannot have an end date");
           }
 
           if(isCurrent!=null && !isCurrent && endDate==null){
-              throw new IllegalArgumentException("a past experience must include an end date");
+              throw new BadRequestException("a past experience must include an end date");
           }
 
           if (startDate !=null && endDate !=null && endDate.isBefore(startDate)){
-              throw new IllegalArgumentException("the end date cannot be earlier than the start date");
+              throw new BadRequestException("the end date cannot be earlier than the start date");
           }
 
           if (companyId==null && companyName==null){
-              throw new IllegalArgumentException("both company name and company id cannot be null");
+              throw new BadRequestException("both company name and company id cannot be null");
           }
     }
 }

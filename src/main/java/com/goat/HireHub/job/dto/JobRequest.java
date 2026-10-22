@@ -9,7 +9,7 @@ import java.math.BigDecimal;
 
 public record  JobRequest(
                           @Size(max=100) @NotBlank(message = "Job title is required") String title,
-                          @Size(max=1000) @NotBlank String description,
+                          @Size(max=1000) @NotBlank (message="job description is required") String description,
                           @Positive(message = "salary must be greater than zero") BigDecimal salary,
                           @NotNull Long companyId
                    ){ }

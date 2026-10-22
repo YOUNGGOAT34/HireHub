@@ -1,6 +1,7 @@
 package com.goat.HireHub.company;
 
 import com.goat.HireHub.company.dto.*;
+import com.goat.HireHub.exception.BadRequestException;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -95,7 +96,7 @@ public class CompanyController {
      private void validateSortField(String fieldName){
          Set<String> allowedSortFields=Set.of("name");
          if (!allowedSortFields.contains(fieldName)) {
-             throw new IllegalArgumentException(
+             throw new BadRequestException(
                      "Invalid sort field: " + fieldName
              );
          }

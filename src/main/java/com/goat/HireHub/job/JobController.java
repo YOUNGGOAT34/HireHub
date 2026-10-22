@@ -1,11 +1,13 @@
 package com.goat.HireHub.job;
 
 
+import com.goat.HireHub.exception.BadRequestException;
 import com.goat.HireHub.job.dto.JobPatchRequest;
 import com.goat.HireHub.job.dto.JobRequest;
 import com.goat.HireHub.job.dto.JobResponse;
 import com.goat.HireHub.job.dto.JobUpdateRequest;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import org.springframework.data.domain.Page;
@@ -37,15 +39,17 @@ public class JobController {
     @GetMapping
 
       public ResponseEntity<Page<JobResponse>> getAll(@RequestParam(defaultValue = "0") @PositiveOrZero(message="Page must be 0 or greater")int page,
-                                                      @RequestParam(defaultValue = "10") @PositiveOrZero(message="Size must be greater than zero") int size,
+                                                      @RequestParam(defaultValue = "10") @Max(value=50,message="size cannot exceed 50") @PositiveOrZero(message="Size must be greater than zero") int size,
                                                       @RequestParam(defaultValue = "desc")String direction,
                                                       @RequestParam(defaultValue = "salary")String sortBy
                                                       ){
         validateSortField(sortBy);
-        Sort.Direction sortDirection=Sort.Direction.fromString(direction);
+        Sort.Direction sortDirection=validateSortDirection(direction);
         Pageable pageable=PageRequest.of(page,size, Sort.by(sortDirection,sortBy));
         return ResponseEntity.ok(jobService.getAll(pageable));
       }
+
+
 
       //get a job by an id
       @GetMapping("/{id}")
@@ -56,7 +60,7 @@ public class JobController {
     @GetMapping("/search")
     public Page<JobResponse> searchJobs(@RequestParam(required = false) String title,
                                            @RequestParam(defaultValue = "0") @PositiveOrZero(message = "page must be positive") int page,
-                                           @RequestParam(defaultValue = "10") @PositiveOrZero(message = "size must be a positive value") int size,
+                                           @RequestParam(defaultValue = "10") @Max(value=50,message = "size cannot exceed 50") @Positive(message = "size must be greater than zero") int size,
                                            @RequestParam(defaultValue = "salary")String sortBy,
                                            @RequestParam(required = false) @PositiveOrZero(message = "minimum salary must be positive") BigDecimal minSalary,
                                            @RequestParam(required=false) @PositiveOrZero(message = "maximum salary must be positive") BigDecimal maxSalary,
@@ -65,7 +69,7 @@ public class JobController {
                                            @RequestParam(defaultValue = "desc")String direction){
         validateSortField(sortBy);
         if (minSalary != null && maxSalary != null && minSalary.compareTo(maxSalary) > 0){
-            throw new IllegalArgumentException(
+            throw new BadRequestException(
                     "minimum salary cannot be greater than maximum salary"
             );
         }
@@ -102,10 +106,20 @@ public class JobController {
                 "salary"
         );
         if (!allowedSortFields.contains(fieldName)) {
-            throw new IllegalArgumentException(
+            throw new BadRequestException(
                     "Invalid sort field: " + fieldName
             );
         }
+    }
+
+    private Sort.Direction validateSortDirection(String direction){
+        Set<String> validDirections=Set.of("desc","asc");
+        if(!validDirections.contains(direction)){
+            throw new BadRequestException(
+                    "Invalid sort field: " + direction
+            );
+        }
+        return Sort.Direction.fromString(direction);
     }
 
 

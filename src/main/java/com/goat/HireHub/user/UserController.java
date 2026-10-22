@@ -1,6 +1,7 @@
 package com.goat.HireHub.user;
 
 
+import com.goat.HireHub.exception.BadRequestException;
 import com.goat.HireHub.skill.dto.SkillRequest;
 import com.goat.HireHub.skill.dto.SkillResponse;
 import com.goat.HireHub.user.dto.*;
@@ -85,7 +86,7 @@ public class UserController {
      private void validateSortingField(String field){
          Set<String> allowedSortFields=Set.of("firstName","lastName","email","username");
          if (!allowedSortFields.contains(field)) {
-             throw new IllegalArgumentException(
+             throw new BadRequestException(
                      "Invalid sort field: " + field
              );
          }
@@ -93,6 +94,6 @@ public class UserController {
 
 
      private Sort.Direction validateSortDirection(String direction){
-         return Sort.Direction.fromOptionalString(direction).orElseThrow(() -> new IllegalArgumentException("direction must be asc or desc"));
+         return Sort.Direction.fromOptionalString(direction).orElseThrow(() -> new BadRequestException("direction must be asc or desc"));
      }
 }
