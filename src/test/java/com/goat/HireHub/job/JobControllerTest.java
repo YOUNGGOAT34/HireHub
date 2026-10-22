@@ -348,16 +348,104 @@ class JobControllerTest extends ControllerBase {
     }
 
 
-    @Test
-      @WithMockUser
-    void getById_WhenJobMissing_returns404WithMessage() throws Exception{
-          when(jobService.getById(99L)).thenThrow(new ResourceNotFoundException("Job",99L));
-          mockMvc.perform(get("/jobs/99"))
-                  .andExpect(status().isNotFound())
-                  .andExpect(jsonPath("$.detail").value("Job not found with id 99"));
-      }
+    //missing resources
 
-      @ParameterizedTest
+    @Test
+    void getById_whenJobMissing_returns404WithMessage() throws Exception {
+        when(jobService.getById(99L)).thenThrow(new ResourceNotFoundException("Job", 99L));
+
+        mockMvc.perform(get("/jobs/99"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.detail").value("Job not found with id 99"));
+    }
+
+    @Test
+    void updateJob_whenJobMissing_returns404() throws Exception {
+        when(jobService.updateJob(eq(99L), any())).thenThrow(new ResourceNotFoundException("Job", 99L));
+
+        mockMvc.perform(put("/jobs/99")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(VALID_UPDATE))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void patchJob_whenJobMissing_returns404() throws Exception {
+        when(jobService.patchJob(eq(99L), any())).thenThrow(new ResourceNotFoundException("Job", 99L));
+
+        mockMvc.perform(patch("/jobs/99")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"title":"New Title"}
+                                """))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void deleteJob_whenJobMissing_returns404() throws Exception {
+        doThrow(new ResourceNotFoundException("Job", 99L)).when(jobService).deleteById(99L);
+
+        mockMvc.perform(delete("/jobs/99"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void addJob_whenCompanyMissing_returns404() throws Exception {
+        when(jobService.addJob(any(JobRequest.class)))
+                .thenThrow(new ResourceNotFoundException("Company", 1L));
+
+        mockMvc.perform(post("/jobs")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(VALID_CREATE))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.detail").value("Company not found with id 1"));
+    }
+
+
+  //permissions :service throws 403
+    @Test
+    void addJob_whenNotMemberOfCompany_returns403() throws Exception {
+        when(jobService.addJob(any(JobRequest.class)))
+                .thenThrow(new AccessDeniedException("not a member"));
+
+        mockMvc.perform(post("/jobs")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(VALID_CREATE))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void updateJob_whenServiceDeniesAccess_returns403() throws Exception {
+        when(jobService.updateJob(eq(5L), any())).thenThrow(new AccessDeniedException("not a member"));
+
+        mockMvc.perform(put("/jobs/5")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(VALID_UPDATE))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void patchJob_whenServiceDeniesAccess_returns403() throws Exception {
+        when(jobService.patchJob(eq(5L), any())).thenThrow(new AccessDeniedException("not a member"));
+
+        mockMvc.perform(patch("/jobs/5")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"title":"Hacked"}
+                                """))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void deleteJob_whenServiceDeniesAccess_returns403() throws Exception {
+        doThrow(new AccessDeniedException("not a member")).when(jobService).deleteById(5L);
+
+        mockMvc.perform(delete("/jobs/5"))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.title").value("Access denied"));
+    }
+
+    @ParameterizedTest
       @WithMockUser
       @ValueSource(strings={"""
                 {"title":"","description":"Build APIs","salary":50000,"companyId":1}
