@@ -4,6 +4,7 @@ import com.goat.HireHub.ControllerBase;
 import com.goat.HireHub.company.dto.CompanyRequest;
 import com.goat.HireHub.company.dto.CompanyResponse;
 import com.goat.HireHub.exception.BadRequestException;
+import com.goat.HireHub.exception.ResourceNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -366,6 +367,70 @@ class CompanyControllerTest extends ControllerBase{
         verifyNoInteractions(companyService);
     }
 
+
+    //missing resources
+
+
+    @Test
+    void getById_whenCompanyMissing_returns404WithMessage() throws Exception {
+        when(companyService.getCompanyById(99L)).thenThrow(new ResourceNotFoundException("Company", 99L));
+
+        mockMvc.perform(get("/companies/99"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.detail").value("Company not found with id 99"));
+    }
+
+    @Test
+    void updateCompany_whenCompanyMissing_returns404() throws Exception {
+        when(companyService.updateCompany(eq(99L), any()))
+                .thenThrow(new ResourceNotFoundException("Company", 99L));
+
+        mockMvc.perform(put("/companies/99")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(VALID_COMPANY))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void patchCompany_whenCompanyMissing_returns404() throws Exception {
+        when(companyService.patchCompany(eq(99L), any()))
+                .thenThrow(new ResourceNotFoundException("Company", 99L));
+
+        mockMvc.perform(patch("/companies/99")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"name":"New Name"}
+                                """))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void deleteCompany_whenCompanyMissing_returns404() throws Exception {
+        doThrow(new ResourceNotFoundException("Company", 99L)).when(companyService).deleteById(99L);
+
+        mockMvc.perform(delete("/companies/99"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void getMembers_whenCompanyMissing_returns404() throws Exception {
+        when(companyService.getMembers(eq(99L), any(Pageable.class)))
+                .thenThrow(new ResourceNotFoundException("Company", 99L));
+
+        mockMvc.perform(get("/companies/99/members"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void addMember_whenUserEmailUnknown_returns404() throws Exception {
+        when(companyService.addMember(eq(1L), any(), any()))
+                .thenThrow(new ResourceNotFoundException("User", 0L));
+
+        mockMvc.perform(post("/companies/1/members")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(VALID_INVITE))
+                .andExpect(status().isNotFound());
+    }
 
 
 
