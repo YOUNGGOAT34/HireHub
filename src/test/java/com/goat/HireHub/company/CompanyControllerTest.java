@@ -239,6 +239,133 @@ class CompanyControllerTest extends ControllerBase{
         verify(companyService).addMember(1L, "jane@x.com", Role.RECRUITER);
     }
 
+    //validation on writes
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+            // blank name
+            """
+            {"name":"","description":"Telecom"}
+            """,
+            // missing name
+            """
+            {"description":"Telecom"}
+            """,
+            // malformed JSON
+            """
+            {"name":
+            """,
+            "{}"
+    })
+    void addCompany_invalidBody_returns400(String body) throws Exception {
+        mockMvc.perform(post("/companies")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(companyService);
+    }
+
+    @Test
+    void addCompany_nameTooLong_returns400() throws Exception {
+        String body = """
+                {"name":"%s","description":"Telecom"}
+                """.formatted("a".repeat(101));
+
+        mockMvc.perform(post("/companies").contentType(MediaType.APPLICATION_JSON).content(body))
+                .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(companyService);
+    }
+
+    @Test
+    void addCompany_descriptionTooLong_returns400() throws Exception {
+        String body = """
+                {"name":"Safaricom","description":"%s"}
+                """.formatted("a".repeat(1001));
+
+        mockMvc.perform(post("/companies").contentType(MediaType.APPLICATION_JSON).content(body))
+                .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(companyService);
+    }
+
+    @Test
+    void addCompany_emptyBody_returns400() throws Exception {
+        mockMvc.perform(post("/companies").contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(companyService);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+            """
+            {"name":"","description":"Telecom"}
+            """,
+            """
+            {"description":"Telecom"}
+            """
+    })
+    void updateCompany_invalidBody_returns400(String body) throws Exception {
+        mockMvc.perform(put("/companies/5")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(companyService);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+            """
+            {"name":""}
+            """,
+            """
+            {"description":""}
+            """
+    })
+    void patchCompany_invalidBody_returns400(String body) throws Exception {
+        mockMvc.perform(patch("/companies/5")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(companyService);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+            // missing email
+            """
+            {"role":"RECRUITER"}
+            """,
+            // blank email
+            """
+            {"email":"","role":"RECRUITER"}
+            """,
+            // not an email
+            """
+            {"email":"not-an-email","role":"RECRUITER"}
+            """,
+            // missing role
+            """
+            {"email":"jane@x.com"}
+            """,
+            // role that doesn't exist
+            """
+            {"email":"jane@x.com","role":"BOSS"}
+            """
+    })
+    void addMember_invalidBody_returns400(String body) throws Exception {
+        mockMvc.perform(post("/companies/1/members")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(companyService);
+    }
+
 
 
 
