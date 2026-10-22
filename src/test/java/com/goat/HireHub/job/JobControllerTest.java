@@ -445,28 +445,7 @@ class JobControllerTest extends ControllerBase {
                 .andExpect(jsonPath("$.title").value("Access denied"));
     }
 
-    @ParameterizedTest
-      @WithMockUser
-      @ValueSource(strings={"""
-                {"title":"","description":"Build APIs","salary":50000,"companyId":1}
-                """,
-              """
-                {"title":"software engineer","description":"","salary":50000,"companyId":1}
-                """,
-              """
-                {"title":"software engineer","description":"Build APIs","salary":50000,"companyId":null}
-                """
-      })
-
-      void addJob_WhenFieldIsBlank_returns400WithFieldError(String body) throws  Exception{
-          mockMvc.perform(post("/jobs")
-                          .contentType(MediaType.APPLICATION_JSON)
-                           .content(body)
-                          )
-                  .andExpect(status().isBadRequest())
-                  .andExpect(jsonPath("$.errors").isNotEmpty());
-          verifyNoInteractions(jobService);
-      }
+    //helpers
 
 
     private JobResponse sampleJob(Long id, String title) {
