@@ -45,6 +45,7 @@ class JobControllerTest extends ControllerBase {
             """;
 
 
+    //pagination and search
 
     @ParameterizedTest
     @ValueSource(strings = {
@@ -186,7 +187,7 @@ class JobControllerTest extends ControllerBase {
     }
 
 
-
+//happy paths
 
     @Test
     void getById_whenFound_returns200WithJob() throws Exception {
@@ -249,6 +250,102 @@ class JobControllerTest extends ControllerBase {
         verify(jobService).deleteById(5L);
     }
 
+
+
+//validation on writes
+    @ParameterizedTest
+    @ValueSource(strings = {
+            // blank title
+            """
+            {"title":"","description":"Build APIs","salary":50000,"companyId":1}
+            """,
+            // blank description
+            """
+            {"title":"Engineer","description":"","salary":50000,"companyId":1}
+            """,
+            // null companyId
+            """
+            {"title":"Engineer","description":"Build APIs","salary":50000,"companyId":null}
+            """,
+            // negative salary
+            """
+            {"title":"Engineer","description":"Build APIs","salary":-1,"companyId":1}
+            """,
+            // malformed JSON
+            """
+            {"title":
+            """,
+            // empty object
+            "{}"
+    })
+    void addJob_invalidBody_returns400(String body) throws Exception {
+        mockMvc.perform(post("/jobs")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(jobService);
+    }
+
+    @Test
+    void addJob_titleTooLong_returns400() throws Exception {
+        String longTitle = "a".repeat(151);
+        String body = """
+                {"title":"%s","description":"Build APIs","salary":50000,"companyId":1}
+                """.formatted(longTitle);
+
+        mockMvc.perform(post("/jobs").contentType(MediaType.APPLICATION_JSON).content(body))
+                .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(jobService);
+    }
+
+    @Test
+    void addJob_emptyBody_returns400() throws Exception {
+        mockMvc.perform(post("/jobs").contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(jobService);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+            """
+            {"title":"","description":"Lead APIs","salary":80000}
+            """,
+            """
+            {"title":"Engineer","description":"","salary":80000}
+            """,
+            """
+            {"title":"Engineer","description":"Lead APIs","salary":-1}
+            """
+    })
+    void updateJob_invalidBody_returns400(String body) throws Exception {
+        mockMvc.perform(put("/jobs/5")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(jobService);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+            """
+            {"title":""}
+            """,
+            """
+            {"salary":-1}
+            """
+    })
+    void patchJob_invalidBody_returns400(String body) throws Exception {
+        mockMvc.perform(patch("/jobs/5")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(jobService);
+    }
 
 
     @Test
