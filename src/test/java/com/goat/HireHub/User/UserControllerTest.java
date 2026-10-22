@@ -214,6 +214,114 @@ class UserControllerTest extends ControllerBase {
         verify(userService).deleteUserById();
     }
 
+    //validation on writes
+
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+            // blank first name
+            """
+            {"firstName":"","lastName":"Otieno","email":"kim@x.com","username":"kim","password":"password123"}
+            """,
+            // blank last name
+            """
+            {"firstName":"Kim","lastName":"","email":"kim@x.com","username":"kim","password":"password123"}
+            """,
+            // missing email
+            """
+            {"firstName":"Kim","lastName":"Otieno","username":"kim","password":"password123"}
+            """,
+            // invalid email
+            """
+            {"firstName":"Kim","lastName":"Otieno","email":"not-an-email","username":"kim","password":"password123"}
+            """,
+            // missing password
+            """
+            {"firstName":"Kim","lastName":"Otieno","email":"kim@x.com","username":"kim"}
+            """,
+            // password too short (7)
+            """
+            {"firstName":"Kim","lastName":"Otieno","email":"kim@x.com","username":"kim","password":"1234567"}
+            """,
+            // malformed JSON
+            """
+            {"firstName":
+            """,
+            "{}"
+    })
+    void registerUser_invalidBody_returns400(String body) throws Exception {
+        mockMvc.perform(post("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(userService);
+    }
+
+    @Test
+    void registerUser_passwordTooLong_returns400() throws Exception {
+        String body = """
+                {"firstName":"Kim","lastName":"Otieno","email":"kim@x.com","username":"kim","password":"%s"}
+                """.formatted("a".repeat(73));
+
+        mockMvc.perform(post("/users").contentType(MediaType.APPLICATION_JSON).content(body))
+                .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(userService);
+    }
+
+    @Test
+    void registerUser_emptyBody_returns400() throws Exception {
+        mockMvc.perform(post("/users").contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(userService);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+            """
+            {"firstName":"","lastName":"Otieno","email":"kim@x.com","username":"kim"}
+            """,
+            """
+            {"firstName":"Kim","lastName":"Otieno","email":"not-an-email","username":"kim"}
+            """,
+            """
+            {"firstName":"Kim","lastName":"Otieno","username":"kim"}
+            """
+    })
+    void updateMe_invalidBody_returns400(String body) throws Exception {
+        mockMvc.perform(put("/users/me")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(userService);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+            """
+            {"email":"not-an-email"}
+            """,
+            """
+            {"password":"short"}
+            """,
+            """
+            {"firstName":""}
+            """
+    })
+    void patchMe_invalidBody_returns400(String body) throws Exception {
+        mockMvc.perform(patch("/users/me")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(userService);
+    }
+
+
+
 
     //helpers
 
