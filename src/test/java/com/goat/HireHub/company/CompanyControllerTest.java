@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.data.domain.*;
 import org.springframework.http.MediaType;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -446,6 +447,78 @@ class CompanyControllerTest extends ControllerBase{
                         .content(VALID_INVITE))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.detail").value("jane@x.com is already a member of this company"));
+    }
+
+
+//permissions ,service throws 403
+
+    @Test
+    void updateCompany_whenNotAdmin_returns403() throws Exception {
+        when(companyService.updateCompany(eq(5L), any())).thenThrow(new AccessDeniedException("not admin"));
+
+        mockMvc.perform(put("/companies/5")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(VALID_COMPANY))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void patchCompany_whenNotAdmin_returns403() throws Exception {
+        when(companyService.patchCompany(eq(5L), any())).thenThrow(new AccessDeniedException("not admin"));
+
+        mockMvc.perform(patch("/companies/5")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"name":"Hacked"}
+                                """))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void deleteCompany_whenNotAdmin_returns403() throws Exception {
+        doThrow(new AccessDeniedException("not admin")).when(companyService).deleteById(5L);
+
+        mockMvc.perform(delete("/companies/5"))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.title").value("Access denied"));
+    }
+
+    @Test
+    void addMember_whenNotAdmin_returns403() throws Exception {
+        when(companyService.addMember(eq(1L), any(), any())).thenThrow(new AccessDeniedException("not admin"));
+
+        mockMvc.perform(post("/companies/1/members")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(VALID_INVITE))
+                .andExpect(status().isForbidden());
+    }
+
+
+    //wrong types ,ids and methods
+
+    @ParameterizedTest
+    @ValueSource(strings = {"/companies/0", "/companies/-1", "/companies/abc", "/companies/0/members"})
+    void get_withBadId_returns400(String url) throws Exception {
+        mockMvc.perform(get(url))
+                .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(companyService);
+    }
+
+    @Test
+    void deleteCompany_withZeroId_returns400() throws Exception {
+        mockMvc.perform(delete("/companies/0"))
+                .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(companyService);
+    }
+
+    @Test
+    void deleteWithoutId_returns405() throws Exception {
+        mockMvc.perform(delete("/companies"))
+                .andExpect(status().isMethodNotAllowed());
+
+        verifyNoInteractions(companyService);
     }
 
 
