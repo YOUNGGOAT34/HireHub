@@ -282,6 +282,51 @@ class ExperienceControllerTest extends ControllerBase {
                 .andExpect(status().isForbidden());
     }
 
+    //wrong ids and methods
+
+    @ParameterizedTest
+    @ValueSource(strings = {"/users/me/experiences/0", "/users/me/experiences/-1", "/users/me/experiences/abc"})
+    void deleteExperience_withBadId_returns400(String url) throws Exception {
+        mockMvc.perform(delete(url))
+                .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(experienceService);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"/users/me/experiences/0", "/users/me/experiences/abc"})
+    void updateExperience_withBadId_returns400(String url) throws Exception {
+        mockMvc.perform(put(url)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(VALID_BODY))
+                .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(experienceService);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"/users/0/experiences", "/users/-1/experiences", "/users/abc/experiences", "/users/me/experiences"})
+    void getUserExperiences_withBadId_returns400(String url) throws Exception {
+        mockMvc.perform(get(url))
+                .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(experienceService);
+    }
+
+    @Test
+    void putAndDeleteWithoutId_return405() throws Exception {
+        mockMvc.perform(put("/users/me/experiences")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(VALID_BODY))
+                .andExpect(status().isMethodNotAllowed());
+        mockMvc.perform(delete("/users/me/experiences"))
+                .andExpect(status().isMethodNotAllowed());
+
+        verifyNoInteractions(experienceService);
+    }
+
+
+
 
     private ExperienceResponse sampleExperience(Long id, String jobTitle) {
         Experience e = new Experience();
