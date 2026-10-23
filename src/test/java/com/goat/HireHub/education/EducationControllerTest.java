@@ -257,6 +257,52 @@ class EducationControllerTest extends ControllerBase {
                 .andExpect(status().isForbidden());
     }
 
+    //wrong ids and methods
+
+
+    @ParameterizedTest
+    @ValueSource(strings = {"/users/me/educations/0", "/users/me/educations/-1", "/users/me/educations/abc"})
+    void deleteEducation_withBadId_returns400(String url) throws Exception {
+        mockMvc.perform(delete(url))
+                .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(educationService);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"/users/me/educations/0", "/users/me/educations/abc"})
+    void updateEducation_withBadId_returns400(String url) throws Exception {
+        mockMvc.perform(put(url)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(VALID_BODY))
+                .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(educationService);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"/users/0/educations", "/users/-1/educations", "/users/abc/educations", "/users/me/educations"})
+    void getUserEducations_withBadId_returns400(String url) throws Exception {
+        mockMvc.perform(get(url))
+                .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(educationService);
+    }
+
+    @Test
+    void putAndDeleteWithoutId_return405() throws Exception {
+        mockMvc.perform(put("/users/me/educations")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(VALID_BODY))
+                .andExpect(status().isMethodNotAllowed());
+        mockMvc.perform(delete("/users/me/educations"))
+                .andExpect(status().isMethodNotAllowed());
+
+        verifyNoInteractions(educationService);
+    }
+
+
+
 
 //helpers
 
