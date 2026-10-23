@@ -3,20 +3,25 @@ package com.goat.HireHub.profile;
 import com.goat.HireHub.ControllerBase;
 import com.goat.HireHub.exception.ResourceNotFoundException;
 import com.goat.HireHub.profile.dto.FullProfileResponse;
+import com.goat.HireHub.profile.dto.ProfileSummaryResponse;
+import com.goat.HireHub.profile.dto.ProfileSummaryUpdateRequest;
 import com.goat.HireHub.user.SearchStatus;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -96,6 +101,96 @@ class CandidateProfileControllerTest extends ControllerBase {
 
         verifyNoInteractions(candidateProfileService);
     }
+
+    //put candidate profile
+    @Test
+    void updateMyProfile_validBody_returns200AndPassesValuesToService() throws Exception {
+        when(candidateProfileService.updateMainProfile(any(ProfileSummaryUpdateRequest.class)))
+                .thenReturn(new ProfileSummaryResponse(1L, "Java Developer", "I build APIs", SearchStatus.OPEN_TO_WORK));
+
+        mockMvc.perform(put("/users/me/profile")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(VALID_BODY))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.headline").value("Java Developer"))
+                .andExpect(jsonPath("$.summary").value("I build APIs"));
+
+        ArgumentCaptor<ProfileSummaryUpdateRequest> captor =
+                ArgumentCaptor.forClass(ProfileSummaryUpdateRequest.class);
+        verify(candidateProfileService).updateMainProfile(captor.capture());
+        assertEquals("Java Developer", captor.getValue().headline());
+        assertEquals("I build APIs", captor.getValue().summary());
+        assertEquals(SearchStatus.OPEN_TO_WORK, captor.getValue().searchStatus());
+    }
+
+    @Test
+    void updateMyProfile_headlineAndSummaryAreIndependent() throws Exception {
+
+        when(candidateProfileService.updateMainProfile(any(ProfileSummaryUpdateRequest.class)))
+                .thenReturn(new ProfileSummaryResponse(1L, "Headline text", "Summary text", SearchStatus.OPEN_TO_WORK));
+
+        mockMvc.perform(put("/users/me/profile")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"headline":"Headline text","summary":"Summary text","searchStatus":"OPEN_TO_WORK"}
+                                """))
+                .andExpect(jsonPath("$.headline").value("Headline text"))
+                .andExpect(jsonPath("$.summary").value("Summary text"));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+            // search status that doesn't exist
+            """
+            {"headline":"Dev","summary":"About me","searchStatus":"BANANA"}
+            """,
+            // malformed JSON
+            """
+            {"headline":
+            """
+    })
+    void updateMyProfile_unreadableBody_returns400(String body) throws Exception {
+        mockMvc.perform(put("/users/me/profile")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(candidateProfileService);
+    }
+
+    @Test
+    void updateMyProfile_headlineTooLong_returns400() throws Exception {
+        String body = """
+                {"headline":"%s","summary":"About me","searchStatus":"OPEN_TO_WORK"}
+                """.formatted("a".repeat(151));   // adjust to your @Size max
+
+        mockMvc.perform(put("/users/me/profile").contentType(MediaType.APPLICATION_JSON).content(body))
+                .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(candidateProfileService);
+    }
+
+    @Test
+    void updateMyProfile_summaryTooLong_returns400() throws Exception {
+        String body = """
+                {"headline":"Dev","summary":"%s","searchStatus":"OPEN_TO_WORK"}
+                """.formatted("a".repeat(5001));   // adjust to your @Size max
+
+        mockMvc.perform(put("/users/me/profile").contentType(MediaType.APPLICATION_JSON).content(body))
+                .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(candidateProfileService);
+    }
+
+    @Test
+    void updateMyProfile_emptyBody_returns400() throws Exception {
+        mockMvc.perform(put("/users/me/profile").contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(candidateProfileService);
+    }
+
 
     //helpers
     private FullProfileResponse fullProfile(String firstName, String headline) {
