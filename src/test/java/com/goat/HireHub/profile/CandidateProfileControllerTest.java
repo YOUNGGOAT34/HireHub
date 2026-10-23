@@ -191,6 +191,32 @@ class CandidateProfileControllerTest extends ControllerBase {
         verifyNoInteractions(candidateProfileService);
     }
 
+    //wrong methods
+
+    @Test
+    void writingAnotherUsersProfileById_isNotAllowed() throws Exception {
+        mockMvc.perform(put("/users/5/profile")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(VALID_BODY))
+                .andExpect(status().isMethodNotAllowed());
+        mockMvc.perform(delete("/users/5/profile"))
+                .andExpect(status().isMethodNotAllowed());
+
+        verifyNoInteractions(candidateProfileService);
+    }
+
+    @Test
+    void postAndDeleteOnMyProfile_return405() throws Exception {
+        mockMvc.perform(post("/users/me/profile")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(VALID_BODY))
+                .andExpect(status().isMethodNotAllowed());
+        mockMvc.perform(delete("/users/me/profile"))
+                .andExpect(status().isMethodNotAllowed());
+
+        verifyNoInteractions(candidateProfileService);
+    }
+
 
     //helpers
     private FullProfileResponse fullProfile(String firstName, String headline) {
