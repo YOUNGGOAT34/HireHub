@@ -3,6 +3,7 @@ package com.goat.HireHub.education;
 import com.goat.HireHub.ControllerBase;
 import com.goat.HireHub.education.dto.EducationRequest;
 import com.goat.HireHub.education.dto.EducationResponse;
+import com.goat.HireHub.exception.ResourceNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -201,6 +202,35 @@ class EducationControllerTest extends ControllerBase {
         verifyNoInteractions(educationService);
     }
 
+    //missing resources
+
+    @Test
+    void updateEducation_whenRecordMissing_returns404() throws Exception {
+        when(educationService.updateEducation(eq(99L), any()))
+                .thenThrow(new ResourceNotFoundException("Education", 99L));
+        mockMvc.perform(put("/users/me/educations/99")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(VALID_BODY))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.detail").value("Education not found with id 99"));
+    }
+
+    @Test
+    void deleteEducation_whenRecordMissing_returns404() throws Exception {
+        doThrow(new ResourceNotFoundException("Education", 99L)).when(educationService).deleteEducation(99L);
+
+        mockMvc.perform(delete("/users/me/educations/99"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void getUserEducations_whenUserMissing_returns404() throws Exception {
+        when(educationService.getAllEducationsById(99L))
+                .thenThrow(new ResourceNotFoundException("User", 99L));
+
+        mockMvc.perform(get("/users/99/educations"))
+                .andExpect(status().isNotFound());
+    }
 
 //helpers
 
