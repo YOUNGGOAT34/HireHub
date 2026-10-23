@@ -1,6 +1,7 @@
 package com.goat.HireHub.experience;
 
 import com.goat.HireHub.ControllerBase;
+import com.goat.HireHub.exception.ResourceNotFoundException;
 import com.goat.HireHub.experience.dto.ExperienceRequest;
 import com.goat.HireHub.experience.dto.ExperienceResponse;
 import org.junit.jupiter.api.Test;
@@ -235,6 +236,38 @@ class ExperienceControllerTest extends ControllerBase {
         verifyNoInteractions(experienceService);
     }
 
+
+    //missing resources
+
+    @Test
+    void updateExperience_whenRecordMissing_returns404() throws Exception {
+        when(experienceService.updateExperience(eq(99L), any()))
+                .thenThrow(new ResourceNotFoundException("Experience", 99L));
+
+        mockMvc.perform(put("/users/me/experiences/99")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(VALID_BODY))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.detail").value("Experience not found with id 99"));
+    }
+
+    @Test
+    void deleteExperience_whenRecordMissing_returns404() throws Exception {
+        doThrow(new ResourceNotFoundException("Experience", 99L))
+                .when(experienceService).deleteExperienceById(99L);
+
+        mockMvc.perform(delete("/users/me/experiences/99"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void getUserExperiences_whenUserMissing_returns404() throws Exception {
+        when(experienceService.getAllExperiencesByUserId(99L))
+                .thenThrow(new ResourceNotFoundException("User", 99L));
+
+        mockMvc.perform(get("/users/99/experiences"))
+                .andExpect(status().isNotFound());
+    }
 
 
 }
