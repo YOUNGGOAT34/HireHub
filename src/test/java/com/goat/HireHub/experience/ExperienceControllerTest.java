@@ -11,6 +11,7 @@ import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -116,16 +117,6 @@ class ExperienceControllerTest extends ControllerBase {
                 .andExpect(jsonPath("$").isEmpty());
     }
 
-
-    private ExperienceResponse sampleExperience(Long id, String jobTitle) {
-        Experience e = new Experience();
-        e.setId(id);
-        e.setJobTitle(jobTitle);
-        e.setCompanyNameRaw("Safaricom");
-        e.setStartDate(LocalDate.of(2021, 1, 1));
-        e.setEndDate(LocalDate.of(2023, 6, 1));
-        return ExperienceResponse.from(e);
-    }
 
     //validation on writes
 
@@ -267,6 +258,39 @@ class ExperienceControllerTest extends ControllerBase {
 
         mockMvc.perform(get("/users/99/experiences"))
                 .andExpect(status().isNotFound());
+    }
+
+    //permissions-->when service returns 403
+    @Test
+    void updateExperience_whenNotOwner_returns403() throws Exception {
+        when(experienceService.updateExperience(eq(5L), any()))
+                .thenThrow(new AccessDeniedException("You do not have permission to update this experience record."));
+
+        mockMvc.perform(put("/users/me/experiences/5")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(VALID_BODY))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.title").value("Access denied"));
+    }
+
+    @Test
+    void deleteExperience_whenNotOwner_returns403() throws Exception {
+        doThrow(new AccessDeniedException("You do not have permission to delete this experience record."))
+                .when(experienceService).deleteExperienceById(5L);
+
+        mockMvc.perform(delete("/users/me/experiences/5"))
+                .andExpect(status().isForbidden());
+    }
+
+
+    private ExperienceResponse sampleExperience(Long id, String jobTitle) {
+        Experience e = new Experience();
+        e.setId(id);
+        e.setJobTitle(jobTitle);
+        e.setCompanyNameRaw("Safaricom");
+        e.setStartDate(LocalDate.of(2021, 1, 1));
+        e.setEndDate(LocalDate.of(2023, 6, 1));
+        return ExperienceResponse.from(e);
     }
 
 
