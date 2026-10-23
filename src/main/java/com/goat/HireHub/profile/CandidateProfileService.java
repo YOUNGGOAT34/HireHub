@@ -39,7 +39,7 @@ public class CandidateProfileService {
                 ? profile.getEducations().stream().map(EducationResponse::from).toList() : List.of();
 
         return new FullProfileResponse(
-                user.getId(), user.getFirstName(), user.getLastName(), user.getEmail(), user.getUsername(),
+                user.getId(), user.getFirstName(), user.getLastName(),user.getUsername(),
                 (profile != null) ? profile.getHeadline() : null,
                 (profile != null) ? profile.getSummary() : null,
                 (profile != null) ? profile.getSearchStatus() : null,
