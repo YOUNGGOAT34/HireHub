@@ -4,6 +4,8 @@ import com.goat.HireHub.ControllerBase;
 import com.goat.HireHub.experience.dto.ExperienceRequest;
 import com.goat.HireHub.experience.dto.ExperienceResponse;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
@@ -17,8 +19,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -124,6 +125,116 @@ class ExperienceControllerTest extends ControllerBase {
         e.setEndDate(LocalDate.of(2023, 6, 1));
         return ExperienceResponse.from(e);
     }
+
+    //validation on writes
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+            // blank job title
+            """
+            {"jobTitle":"","companyName":"Safaricom","startDate":"2021-01-01","isCurrent":false}
+            """,
+            // missing job title
+            """
+            {"companyName":"Safaricom","startDate":"2021-01-01","isCurrent":false}
+            """,
+            // missing start date
+            """
+            {"jobTitle":"Backend Developer","companyName":"Safaricom","isCurrent":false}
+            """,
+            // wrong date format
+            """
+            {"jobTitle":"Backend Developer","companyName":"Safaricom","startDate":"01/01/2021","isCurrent":false}
+            """,
+            // malformed JSON
+            """
+            {"jobTitle":
+            """,
+            "{}"
+    })
+    void addExperience_invalidBody_returns400(String body) throws Exception {
+        mockMvc.perform(post("/users/me/experiences")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(experienceService);
+    }
+
+    @Test
+    void addExperience_jobTitleTooLong_returns400() throws Exception {
+        String body = """
+                {"jobTitle":"%s","companyName":"Safaricom","startDate":"2021-01-01","isCurrent":false}
+                """.formatted("a".repeat(256));   // adjust to your @Size max
+
+        mockMvc.perform(post("/users/me/experiences").contentType(MediaType.APPLICATION_JSON).content(body))
+                .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(experienceService);
+    }
+
+    @Test
+    void addExperience_emptyBody_returns400() throws Exception {
+        mockMvc.perform(post("/users/me/experiences").contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(experienceService);
+    }
+
+    // These three need rules your DTO may not have yet (@AssertTrue methods on the record).
+    @Test
+    void addExperience_endDateBeforeStartDate_returns400() throws Exception {
+        String body = """
+                {"jobTitle":"Backend Developer","companyName":"Safaricom",
+                 "startDate":"2023-01-01","endDate":"2022-01-01","isCurrent":false}
+                """;
+
+        mockMvc.perform(post("/users/me/experiences").contentType(MediaType.APPLICATION_JSON).content(body))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void addExperience_currentButHasEndDate_returns400() throws Exception {
+        String body = """
+                {"jobTitle":"Backend Developer","companyName":"Safaricom",
+                 "startDate":"2021-01-01","endDate":"2023-01-01","isCurrent":true}
+                """;
+
+        mockMvc.perform(post("/users/me/experiences").contentType(MediaType.APPLICATION_JSON).content(body))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void addExperience_neitherCompanyNorCompanyName_returns400() throws Exception {
+        String body = """
+                {"jobTitle":"Backend Developer","startDate":"2021-01-01","isCurrent":false}
+                """;
+
+        mockMvc.perform(post("/users/me/experiences").contentType(MediaType.APPLICATION_JSON).content(body))
+                .andExpect(status().isBadRequest());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+            """
+            {"jobTitle":"","companyName":"Safaricom","startDate":"2021-01-01","isCurrent":false}
+            """,
+            """
+            {"companyName":"Safaricom","startDate":"2021-01-01","isCurrent":false}
+            """,
+            """
+            {"jobTitle":"Backend Developer","companyName":"Safaricom","isCurrent":false}
+            """
+    })
+    void updateExperience_invalidBody_returns400(String body) throws Exception {
+        mockMvc.perform(put("/users/me/experiences/5")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(experienceService);
+    }
+
 
 
 }
