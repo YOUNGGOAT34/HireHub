@@ -11,6 +11,7 @@ import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -231,6 +232,31 @@ class EducationControllerTest extends ControllerBase {
         mockMvc.perform(get("/users/99/educations"))
                 .andExpect(status().isNotFound());
     }
+
+
+    //permissions -when service throws 403
+
+    @Test
+    void updateEducation_whenNotOwner_returns403() throws Exception {
+        when(educationService.updateEducation(eq(5L), any()))
+                .thenThrow(new AccessDeniedException("You do not have permission to update this education record."));
+
+        mockMvc.perform(put("/users/me/educations/5")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(VALID_BODY))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.title").value("Access denied"));
+    }
+
+    @Test
+    void deleteEducation_whenNotOwner_returns403() throws Exception {
+        doThrow(new AccessDeniedException("You do not have permission to delete this education record."))
+                .when(educationService).deleteEducation(5L);
+
+        mockMvc.perform(delete("/users/me/educations/5"))
+                .andExpect(status().isForbidden());
+    }
+
 
 //helpers
 
