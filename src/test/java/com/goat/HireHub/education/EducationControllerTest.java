@@ -4,12 +4,15 @@ import com.goat.HireHub.ControllerBase;
 import com.goat.HireHub.education.dto.EducationRequest;
 import com.goat.HireHub.education.dto.EducationResponse;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -17,8 +20,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -43,12 +45,14 @@ class EducationControllerTest extends ControllerBase {
         when(educationService.addEducation(any(EducationRequest.class)))
                 .thenReturn(sampleEducation(10L, "University of Nairobi"));
 
+
         mockMvc.perform(post("/users/me/educations")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(VALID_BODY))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").value(10))
                 .andExpect(jsonPath("$.institutionName").value("University of Nairobi"));
+
 
         ArgumentCaptor<EducationRequest> captor = ArgumentCaptor.forClass(EducationRequest.class);
         verify(educationService).addEducation(captor.capture());
@@ -98,6 +102,107 @@ class EducationControllerTest extends ControllerBase {
                 .andExpect(jsonPath("$").isEmpty());
     }
 
+    //validation on writes
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+            // blank institution
+            """
+            {"institutionName":"","startDate":"2016-09-01","isCurrent":false}
+            """,
+            // missing institution
+            """
+            {"startDate":"2016-09-01","isCurrent":false}
+            """,
+            // missing start date
+            """
+            {"institutionName":"University of Nairobi","isCurrent":false}
+            """,
+            // wrong date format
+            """
+            {"institutionName":"University of Nairobi","startDate":"01/09/2016","isCurrent":false}
+            """,
+            // malformed JSON
+            """
+            {"institutionName":
+            """,
+            "{}"
+    })
+    void addEducation_invalidBody_returns400(String body) throws Exception {
+        mockMvc.perform(post("/users/me/educations")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(educationService);
+    }
+    @Test
+    void addEducation_institutionNameTooLong_returns400() throws Exception {
+        String body = """
+                {"institutionName":"%s","startDate":"2016-09-01","isCurrent":false}
+                """.formatted("a".repeat(256));
+
+        mockMvc.perform(post("/users/me/educations").contentType(MediaType.APPLICATION_JSON).content(body))
+                .andExpect(status().isBadRequest());
+        verifyNoInteractions(educationService);
+    }
+
+    @Test
+    void addEducation_emptyBody_returns400() throws Exception {
+        mockMvc.perform(post("/users/me/educations").contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(educationService);
+    }
+
+    @Test
+    void addEducation_endDateBeforeStartDate_returns400() throws Exception {
+        String body = """
+                {"institutionName":"Kenyatta university","startDate":"2020-01-01",
+                 "endDate":"2019-01-01","isCurrent":false}
+                """;
+
+        mockMvc.perform(post("/users/me/educations").contentType(MediaType.APPLICATION_JSON).content(body))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void addEducation_currentButHasEndDate_returns400() throws Exception {
+        String body = """
+                {"institutionName":"University of Nairobi","startDate":"2020-01-01",
+                 "endDate":"2022-01-01","isCurrent":true}
+                """;
+
+        mockMvc.perform(post("/users/me/educations").contentType(MediaType.APPLICATION_JSON).content(body))
+                .andExpect(status().isBadRequest());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+            //empty institution and no end date
+            """
+            {"institutionName":"","startDate":"2016-09-01","isCurrent":false}
+            """,
+            //is current is false but no end date
+            """
+            {"startDate":"2016-09-01","isCurrent":false}
+            """,
+            //no start date
+            """
+            {"institutionName":"University of Nairobi","isCurrent":false}
+            """
+    })
+    void updateEducation_invalidBody_returns400(String body) throws Exception {
+        mockMvc.perform(put("/users/me/educations/5")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(educationService);
+    }
+
+
+//helpers
 
     private EducationResponse sampleEducation(Long id, String institution) {
         Education e = new Education();
@@ -107,6 +212,7 @@ class EducationControllerTest extends ControllerBase {
         e.setFieldOfStudy("Computer Science");
         e.setStartDate(LocalDate.of(2016, 9, 1));
         e.setEndDate(LocalDate.of(2020, 12, 1));
+        e.setActivitiesAndSocieties("Coding club");
         return EducationResponse.from(e);
     }
 
