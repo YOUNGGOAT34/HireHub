@@ -192,12 +192,36 @@ class SkillControllerTest extends ControllerBase {
         verifyNoInteractions(skillService);
     }
 
+    //wrong methods
+
+    @Test
+    void deleteWithoutId_returns405() throws Exception {
+        mockMvc.perform(delete("/users/me/skills"))
+                .andExpect(status().isMethodNotAllowed());
+
+        verifyNoInteractions(skillService);
+    }
+
+    @Test
+    void putAndPostOnSkillId_return405() throws Exception {
+        mockMvc.perform(put("/users/me/skills/5")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(VALID_BODY))
+                .andExpect(status().isMethodNotAllowed());
+        mockMvc.perform(post("/users/me/skills/5")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(VALID_BODY))
+                .andExpect(status().isMethodNotAllowed());
+
+        verifyNoInteractions(skillService);
+    }
+
+
 
     private SkillResponse sampleSkill(Long id, String name) {
         Skill skill = new Skill(id, name);
         return SkillResponse.from(skill);
     }
-
 
 
 }
