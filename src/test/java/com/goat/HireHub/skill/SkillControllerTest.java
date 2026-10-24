@@ -20,9 +20,8 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(SkillController.class)
 class SkillControllerTest extends ControllerBase {
@@ -153,6 +152,44 @@ class SkillControllerTest extends ControllerBase {
                         .content(VALID_BODY))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.detail").value("You have already added the skill 'Java' to your profile."));
+    }
+
+
+    //remove a skill
+
+    @Test
+    void removeSkill_whenOnProfile_returns204WithEmptyBody() throws Exception {
+        mockMvc.perform(delete("/users/me/skills/5"))
+                .andExpect(status().isNoContent())
+                .andExpect(content().string(""));
+
+        verify(skillService).removeSkillFromProfile(5L);
+    }
+
+    @Test
+    void removeSkill_whenSkillNotOnMyProfile_returns404() throws Exception {
+        doThrow(new ResourceNotFoundException("Skill", 5L)).when(skillService).removeSkillFromProfile(5L);
+
+        mockMvc.perform(delete("/users/me/skills/5"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.detail").value("Skill not found with id 5"));
+    }
+
+    @Test
+    void removeSkill_whenUserHasNoProfile_returns404() throws Exception {
+        doThrow(new ResourceNotFoundException("Profile", 1L)).when(skillService).removeSkillFromProfile(5L);
+
+        mockMvc.perform(delete("/users/me/skills/5"))
+                .andExpect(status().isNotFound());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"/users/me/skills/0", "/users/me/skills/-1", "/users/me/skills/abc"})
+    void removeSkill_withBadId_returns400(String url) throws Exception {
+        mockMvc.perform(delete(url))
+                .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(skillService);
     }
 
 
