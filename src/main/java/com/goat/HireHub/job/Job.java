@@ -21,7 +21,7 @@ public class Job {
        @JoinColumn(name="company_id")
        private Company company;
 
-       protected Job(){}
+       public Job(){}
 
     public Job(BigDecimal salary, String description, String title,Company company) {
         this.salary = salary;

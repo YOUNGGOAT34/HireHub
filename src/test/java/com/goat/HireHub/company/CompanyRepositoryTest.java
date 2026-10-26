@@ -2,7 +2,9 @@ package com.goat.HireHub.company;
 
 import com.goat.HireHub.PostgresTestBase;
 import com.goat.HireHub.TestData;
+import com.goat.HireHub.job.Job;
 import com.goat.HireHub.job.JobRepository;
+import com.goat.HireHub.user.User;
 import com.goat.HireHub.user.UserRepository;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.Test;
@@ -14,10 +16,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 
+import java.math.BigDecimal;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 
 @DataJpaTest(properties = "spring.jpa.hibernate.ddl-auto=create-drop")
@@ -84,5 +86,46 @@ class CompanyRepositoryTest extends PostgresTestBase {
         assertEquals(List.of("Equity", "Andela"), page1);
     }
 
+    //deleting a company
+    @Test
+    void deletingACompany_removesItsJobsAndMemberships() {
+        User owner = userRepository.save(TestData.user("owner@x.com"));
+        Company company = companyRepository.save(TestData.company("Safaricom"));
+        membershipRepository.save(new CompanyMembership(owner, company, Role.ADMIN));
+        jobRepository.save(job("Java Developer", company));
+        jobRepository.save(job("Python Developer", company));
+        em.flush();
+        em.clear();
+
+        companyRepository.deleteById(company.getId());
+        em.flush();
+
+        assertFalse(companyRepository.existsById(company.getId()));
+        assertEquals(0, jobRepository.count());
+        assertEquals(0, membershipRepository.count());
+    }
+
+    @Test
+    void deletingACompany_doesNotDeleteItsMembersAccounts() {
+        User owner = userRepository.save(TestData.user("owner@x.com"));
+        Company company = companyRepository.save(TestData.company("Safaricom"));
+        membershipRepository.save(new CompanyMembership(owner, company, Role.ADMIN));
+        em.flush();
+        em.clear();
+
+        companyRepository.deleteById(company.getId());
+        em.flush();
+
+        assertTrue(userRepository.existsById(owner.getId()));
+    }
+
+    private Job job(String title, Company company) {
+        Job j = new Job();
+        j.setTitle(title);
+        j.setDescription("Description for " + title);
+        j.setSalary(new BigDecimal("50000"));
+        j.setCompany(company);
+        return j;
+    }
 
 }
