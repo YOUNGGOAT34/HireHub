@@ -6,6 +6,7 @@ import com.goat.HireHub.education.Education;
 import com.goat.HireHub.education.EducationRepository;
 import com.goat.HireHub.experience.Experience;
 import com.goat.HireHub.experience.ExperienceRepository;
+import com.goat.HireHub.skill.Skill;
 import com.goat.HireHub.skill.SkillRepository;
 import com.goat.HireHub.user.SearchStatus;
 import com.goat.HireHub.user.User;
@@ -171,6 +172,53 @@ class CandidateProfileRepositoryTest extends PostgresTestBase {
 
         assertEquals(0, experienceRepository.count());
     }
+
+    //skills
+
+    @Test
+    void addingASkill_isPersisted() {
+        CandidateProfile kim = profileFor("kim@x.com");
+        Skill java = skillRepository.save(new Skill("Java"));
+        kim.getSkills().add(java);
+        em.flush();
+        em.clear();
+
+        CandidateProfile loaded = profileRepository.findById(kim.getId()).orElseThrow();
+
+        assertEquals(1, loaded.getSkills().size());
+        assertEquals("Java", loaded.getSkills().iterator().next().getName());
+    }
+
+    @Test
+    void removingASkill_isPersisted_andTheSkillRowItselfSurvives() {
+        CandidateProfile kim = profileFor("kim@x.com");
+        Skill java = skillRepository.save(new Skill("Java"));
+        kim.getSkills().add(java);
+        em.flush();
+        em.clear();
+
+        CandidateProfile loaded = profileRepository.findById(kim.getId()).orElseThrow();
+        loaded.getSkills().removeIf(s -> s.getName().equals("Java"));
+        em.flush();
+        em.clear();
+
+        assertTrue(profileRepository.findById(kim.getId()).orElseThrow().getSkills().isEmpty());
+        assertTrue(skillRepository.findByNameIgnoreCase("java").isPresent());
+    }
+
+    @Test
+    void deletingAProfile_keepsTheSharedSkills() {
+        CandidateProfile kim = profileFor("kim@x.com");
+        kim.getSkills().add(skillRepository.save(new Skill("Java")));
+        em.flush();
+        em.clear();
+
+        profileRepository.deleteById(kim.getId());
+        em.flush();
+
+        assertFalse(skillRepository.findAll().isEmpty());
+    }
+
 
     //helpers
     private CandidateProfile profileFor(String email) {
