@@ -8,8 +8,11 @@ import org.testcontainers.postgresql.PostgreSQLContainer;
 @Testcontainers
 public abstract class PostgresTestBase {
 
-    @Container
     @ServiceConnection
     static PostgreSQLContainer postgres = new PostgreSQLContainer("postgres:16-alpine");
+
+    static{
+        postgres.start();
+    }
 }
 

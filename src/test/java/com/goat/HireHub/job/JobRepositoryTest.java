@@ -24,7 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DataJpaTest(properties = "spring.jpa.hibernate.ddl-auto=create-drop")
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-public class JobRepositoryTest extends PostgresTestBase {
+class JobRepositoryTest extends PostgresTestBase {
     @Autowired
     JobRepository jobRepository;
     @Autowired
@@ -63,15 +63,6 @@ public class JobRepositoryTest extends PostgresTestBase {
                 .and(JobSpecification.salaryAtMost(new BigDecimal("8000")));
 
         Page<Job> result = jobRepository.findAll(spec, PageRequest.of(0, 50, Sort.by("salary")));
-
-        // Print general pagination details
-        System.out.println("Total elements found: " + result.getTotalElements());
-
-        // Print every job matching the specification
-        System.out.println("--- Retrieved Jobs ---");
-        result.getContent().forEach(job -> {
-            System.out.println("Job ID: " + job.getId() + " | Title: " + job.getTitle() + " | Salary: " + job.getSalary());
-        });
 
         assertEquals(4, result.getTotalElements());   // 5000, 6000, 7000, 8000
         assertEquals(0, new BigDecimal("5000").compareTo(result.getContent().get(0).getSalary()));
