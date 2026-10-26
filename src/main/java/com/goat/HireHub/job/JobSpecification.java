@@ -27,7 +27,7 @@ public class JobSpecification {
         return (root,query,criteriaBuilder)->{
             if (maxSalary==null) return null;
 
-            return criteriaBuilder.greaterThanOrEqualTo(root.get("salary"),maxSalary);
+            return criteriaBuilder.lessThanOrEqualTo(root.get("salary"),maxSalary);
         };
     }
 
