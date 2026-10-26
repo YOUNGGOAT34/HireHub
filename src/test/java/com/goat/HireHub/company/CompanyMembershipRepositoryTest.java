@@ -10,9 +10,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
+import org.springframework.dao.DataIntegrityViolationException;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest(properties = "spring.jpa.hibernate.ddl-auto=create-drop")
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
@@ -74,6 +74,16 @@ class CompanyMembershipRepositoryTest extends PostgresTestBase {
                 membershipRepository.findByUserIdAndCompanyId(u1.getId(), companyB.getId()).orElseThrow().getRole());
     }
 
+    //unique (user,company)
+
+    @Test
+    void duplicateMembership_isRejectedByTheDatabase() {
+        User managedU2 = userRepository.findById(u2.getId()).orElseThrow();
+        Company managedA = companyRepository.findById(companyA.getId()).orElseThrow();
+
+        assertThrows(DataIntegrityViolationException.class,
+                () -> membershipRepository.saveAndFlush(new CompanyMembership(managedU2, managedA, Role.ADMIN)));
+    }
 
 
 }
