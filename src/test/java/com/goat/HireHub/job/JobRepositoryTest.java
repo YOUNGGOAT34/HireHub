@@ -171,6 +171,28 @@ public class JobRepositoryTest extends PostgresTestBase {
         assertEquals(sorted, titles);
     }
 
+    //stable paging when the sort column has duplicates
+    @Test
+    void sortingBySalaryWithTies_andIdAsTieBreaker_neverRepeatsOrLosesRows() {
+        List<Job> ties = new ArrayList<>();
+        for (int i = 1; i <= 7; i++) {
+            ties.add(job("Tie Job " + i, 99999, safaricom));   // seven jobs, identical salary
+        }
+        jobRepository.saveAll(ties);
+        jobRepository.flush();
+
+        Sort sort = Sort.by(Sort.Direction.DESC, "salary").and(Sort.by("id"));
+        Specification<Job> spec = JobSpecification.titleContains("tie job");
+        Set<Long> seen = new HashSet<>();
+
+        for (int p = 0; p < 3; p++) {   // pages of 3 + 3 + 1
+            for (Job j : jobRepository.findAll(spec, PageRequest.of(p, 3, sort)).getContent()) {
+                assertTrue(seen.add(j.getId()), "job " + j.getId() + " repeated across pages");
+            }
+        }
+
+        assertEquals(7, seen.size());
+    }
 
 
     private Company company(String name) {
