@@ -20,6 +20,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import java.time.LocalDate;
 import java.util.List;
 
+import static org.hibernate.models.internal.util.CollectionHelper.forEach;
 import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest(properties = "spring.jpa.hibernate.ddl-auto=create-drop")
@@ -129,8 +130,47 @@ class CandidateProfileRepositoryTest extends PostgresTestBase {
         assertThrows(DataIntegrityViolationException.class, () -> educationRepository.saveAndFlush(noInstitution));
     }
 
+    //cascades
+    @Test
+    void deletingAProfile_deletesItsExperiencesAndEducations() {
+        CandidateProfile kim = profileFor("kim@x.com");
+        Experience e = experience(kim, "Backend Dev");
+        kim.getExperiences().add(e);
+        Education ed = education(kim, "University of Nairobi");
+        kim.getEducations().add(ed);
+        profileRepository.saveAndFlush(kim);
+        em.clear();
+        assertEquals(1, experienceRepository.count());
+        assertEquals(1, educationRepository.count());
 
 
+        CandidateProfile profile=profileRepository.findById(kim.getId()).orElseThrow();
+        if(profile.getUser()!=null){
+            profile.getUser().setCandidateProfile(null);
+        }
+        profileRepository.delete(profile);
+
+        System.out.println("FORCING FLUSH TO POSTGRES CONTAINER...");
+        em.flush();
+
+        assertEquals(0, experienceRepository.count());
+        assertEquals(0, educationRepository.count());
+    }
+
+    @Test
+    void removingAnExperienceFromTheProfile_deletesTheRow() {
+        CandidateProfile kim = profileFor("kim@x.com");
+        Experience e = experience(kim, "Backend Dev");
+        kim.getExperiences().add(e);
+        profileRepository.saveAndFlush(kim);
+        em.clear();
+
+        CandidateProfile loaded = profileRepository.findById(kim.getId()).orElseThrow();
+        loaded.getExperiences().clear();
+        em.flush();
+
+        assertEquals(0, experienceRepository.count());
+    }
 
     //helpers
     private CandidateProfile profileFor(String email) {

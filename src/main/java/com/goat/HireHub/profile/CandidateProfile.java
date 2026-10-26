@@ -35,7 +35,6 @@ public class CandidateProfile {
     @OneToMany(mappedBy = "candidateProfile", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Education> educations = new java.util.ArrayList<>();
 
-
     @OneToMany(mappedBy = "candidateProfile", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Experience> experiences = new ArrayList<>();
 
