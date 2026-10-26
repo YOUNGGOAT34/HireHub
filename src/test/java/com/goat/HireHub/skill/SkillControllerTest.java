@@ -216,8 +216,6 @@ class SkillControllerTest extends ControllerBase {
         verifyNoInteractions(skillService);
     }
 
-
-
     private SkillResponse sampleSkill(Long id, String name) {
         Skill skill = new Skill(id, name);
         return SkillResponse.from(skill);
