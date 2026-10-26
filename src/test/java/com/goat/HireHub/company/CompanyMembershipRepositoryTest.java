@@ -11,6 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -84,6 +86,42 @@ class CompanyMembershipRepositoryTest extends PostgresTestBase {
         assertThrows(DataIntegrityViolationException.class,
                 () -> membershipRepository.saveAndFlush(new CompanyMembership(managedU2, managedA, Role.ADMIN)));
     }
+
+    //membership of a company paginated
+
+    @Test
+    void findMembershipsByCompanyId_pagesThroughOnlyThatCompanysMembers() {
+        Page<CompanyMembership> first = membershipRepository
+                .findMembershipsByCompanyId(companyA.getId(), PageRequest.of(0, 2));
+        Page<CompanyMembership> second = membershipRepository
+                .findMembershipsByCompanyId(companyA.getId(), PageRequest.of(1, 2));
+
+        assertEquals(3, first.getTotalElements());
+        assertEquals(2, first.getTotalPages());
+        assertEquals(2, first.getContent().size());
+        assertEquals(1, second.getContent().size());
+        assertTrue(second.isLast());
+    }
+
+    @Test
+    void findMembershipsByCompanyId_doesNotMixInOtherCompanies() {
+        Page<CompanyMembership> page = membershipRepository
+                .findMembershipsByCompanyId(companyB.getId(), PageRequest.of(0, 10));
+
+        assertEquals(1, page.getTotalElements());
+    }
+
+    @Test
+    void findMembershipsByCompanyId_forACompanyWithNoMembers_isEmpty() {
+        Company empty = companyRepository.save(TestData.company("Empty Co"));
+
+        Page<CompanyMembership> page = membershipRepository
+                .findMembershipsByCompanyId(empty.getId(), PageRequest.of(0, 10));
+
+        assertTrue(page.isEmpty());
+        assertEquals(0, page.getTotalElements());
+    }
+
 
 
 }
