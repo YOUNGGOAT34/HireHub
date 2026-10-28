@@ -14,9 +14,9 @@ public class Company {
      @GeneratedValue(strategy = GenerationType.SEQUENCE)
      @Column(name="company_id")
      private Long Id;
-     @Column(name="company_name")
+     @Column(name="company_name",nullable = false)
      private String name;
-     @Column(name="company_description")
+     @Column(name="company_description",nullable = false)
      private String description;
      @OneToMany(mappedBy = "company",cascade = CascadeType.ALL, orphanRemoval =true)
      private List<Job> jobs;

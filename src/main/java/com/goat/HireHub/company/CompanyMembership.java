@@ -10,6 +10,7 @@ import jakarta.persistence.*;
 public class CompanyMembership {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @Column(name="membership_id")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
