@@ -21,10 +21,10 @@ public class Education {
     @Column(name = "institution_name", nullable = false)
     private String institutionName;
 
-    @Column(name = "degree_type")
+    @Column(name = "degree_type",nullable = false)
     private String degreeType;
 
-    @Column(name = "field_of_study")
+    @Column(name = "field_of_study",nullable = false)
     private String fieldOfStudy;
 
     @Column(name = "start_date", nullable = false)
@@ -33,10 +33,10 @@ public class Education {
     @Column(name = "end_date")
     private LocalDate endDate;
 
-    @Column(name = "is_current")
+    @Column(name = "is_current",nullable = false)
     private boolean isCurrent;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(name="activities_and_societies",columnDefinition = "TEXT")
     private String activitiesAndSocieties;
 
     public Education() {}

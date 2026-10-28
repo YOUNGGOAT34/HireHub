@@ -233,6 +233,7 @@ class CandidateProfileRepositoryTest extends PostgresTestBase {
         e.setJobTitle(title);
         e.setCompanyNameRaw("Some Company");
         e.setStartDate(LocalDate.of(2021, 1, 1));
+        e.setDescription("implemented low latency backend services");
         return e;
     }
 
@@ -240,7 +241,10 @@ class CandidateProfileRepositoryTest extends PostgresTestBase {
         Education e = new Education();
         e.setCandidateProfile(profile);
         e.setInstitutionName(institution);
+        e.setDegreeType("Bachelors");
+        e.setFieldOfStudy("computer science");
         e.setStartDate(LocalDate.of(2016, 9, 1));
+
         return e;
     }
 

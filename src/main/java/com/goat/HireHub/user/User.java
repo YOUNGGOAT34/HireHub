@@ -21,7 +21,7 @@ public class User {
     private String lastName;
     @Column(name="username",unique = true)
     private String username;
-    @Column(name="password",nullable = false)
+    @Column(name="password_hash",nullable = false)
     @JsonProperty(access= JsonProperty.Access.WRITE_ONLY)
     private String passwordHash;
 

@@ -35,10 +35,10 @@ public class Experience {
     @Column(name = "end_date")
     private LocalDate endDate;
 
-    @Column(name = "is_current")
+    @Column(name = "is_current",nullable = false)
     private boolean isCurrent;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(columnDefinition = "TEXT",nullable = false)
     private String description;
 
     public Experience() {}
