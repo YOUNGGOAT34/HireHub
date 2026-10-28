@@ -27,3 +27,17 @@ CREATE TABLE company_memberships(
     role VARCHAR(50) NOT NULL
 
 );
+
+-- candidate_profiles
+CREATE TABLE candidate_profiles(
+     profile_id BIGINT primary key REFERENCES users(user_id),
+     headline VARCHAR (100),
+     summary TEXT,
+     search_status VARCHAR(50)
+ );
+
+    CREATE TABLE profile_skills(
+        profile_id BIGINT REFERENCES candidate_profiles(profile_id),
+        skill_id BIGINT REFERENCES skills(skill_id),
+        primary key(profile_id,skill_id)
+    )
