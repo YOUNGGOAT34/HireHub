@@ -1,4 +1,4 @@
-package com.goat.HireHub.User;
+package com.goat.HireHub.user;
 
 import com.goat.HireHub.exception.ConflictException;
 import com.goat.HireHub.security.SecurityUtils;
@@ -83,7 +83,6 @@ class UserServiceTest {
             when(securityUtils.getCurrentUser()).thenReturn(me);
 
             userService.deleteUserById();
-
             verify(userRepository).delete(me);
         }
 

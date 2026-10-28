@@ -1,12 +1,8 @@
-package com.goat.HireHub.User;
+package com.goat.HireHub.user;
 
 import com.goat.HireHub.ControllerBase;
-import com.goat.HireHub.exception.BadRequestException;
 import com.goat.HireHub.exception.ConflictException;
 import com.goat.HireHub.exception.ResourceNotFoundException;
-import com.goat.HireHub.user.User;
-import com.goat.HireHub.user.UserController;
-import com.goat.HireHub.user.UserService;
 import com.goat.HireHub.user.dto.UserRequest;
 import com.goat.HireHub.user.dto.UserResponse;
 import org.junit.jupiter.api.Test;

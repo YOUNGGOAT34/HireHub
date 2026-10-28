@@ -1,10 +1,7 @@
-package com.goat.HireHub.User;
+package com.goat.HireHub.user;
 
 import com.goat.HireHub.PostgresTestBase;
 import com.goat.HireHub.TestData;
-import com.goat.HireHub.user.User;
-import com.goat.HireHub.user.UserRepository;
-import com.goat.HireHub.user.UserSpecification;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
