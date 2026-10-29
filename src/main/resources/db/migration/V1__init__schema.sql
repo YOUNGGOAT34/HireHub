@@ -105,3 +105,9 @@ CREATE INDEX idx_jobs_title_trgm ON jobs USING gin (job_title gin_trgm_ops);
 create index company_name_idx on companies (company_name);
 CREATE INDEX idx_company_name_trgm ON companies USING gin (company_name gin_trgm_ops);
 
+-- users
+CREATE INDEX idx_users_first_name_id ON users (first_name, user_id);
+CREATE INDEX idx_users_last_name_id ON users (last_name, user_id);
+CREATE INDEX idx_users_username_trgm   ON users USING gin (lower(username)   gin_trgm_ops);
+CREATE INDEX idx_users_first_name_trgm ON users USING gin (lower(first_name) gin_trgm_ops);
+CREATE INDEX idx_users_last_name_trgm  ON users USING gin (lower(last_name)  gin_trgm_ops)

@@ -35,7 +35,8 @@ public class UserController {
               @RequestParam(defaultValue = "desc") String direction){
 
           validateSortingField(sortBy);
-          Pageable pageable= PageRequest.of(page,size,Sort.by(validateSortDirection(direction),sortBy));
+          Sort.Direction sortDirection=validateSortDirection(direction);
+          Pageable pageable= PageRequest.of(page,size,Sort.by(sortDirection,sortBy).and(Sort.by(sortDirection,"id")));
           return ResponseEntity.ok(userService.getAllUsers(pageable));
       }
 
@@ -50,7 +51,7 @@ public class UserController {
                                                   @RequestParam(required = false) String username,
                                                   @RequestParam(defaultValue = "0") @PositiveOrZero(message = "page number must be zero or greater")int page,
                                                   @RequestParam(defaultValue = "10") @Max(value =50) @Positive(message = "size must be greater than zero")int size){
-          Pageable pageable=PageRequest.of(page,size);
+          Pageable pageable=PageRequest.of(page,size,Sort.by("id"));
            return ResponseEntity.ok(userService.searchUsers(firstName,lastName,username,pageable));
       }
 

@@ -8,7 +8,6 @@ import com.goat.HireHub.profile.CandidateProfile;
 @Entity
 @Table(name="users")
 public class User {
-
     @Id
     @Column(name="user_id")
     @GeneratedValue(strategy=GenerationType.SEQUENCE)
@@ -27,7 +26,6 @@ public class User {
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private CandidateProfile candidateProfile;
-
     public  User(){}
 
     public User(String email, String firstName, String lastName,String passwordHash,String username) {
