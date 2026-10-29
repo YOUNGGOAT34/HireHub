@@ -9,5 +9,4 @@ class HireHubApplicationTests extends PostgresTestBase{
 	@Test
 	void contextLoads() {
 	}
-
 }

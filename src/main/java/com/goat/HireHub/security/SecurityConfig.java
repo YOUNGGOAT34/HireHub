@@ -43,6 +43,7 @@ public class SecurityConfig {
                 .authenticationProvider(authenticationProvider)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers("/jobs").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(

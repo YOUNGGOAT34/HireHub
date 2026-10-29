@@ -93,6 +93,9 @@ CREATE TABLE experiences(
 );
 
 
-
-
-
+-- indexes
+-- jobs
+CREATE index idx_jobs_salary ON jobs (salary DESC NULLS last);
+CREATE index idx_companies_id ON jobs (company_id)
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
+CREATE INDEX idx_jobs_title_trgm ON jobs USING gin (job_title gin_trgm_ops);
