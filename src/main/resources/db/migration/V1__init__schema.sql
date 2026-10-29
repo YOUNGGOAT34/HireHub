@@ -1,14 +1,12 @@
 
-CREATE SEQUENCE IF NOT EXISTS companies_seq START WITH 1 INCREMENT BY 1;
-CREATE SEQUENCE IF NOT EXISTS jobs_seq START WITH 1 INCREMENT BY 1;
-CREATE SEQUENCE IF NOT EXISTS users_seq START WITH 1 INCREMENT BY 1;
-CREATE SEQUENCE IF NOT EXISTS skills_seq START WITH 1 INCREMENT BY 1;
-CREATE SEQUENCE IF NOT EXISTS company_memberships_seq START WITH 1 INCREMENT BY 1;
-CREATE SEQUENCE IF NOT EXISTS educations_seq START WITH 1 INCREMENT BY 1;
-CREATE SEQUENCE IF NOT EXISTS experiences_seq START WITH 1 INCREMENT BY 1;
-
+CREATE SEQUENCE IF NOT EXISTS companies_seq START WITH 1 INCREMENT BY 50;
+CREATE SEQUENCE IF NOT EXISTS jobs_seq START WITH 1 INCREMENT BY 50;
+CREATE SEQUENCE IF NOT EXISTS users_seq START WITH 1 INCREMENT BY 50;
+CREATE SEQUENCE IF NOT EXISTS skills_seq START WITH 1 INCREMENT BY 50;
+CREATE SEQUENCE IF NOT EXISTS company_memberships_seq START WITH 1 INCREMENT BY 50;
+CREATE SEQUENCE IF NOT EXISTS educations_seq START WITH 1 INCREMENT BY 50;
+CREATE SEQUENCE IF NOT EXISTS experiences_seq START WITH 1 INCREMENT BY 50;
 CREATE EXTENSION IF NOT EXISTS pg_trgm;
-
 
 --create tables
 -- companies
@@ -98,7 +96,7 @@ CREATE TABLE experiences(
 -- indexes
 -- jobs
 CREATE index idx_jobs_salary ON jobs (salary DESC NULLS last);
-CREATE index idx_companies_id ON jobs (company_id)
+CREATE index idx_companies_id ON jobs (company_id);
 CREATE INDEX idx_jobs_title_trgm ON jobs USING gin (job_title gin_trgm_ops);
 
 -- companies
@@ -110,4 +108,4 @@ CREATE INDEX idx_users_first_name_id ON users (first_name, user_id);
 CREATE INDEX idx_users_last_name_id ON users (last_name, user_id);
 CREATE INDEX idx_users_username_trgm   ON users USING gin (lower(username)   gin_trgm_ops);
 CREATE INDEX idx_users_first_name_trgm ON users USING gin (lower(first_name) gin_trgm_ops);
-CREATE INDEX idx_users_last_name_trgm  ON users USING gin (lower(last_name)  gin_trgm_ops)
+CREATE INDEX idx_users_last_name_trgm  ON users USING gin (lower(last_name)  gin_trgm_ops);
