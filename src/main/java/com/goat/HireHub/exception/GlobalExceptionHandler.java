@@ -46,16 +46,34 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return problem(HttpStatus.CONFLICT,"Conflict",e.getMessage());
     }
 
+    //security exceptions
+
+    @ExceptionHandler(org.springframework.security.authentication.BadCredentialsException.class)
+    public ProblemDetail handleBadCredentials(
+            org.springframework.security.authentication.BadCredentialsException ex) {
+
+        return problem(HttpStatus.UNAUTHORIZED,"Authentication Failed","Invalid email or password.Please try again");
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ProblemDetail handleAuthentication(AuthenticationException ex) {
+        return problem(HttpStatus.UNAUTHORIZED,"Authentication Failed","Authentication failed or required");
+    }
 
 
+    @ExceptionHandler(org.springframework.security.access.AccessDeniedException.class)
+    public ProblemDetail handleAccessDenied(
+            org.springframework.security.access.AccessDeniedException ex) {
+       return problem(HttpStatus.FORBIDDEN,"Access denied","You do not have permission to perform this action");
+    }
 
+
+    //fall back
     @ExceptionHandler(Exception.class)
     public ProblemDetail handleUnexpected(Exception e) {
         log.error("Unexpected error", e);
-        return ProblemDetail.forStatusAndDetail(
-                HttpStatus.INTERNAL_SERVER_ERROR, "Something went wrong. Please try again later.");
+        return problem(HttpStatus.INTERNAL_SERVER_ERROR,"Internal Server Error","Something went wrong. Please try again later");
     }
-
 
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(
@@ -70,9 +88,6 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         pd.setProperty("errors", errors);
         return ResponseEntity.badRequest().body(pd);
     }
-
-
-
 
 
     @ExceptionHandler(jakarta.validation.ConstraintViolationException.class)
@@ -102,45 +117,6 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         problem.setDetail(e.getMessage());
         return problem;
     }
-
-    @ExceptionHandler(org.springframework.security.authentication.BadCredentialsException.class)
-    public ResponseEntity<ProblemDetail> handleBadCredentials(
-            org.springframework.security.authentication.BadCredentialsException ex) {
-
-        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
-                HttpStatus.UNAUTHORIZED, 
-                "Invalid email or password. Please try again."
-        );
-
-        problemDetail.setTitle("Authentication Failed");
-
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(problemDetail);
-    }
-
-    @ExceptionHandler(AuthenticationException.class)
-    public ResponseEntity<ProblemDetail> handleAuthentication(AuthenticationException ex) {
-        ProblemDetail pd = ProblemDetail.forStatusAndDetail(
-                HttpStatus.UNAUTHORIZED, "Authentication required or failed.");
-        pd.setTitle("Authentication Failed");
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(pd);
-    }
-
-
-    @ExceptionHandler(org.springframework.security.access.AccessDeniedException.class)
-    public ResponseEntity<ProblemDetail> handleAccessDenied(
-            org.springframework.security.access.AccessDeniedException ex) {
-
-        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
-                HttpStatus.FORBIDDEN,
-                ex.getMessage()
-        );
-
-        problemDetail.setTitle("Access denied");
-
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(problemDetail);
-    }
-
-
 
 
     @Override
