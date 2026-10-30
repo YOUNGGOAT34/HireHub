@@ -41,6 +41,11 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
 
+    @ExceptionHandler(BadRequestException.class)
+    public ProblemDetail handleBadRequest(BadRequestException e) {
+        return problem(HttpStatus.BAD_REQUEST,"Bad Request",e.getMessage());
+    }
+
     @ExceptionHandler(ConflictException.class)
     public ProblemDetail handleConflictException(ConflictException e){;
         return problem(HttpStatus.CONFLICT,"Conflict",e.getMessage());
@@ -67,14 +72,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
        return problem(HttpStatus.FORBIDDEN,"Access denied","You do not have permission to perform this action");
     }
 
-
-    //fall back
-    @ExceptionHandler(Exception.class)
-    public ProblemDetail handleUnexpected(Exception e) {
-        log.error("Unexpected error", e);
-        return problem(HttpStatus.INTERNAL_SERVER_ERROR,"Internal Server Error","Something went wrong. Please try again later");
-    }
-
+    //validation exceptions
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(
             MethodArgumentNotValidException ex, HttpHeaders headers,
@@ -83,10 +81,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         Map<String, String> errors = new LinkedHashMap<>();
         ex.getBindingResult().getFieldErrors()
                 .forEach(fe -> errors.putIfAbsent(fe.getField(), fe.getDefaultMessage()));
-
-        ProblemDetail pd = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Validation failed");
-        pd.setProperty("errors", errors);
-        return ResponseEntity.badRequest().body(pd);
+        return ResponseEntity.badRequest().body(validationProblem(errors));
     }
 
 
@@ -95,27 +90,13 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             jakarta.validation.ConstraintViolationException ex) {
 
         Map<String, String> errors = new java.util.LinkedHashMap<>();
-
         ex.getConstraintViolations().forEach(violation -> {
             String propertyPath = violation.getPropertyPath().toString();
             String paramName = propertyPath.substring(propertyPath.lastIndexOf('.') + 1);
             errors.putIfAbsent(paramName, violation.getMessage());
         });
 
-        ProblemDetail pd = ProblemDetail.forStatusAndDetail(
-                HttpStatus.BAD_REQUEST, "Validation failed");
-        pd.setTitle("Invalid Request Parameters");
-        pd.setProperty("errors", errors);
-
-        return ResponseEntity.badRequest().body(pd);
-    }
-
-    @ExceptionHandler(BadRequestException.class)
-    public ProblemDetail handleBadRequest(BadRequestException e) {
-        ProblemDetail problem = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
-        problem.setTitle("Bad Request");
-        problem.setDetail(e.getMessage());
-        return problem;
+        return ResponseEntity.badRequest().body(validationProblem(errors));
     }
 
 
@@ -130,12 +111,15 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 errors.putIfAbsent(paramName, error.getDefaultMessage());
             });
         });
+        return ResponseEntity.badRequest().body(validationProblem(errors));
+    }
 
-        ProblemDetail pd = ProblemDetail.forStatusAndDetail(
-                HttpStatus.BAD_REQUEST, "Validation failed");
-        pd.setTitle("Invalid Request Parameters");
-        pd.setProperty("errors", errors);
-        return ResponseEntity.badRequest().body(pd);
+
+    //fall back
+    @ExceptionHandler(Exception.class)
+    public ProblemDetail handleUnexpected(Exception e) {
+        log.error("Unexpected error", e);
+        return problem(HttpStatus.INTERNAL_SERVER_ERROR,"Internal Server Error","Something went wrong. Please try again later");
     }
 
     //helpers
@@ -159,5 +143,11 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         if(!pd.getProperties().containsKey("timestamp")){
             pd.setProperty("timestamp", Instant.now().toString());
         }
+    }
+
+    private static ProblemDetail validationProblem(Map<String,String> errors){
+         ProblemDetail pd=problem(HttpStatus.BAD_REQUEST,"Validation Failed","One or more fields are invalid");
+         pd.setProperty("errors",errors);
+         return pd;
     }
 }
