@@ -21,6 +21,20 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
+    // Spring MVC's own exceptions (404 URL, 405, 415, missing param...)
+    @Override
+    protected ResponseEntity<Object> handleExceptionInternal(
+            Exception ex, Object body, HttpHeaders headers,
+            HttpStatusCode statusCode, WebRequest request) {
+
+        ResponseEntity<Object> response =
+                super.handleExceptionInternal(ex, body, headers, statusCode, request);
+        if (response != null && response.getBody() instanceof ProblemDetail pd) {
+            normalize(pd);
+        }
+        return response;
+    }
+
     //custom exceptions
     @ExceptionHandler(ResourceNotFoundException.class)
     public ProblemDetail handleNotFound(ResourceNotFoundException e) {
@@ -31,7 +45,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     public ProblemDetail handleConflict(DataIntegrityViolationException e) {
         log.warn("Data integrity violation", e);
         return problem(HttpStatus.CONFLICT,
-                "Conflict",e.getMessage());
+                "Conflict","The request conflicts with existing data");
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
@@ -47,7 +61,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(ConflictException.class)
-    public ProblemDetail handleConflictException(ConflictException e){;
+    public ProblemDetail handleConflictException(ConflictException e){
         return problem(HttpStatus.CONFLICT,"Conflict",e.getMessage());
     }
 
@@ -57,7 +71,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     public ProblemDetail handleBadCredentials(
             org.springframework.security.authentication.BadCredentialsException ex) {
 
-        return problem(HttpStatus.UNAUTHORIZED,"Authentication Failed","Invalid email or password.Please try again");
+        return problem(HttpStatus.UNAUTHORIZED,"Authentication Failed","Invalid email or password. Please try again");
     }
 
     @ExceptionHandler(AuthenticationException.class)
@@ -136,7 +150,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             if (s!=null) pd.setTitle(s.getReasonPhrase());
         }
 
-        if (pd.getProperties()==null || pd.getProperties().containsKey("errors")){
+        if (pd.getProperties()==null || !pd.getProperties().containsKey("errors")){
              pd.setProperty("errors",Map.of());
         }
 
