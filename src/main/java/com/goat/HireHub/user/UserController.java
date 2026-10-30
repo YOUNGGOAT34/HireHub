@@ -61,12 +61,7 @@ public class UserController {
           return ResponseEntity.noContent().build();
       }
 
-      @PostMapping
-    public ResponseEntity<UserResponse> registerUser(@RequestBody @Valid UserRequest userRequest){
-           return ResponseEntity.status(HttpStatus.CREATED).body(userService.registerUser(userRequest));
-      }
-
-     @PutMapping("/me")
+      @PutMapping("/me")
     public   ResponseEntity<UserResponse> updateUser(@RequestBody @Valid UserUpdateRequest userUpdateRequest){
            return ResponseEntity.ok(userService.updateUser(userUpdateRequest));
      }
@@ -74,7 +69,6 @@ public class UserController {
      public   ResponseEntity<UserResponse> patchUser(@RequestBody @Valid UserPatchRequest userPatchRequest){
          return ResponseEntity.ok(userService.patchUser(userPatchRequest));
      }
-
 
      //helpers
      private void validateSortingField(String field){
