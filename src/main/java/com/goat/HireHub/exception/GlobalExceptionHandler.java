@@ -12,6 +12,7 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -20,10 +21,33 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
+    //custom exceptions
     @ExceptionHandler(ResourceNotFoundException.class)
     public ProblemDetail handleNotFound(ResourceNotFoundException e) {
-        return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, e.getMessage());
+        return problem(HttpStatus.NOT_FOUND,"Not Found",e.getMessage());
     }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ProblemDetail handleConflict(DataIntegrityViolationException e) {
+        log.warn("Data integrity violation", e);
+        return problem(HttpStatus.CONFLICT,
+                "Conflict",e.getMessage());
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ProblemDetail handleIllegalArgument(
+            IllegalArgumentException ex) {
+        return problem(HttpStatus.BAD_REQUEST,"Bad Request", ex.getMessage());
+    }
+
+
+    @ExceptionHandler(ConflictException.class)
+    public ProblemDetail handleConflictException(ConflictException e){;
+        return problem(HttpStatus.CONFLICT,"Conflict",e.getMessage());
+    }
+
+
+
 
     @ExceptionHandler(Exception.class)
     public ProblemDetail handleUnexpected(Exception e) {
@@ -47,34 +71,8 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return ResponseEntity.badRequest().body(pd);
     }
 
-    @ExceptionHandler(DataIntegrityViolationException.class)
-    public ProblemDetail handleConflict(DataIntegrityViolationException e) {
-        log.warn("Data integrity violation", e);
-        return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT,
-                "The request conflicts with existing data.");
-    }
-
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<ProblemDetail> handleIllegalArgument(
-            IllegalArgumentException ex) {
-
-        ProblemDetail problem =
-                ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
-
-        problem.setTitle("Invalid Request Parameter");
-        problem.setDetail(ex.getMessage());
-
-        return ResponseEntity.badRequest().body(problem);
-    }
 
 
-    @ExceptionHandler(ConflictException.class)
-    public ProblemDetail handleConflictException(ConflictException e){
-        ProblemDetail problem= ProblemDetail.forStatus(HttpStatus.CONFLICT);
-        problem.setTitle("conflict");
-        problem.setDetail(e.getMessage());
-        return problem;
-    }
 
 
     @ExceptionHandler(jakarta.validation.ConstraintViolationException.class)
@@ -162,5 +160,28 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         pd.setTitle("Invalid Request Parameters");
         pd.setProperty("errors", errors);
         return ResponseEntity.badRequest().body(pd);
+    }
+
+    //helpers
+    private static ProblemDetail problem(HttpStatus status,String title,String detail){
+         ProblemDetail pd=ProblemDetail.forStatusAndDetail(status,detail);
+         pd.setTitle(title);
+         normalize(pd);
+         return pd;
+    }
+
+    private static void normalize(ProblemDetail pd){
+        if(pd.getTitle()==null){
+            HttpStatus s=HttpStatus.resolve(pd.getStatus());
+            if (s!=null) pd.setTitle(s.getReasonPhrase());
+        }
+
+        if (pd.getProperties()==null || pd.getProperties().containsKey("errors")){
+             pd.setProperty("errors",Map.of());
+        }
+
+        if(!pd.getProperties().containsKey("timestamp")){
+            pd.setProperty("timestamp", Instant.now().toString());
+        }
     }
 }
