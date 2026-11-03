@@ -8,7 +8,7 @@ public interface UserFeed {
       BigDecimal getJobSalary();
       Long getCompanyId();
       String getCompanyName();
-      Integer getMatched();
-      Integer getRequired();
+      Long getMatched();
+      Long getRequired();
       Double getScore();
 }

@@ -60,7 +60,7 @@ public class UserController {
     public ResponseEntity<Page<UserFeed>> getRecommendedJobs(@RequestParam(defaultValue = "0") @PositiveOrZero(message = "page number must be zero or greater")int page,
                                                              @RequestParam(defaultValue = "10") @Max(value =50) @Positive(message = "size must be greater than zero")int size){
           Pageable pageable=PageRequest.of(page,size);
-          return ResponseEntity.ok(userService.getRecommendedJobs(pageable,page,size));
+          return ResponseEntity.ok(userService.getRecommendedJobs(pageable));
     }
 
       @DeleteMapping("/me")

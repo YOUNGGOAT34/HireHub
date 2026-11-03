@@ -48,8 +48,8 @@ public class UserService {
      }
 
      //feed
-    public Page<UserFeed> getRecommendedJobs(Pageable pageable,int page,int size){
-         int offset=page*size;
+    public Page<UserFeed> getRecommendedJobs(Pageable pageable){
+
          Long loggedUserId=getCurrentUser().getId();
           return userRepository.recommendedJobs(pageable,loggedUserId);
     }

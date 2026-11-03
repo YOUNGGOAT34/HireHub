@@ -31,13 +31,13 @@ public interface UserRepository extends JpaRepository<User,Long>, JpaSpecificati
             SELECT
                 j.job_id AS jobId,
                 j.job_title AS jobTitle,
-                j.salary AS salary,
+                j.salary AS jobSalary,
                 j.company_id AS companyId,
                 c.company_name AS companyName,
                 m.matched AS matched,
                 r.required AS required,
                 m.matched::numeric/r.required As score
-            
+           
             from matches m
             join jobs j on j.job_id=m.job_id
             join companies c on c.company_id=j.company_id
@@ -50,13 +50,14 @@ public interface UserRepository extends JpaRepository<User,Long>, JpaSpecificati
             WITH my_skills AS (
                 SELECT skill_id FROM profile_skills WHERE profile_id = :profileId
             )
-            SELECT count(distinct js.job_id)
+            SELECT count(*) from(
+            SELECT js.job_id
             FROM job_skills js
             JOIN my_skills ms ON ms.skill_id = js.skill_id
             GROUP BY js.job_id
             HAVING count(*) >= 2
+            ) t
             """,
-
               nativeQuery = true)
       Page<UserFeed> recommendedJobs(
                                Pageable pageable,
