@@ -1,9 +1,12 @@
 package com.goat.HireHub.job;
 
 import com.goat.HireHub.company.Company;
+import com.goat.HireHub.skill.Skill;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name="jobs")
@@ -20,6 +23,14 @@ public class Job {
        @ManyToOne(fetch = FetchType.LAZY)
        @JoinColumn(name="company_id")
        private Company company;
+
+       @ManyToMany
+       @JoinTable(
+           name="jobs_skills",
+           joinColumns = @JoinColumn(name="job_id"),
+           inverseJoinColumns = @JoinColumn(name="skill_id")
+       )
+       private Set<Skill> jobSkills=new HashSet<>();
 
        public Job(){}
 
