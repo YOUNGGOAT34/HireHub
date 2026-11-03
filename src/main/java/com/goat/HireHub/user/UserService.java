@@ -47,6 +47,14 @@ public class UserService {
             return UserResponse.from(user);
      }
 
+     //feed
+    public Page<UserFeed> getRecommendedJobs(Pageable pageable,int page,int size){
+         int offset=page*size;
+         Long loggedUserId=getCurrentUser().getId();
+          return userRepository.recommendedJobs(pageable,loggedUserId);
+    }
+
+
      public Page<UserResponse> searchUsers(String firstName,String lastName,String username,Pageable pageable){
           Specification<User> spec=UserSpecification
                   .firstNameMatches(firstName)
