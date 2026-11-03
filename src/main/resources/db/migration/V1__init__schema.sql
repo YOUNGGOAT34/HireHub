@@ -92,12 +92,11 @@ CREATE TABLE experiences(
    description TEXT NOT NULL
 );
 
-
 -- job skills
 CREATE TABLE job_skills(
-   job_id BIGINT NOT NULL REFERENCES jobs(job_id) ON DELETE CASCADE;
-   skill_id BIGINT NOT NULL REFERENCES skills(skill_id) ON DELETE CASCADE;
-   primary key(job_id,skill_id);
+   job_id BIGINT NOT NULL REFERENCES jobs(job_id) ON DELETE CASCADE,
+   skill_id BIGINT NOT NULL REFERENCES skills(skill_id) ON DELETE CASCADE,
+   primary key(job_id,skill_id)
 );
 
 
@@ -108,7 +107,7 @@ CREATE index idx_companies_id ON jobs (company_id);
 CREATE INDEX idx_jobs_title_trgm ON jobs USING gin (job_title gin_trgm_ops);
 
 -- job skills
-CREATE index idx_job_skill_id ON jobs_skills (skill_id);
+CREATE index idx_job_skill_id ON job_skills (skill_id);
 
 -- companies
 create index company_name_idx on companies (company_name);

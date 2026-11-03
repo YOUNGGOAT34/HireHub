@@ -11,7 +11,12 @@ import java.time.LocalDate;
 public class Experience {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE,generator = "experiences_seq")
+    @SequenceGenerator(
+            name = "experiences_seq_gen",
+            sequenceName = "experiences_seq",
+            allocationSize = 50
+    )
     @Column(name="experience_id")
     private Long id;
 

@@ -10,7 +10,12 @@ import com.goat.HireHub.profile.CandidateProfile;
 public class User {
     @Id
     @Column(name="user_id")
-    @GeneratedValue(strategy=GenerationType.SEQUENCE)
+    @GeneratedValue(strategy=GenerationType.SEQUENCE,generator = "users_seq")
+    @SequenceGenerator(
+            name = "users_seq_gen",
+            sequenceName = "users_seq",
+            allocationSize = 50
+    )
     private Long id;
     @Column(name="email",nullable = false,unique = true)
     private String email;

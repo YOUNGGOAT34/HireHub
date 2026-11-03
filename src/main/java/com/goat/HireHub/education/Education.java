@@ -10,7 +10,12 @@ import java.time.LocalDate;
 public class Education {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE,generator = "educations_seq")
+    @SequenceGenerator(
+            name = "educations_seq_gen",
+            sequenceName = "educations_seq",
+            allocationSize = 50
+    )
     @Column(name = "education_id")
     private Long id;
 

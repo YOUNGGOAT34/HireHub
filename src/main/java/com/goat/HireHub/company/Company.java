@@ -11,7 +11,12 @@ import java.util.List;
 public class Company {
 
      @Id
-     @GeneratedValue(strategy = GenerationType.SEQUENCE)
+     @GeneratedValue(strategy = GenerationType.SEQUENCE,generator = "companies_seq")
+     @SequenceGenerator(
+             name = "companies_seq_gen",
+             sequenceName = "companies_seq",
+             allocationSize = 50
+     )
      @Column(name="company_id")
      private Long Id;
      @Column(name="company_name",nullable = false)

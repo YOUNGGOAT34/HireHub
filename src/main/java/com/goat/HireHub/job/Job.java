@@ -12,7 +12,12 @@ import java.util.Set;
 @Table(name="jobs")
 public class Job {
        @Id
-       @GeneratedValue(strategy = GenerationType.SEQUENCE)
+       @GeneratedValue(strategy = GenerationType.SEQUENCE,generator = "jobs_seq")
+       @SequenceGenerator(
+               name = "experiences_seq_gen",
+               sequenceName = "experiences_seq",
+               allocationSize = 50
+       )
        @Column(name="job_id")
        private Long id;
        @Column(name="job_title")
@@ -26,7 +31,7 @@ public class Job {
 
        @ManyToMany
        @JoinTable(
-           name="jobs_skills",
+           name="job_skills",
            joinColumns = @JoinColumn(name="job_id"),
            inverseJoinColumns = @JoinColumn(name="skill_id")
        )
