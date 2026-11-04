@@ -7,18 +7,18 @@ public record UserFeedResponse(Long jobId,
                                BigDecimal jobSalary,
                                Long companyId,
                                String companyName,
-                               Long matched,
-                               Long required,
+                               String matching,
+                               String missing,
                                Double scorePercentage
                                ) {
-     public static UserFeedResponse from(UserFeed feed){
+     public static UserFeedResponse from(UserFeed feed,SkillBreakDown breakdown){
          return new UserFeedResponse(feed.getJobId(),
                  feed.getJobTitle(),
                  feed.getJobSalary(),
                  feed.getCompanyId(),
                  feed.getCompanyName(),
-                 feed.getMatched(),
-                 feed.getRequired(),
+                 breakdown.getMatching(),
+                 breakdown.getMissing(),
                  calculatePercentage(feed.getScore())
                  );
      }
