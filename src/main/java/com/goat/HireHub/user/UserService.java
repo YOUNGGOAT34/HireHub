@@ -1,5 +1,4 @@
 package com.goat.HireHub.user;
-
 import com.goat.HireHub.education.EducationRepository;
 import com.goat.HireHub.exception.ConflictException;
 import com.goat.HireHub.exception.ResourceNotFoundException;
@@ -18,10 +17,7 @@ import org.springframework.stereotype.Service;
 public class UserService {
      private final UserRepository userRepository;
      private final PasswordEncoder passwordEncoder;
-     private final ExperienceRepository experienceRepository;
      private final SecurityUtils securityUtils;
-     private final EducationRepository educationRepository;
-     private final SkillRepository skillRepository;
 
      public UserService(UserRepository userRepository,
                         PasswordEncoder passwordEncoder,
@@ -31,10 +27,8 @@ public class UserService {
                         SkillRepository skillRepository){
           this.userRepository=userRepository;
           this.passwordEncoder=passwordEncoder;
-          this.experienceRepository=experienceRepository;
-          this.educationRepository=educationRepository;
           this.securityUtils=securityUtils;
-          this.skillRepository=skillRepository;
+
      }
 
      //users
@@ -47,12 +41,7 @@ public class UserService {
             return UserResponse.from(user);
      }
 
-     //feed
-    public Page<UserFeed> getRecommendedJobs(Pageable pageable){
 
-         Long loggedUserId=getCurrentUser().getId();
-          return userRepository.recommendedJobs(pageable,loggedUserId);
-    }
 
 
      public Page<UserResponse> searchUsers(String firstName,String lastName,String username,Pageable pageable){

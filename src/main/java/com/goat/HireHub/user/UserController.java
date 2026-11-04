@@ -2,6 +2,7 @@ package com.goat.HireHub.user;
 
 
 import com.goat.HireHub.exception.BadRequestException;
+import com.goat.HireHub.feed.dto.UserFeed;
 import com.goat.HireHub.user.dto.*;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
@@ -11,7 +12,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -54,14 +54,6 @@ public class UserController {
           Pageable pageable=PageRequest.of(page,size,Sort.by("id"));
            return ResponseEntity.ok(userService.searchUsers(firstName,lastName,username,pageable));
       }
-
-      //feed
-      @GetMapping ("/me/feed")
-    public ResponseEntity<Page<UserFeed>> getRecommendedJobs(@RequestParam(defaultValue = "0") @PositiveOrZero(message = "page number must be zero or greater")int page,
-                                                             @RequestParam(defaultValue = "10") @Max(value =50) @Positive(message = "size must be greater than zero")int size){
-          Pageable pageable=PageRequest.of(page,size);
-          return ResponseEntity.ok(userService.getRecommendedJobs(pageable));
-    }
 
       @DeleteMapping("/me")
       public ResponseEntity<Void> deleteById(){
