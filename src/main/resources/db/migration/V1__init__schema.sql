@@ -6,6 +6,7 @@ CREATE SEQUENCE IF NOT EXISTS skills_seq START WITH 1 INCREMENT BY 50;
 CREATE SEQUENCE IF NOT EXISTS company_memberships_seq START WITH 1 INCREMENT BY 50;
 CREATE SEQUENCE IF NOT EXISTS educations_seq START WITH 1 INCREMENT BY 50;
 CREATE SEQUENCE IF NOT EXISTS experiences_seq START WITH 1 INCREMENT BY 50;
+CREATE SEQUENCE IF NOT EXISTS job__requirements_seq START WITH 1 INCREMENT BY 50;
 CREATE EXTENSION IF NOT EXISTS pg_trgm;
 
 --create tables
@@ -99,7 +100,13 @@ CREATE TABLE job_skills(
    primary key(job_id,skill_id)
 );
 
-
+CREATE TABLE job_requirements(
+   requirement_id BIGINT primary key DEFAULT nextval("job_requirements_seq"),
+   job_id BIGINT NOT NULL REFERENCES jobs(job_id) ON DELETE CASCADE,
+   requirement_type NOT NULL VARCHAR(20),
+   order_by INT NOT NULL,
+   content TEXT NOT NULL
+)
 
 
 -- indexes
@@ -121,3 +128,6 @@ CREATE INDEX idx_users_last_name_id ON users (last_name, user_id);
 CREATE INDEX idx_users_username_trgm   ON users USING gin (lower(username)   gin_trgm_ops);
 CREATE INDEX idx_users_first_name_trgm ON users USING gin (lower(first_name) gin_trgm_ops);
 CREATE INDEX idx_users_last_name_trgm  ON users USING gin (lower(last_name)  gin_trgm_ops);
+
+-- job requirements
+CREATE INDEX   idx_job_requirements ON job_requirements(job_id)
