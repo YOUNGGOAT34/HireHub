@@ -8,12 +8,11 @@ public class JobRequirement{
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     @Column(name="requirement_id")
-     private Long Id;
-    @Column(name="job_id",nullable = false)
+     private Long id;
     @ManyToOne
-    @JoinColumn(name="job_id")
+    @JoinColumn(name="job_id",nullable = false)
     private Job job;
-    @Column(name="display_order",nullable = false)
+    @Column(name="display_order")
     private Integer displayOrder;
     @Enumerated(EnumType.STRING)
     @Column(name = "requirement_type",nullable = false)
@@ -48,11 +47,11 @@ public class JobRequirement{
     }
 
     public Long getId(){
-        return this.Id;
+        return this.id;
     }
 
     public void setId(Long id){
-        this.Id=id;
+        this.id=id;
     }
 
     public String getContent(){
