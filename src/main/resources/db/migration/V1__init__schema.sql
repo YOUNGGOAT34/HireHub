@@ -100,6 +100,8 @@ CREATE TABLE job_skills(
 );
 
 
+
+
 -- indexes
 -- jobs
 CREATE index idx_jobs_salary ON jobs (salary DESC NULLS last);

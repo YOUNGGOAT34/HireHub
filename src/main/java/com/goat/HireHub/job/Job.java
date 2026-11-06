@@ -5,7 +5,9 @@ import com.goat.HireHub.skill.Skill;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -28,7 +30,9 @@ public class Job {
        @ManyToOne(fetch = FetchType.LAZY)
        @JoinColumn(name="company_id")
        private Company company;
-
+       @OneToMany(mappedBy = "job",cascade =CascadeType.ALL,orphanRemoval = true)
+       @OrderBy("displayOrder ASC")
+       private List<JobRequirement> requirements=new ArrayList<>();
        @ManyToMany
        @JoinTable(
            name="job_skills",
@@ -82,5 +86,15 @@ public class Job {
 
     public void setCompany(Company company) {
         this.company = company;
+    }
+
+    public void addRequirement(JobRequirement requirement){
+           requirements.add(requirement);
+           requirement.setJob(this);
+    }
+
+    public void removeRequirement(JobRequirement requirement){
+           requirements.remove(requirement);
+           requirement.setJob(null);
     }
 }
