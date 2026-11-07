@@ -88,14 +88,6 @@ public class Job {
         this.company = company;
     }
 
-    public void addRequirement(JobRequirement requirement){
-           requirements.add(requirement);
-           requirement.setJob(this);
-    }
 
 
-    public void removeRequirement(JobRequirement requirement){
-           requirements.remove(requirement);
-           requirement.setJob(null);
-    }
 }

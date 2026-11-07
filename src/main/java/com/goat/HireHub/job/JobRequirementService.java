@@ -5,6 +5,7 @@ import com.goat.HireHub.company.CompanyMembership;
 import com.goat.HireHub.company.CompanyService;
 import com.goat.HireHub.company.Role;
 import com.goat.HireHub.exception.ResourceNotFoundException;
+import com.goat.HireHub.job.dto.JobPatchRequest;
 import com.goat.HireHub.job.dto.JobResponse;
 import com.goat.HireHub.security.SecurityUtils;
 import com.goat.HireHub.user.User;
@@ -43,12 +44,11 @@ public class JobRequirementService {
           Job job=jobService.findOrThrow(jobId);
           authorizeAccess(job);
           JobRequirement requirement=new JobRequirement();
-          requirement.setJob(job);
           requirement.setRequirementType(request.requirementType());
           requirement.setContent(request.content());
           requirement.setDisplayOrder(request.position());
-          job.addRequirement(requirement);
-          return JobRequirementResponse.from(requirement);
+          JobRequirement savedRequirement=jobRequirementsRepository.save(requirement);
+          return JobRequirementResponse.from(savedRequirement);
     }
 
     @Transactional
@@ -56,6 +56,7 @@ public class JobRequirementService {
                                                         Long jobId, Long requirementId){
         authorizeAccess(jobId);
         JobRequirement requirement=findOrThrow(requirementId);
+        checkRequirementOwnership(requirement.getJob().getId(),jobId);
         requirement.setContent(request.content());
         requirement.setRequirementType(request.requirementType());
         requirement.setDisplayOrder(request.position());
@@ -64,20 +65,42 @@ public class JobRequirementService {
     }
 
     @Transactional
+    public JobRequirementResponse patchJobRequirement(Long jobId,
+                                                      Long requirementId,
+                                                      JobRequirementPatchRequest request){
+          authorizeAccess(jobId);
+          JobRequirement requirement=findOrThrow(requirementId);
+          checkRequirementOwnership(requirement.getJob().getId(),jobId);
+          if(request.content()!=null){
+              requirement.setContent(request.content());
+          }
+
+          if(request.requirementType()!=null){
+               requirement.setRequirementType(request.requirementType());
+          }
+
+          if(request.position()!=null){
+              requirement.setDisplayOrder(request.position());
+          }
+
+          return JobRequirementResponse.from(requirement);
+
+    }
+
+    @Transactional
     public void deleteRequirement(Long jobId,Long requirementId){
          Job savedJob=jobService.findOrThrow(jobId);
          authorizeAccess(savedJob);
-         JobRequirement requirementResponse=findOrThrow(requirementId);
-         if(!requirementResponse.getJob().getId().equals(savedJob.getId())){
-              throw new org.springframework.security.access.AccessDeniedException("requirement does not belong to the specified job");
-         }
-         savedJob.removeRequirement(requirementResponse);
+         JobRequirement requirement=findOrThrow(requirementId);
+
+         checkRequirementOwnership(requirement.getJob().getId(),savedJob.getId());
+
+         jobRequirementsRepository.delete(requirement);
     }
 
     private void authorizeAccess(Long jobId){
         JobResponse response=jobService.getById(jobId);
         Long companyId=response.companyId();
-        Company company=companyService.findOrThrow(companyId);
         User currentUser=securityUtils.getCurrentUser();
         CompanyMembership membership=companyService.findMemberShipOrThrow(currentUser.getId(),companyId);
         if(membership.getRole() != Role.ADMIN && membership.getRole()!=Role.RECRUITER){
@@ -90,7 +113,6 @@ public class JobRequirementService {
 
     private void authorizeAccess(Job job){
         Long companyId=job.getCompany().getId();
-        Company company=companyService.findOrThrow(companyId);
         User currentUser=securityUtils.getCurrentUser();
         CompanyMembership membership=companyService.findMemberShipOrThrow(currentUser.getId(),companyId);
         if(membership.getRole() != Role.ADMIN && membership.getRole()!=Role.RECRUITER){
@@ -106,6 +128,12 @@ public class JobRequirementService {
           return jobRequirementsRepository.findById(requirementId).orElseThrow(
                   ()->new ResourceNotFoundException("job requirement")
           );
+    }
+
+    private void checkRequirementOwnership(Long requirementId,Long jobId){
+        if(!requirementId.equals(jobId)){
+            throw new org.springframework.security.access.AccessDeniedException("requirement does not belong to the specified job");
+        }
     }
 
 }
