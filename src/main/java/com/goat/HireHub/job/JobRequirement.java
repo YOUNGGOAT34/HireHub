@@ -30,6 +30,10 @@ public class JobRequirement{
         this.job=job;
     }
 
+    public Job getJob(){
+         return this.job;
+    }
+
     public Integer getDisplayOrder(){
         return this.displayOrder;
     }

@@ -42,9 +42,6 @@ public class UserService {
             return UserResponse.from(user);
      }
 
-
-
-
      public Page<UserResponse> searchUsers(String firstName,String lastName,String username,Pageable pageable){
           Specification<User> spec=UserSpecification
                   .firstNameMatches(firstName)

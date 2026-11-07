@@ -54,13 +54,24 @@ public class JobRequirementService {
     @Transactional
     public JobRequirementResponse updateJobRequirements(JobRequirementRequest request,
                                                         Long jobId, Long requirementId){
-        JobRequirement requirement=findOrThrow(requirementId);
         authorizeAccess(jobId);
+        JobRequirement requirement=findOrThrow(requirementId);
         requirement.setContent(request.content());
         requirement.setRequirementType(request.requirementType());
         requirement.setDisplayOrder(request.position());
         return JobRequirementResponse.from(requirement);
 
+    }
+
+    @Transactional
+    public void deleteRequirement(Long jobId,Long requirementId){
+         Job savedJob=jobService.findOrThrow(jobId);
+         authorizeAccess(savedJob);
+         JobRequirement requirementResponse=findOrThrow(requirementId);
+         if(!requirementResponse.getJob().getId().equals(savedJob.getId())){
+              throw new org.springframework.security.access.AccessDeniedException("requirement does not belong to the specified job");
+         }
+         savedJob.removeRequirement(requirementResponse);
     }
 
     private void authorizeAccess(Long jobId){
