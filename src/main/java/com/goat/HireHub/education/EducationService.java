@@ -14,7 +14,6 @@ import java.util.List;
 
 @Service
 public class EducationService {
-
     private final SecurityUtils securityUtils;
     private final EducationRepository educationRepository;
     private final CandidateProfileService candidateProfileService;
