@@ -1,11 +1,9 @@
 package com.goat.HireHub.job;
 
-import com.goat.HireHub.company.Company;
 import com.goat.HireHub.company.CompanyMembership;
 import com.goat.HireHub.company.CompanyService;
 import com.goat.HireHub.company.Role;
 import com.goat.HireHub.exception.ResourceNotFoundException;
-import com.goat.HireHub.job.dto.JobPatchRequest;
 import com.goat.HireHub.job.dto.JobResponse;
 import com.goat.HireHub.security.SecurityUtils;
 import com.goat.HireHub.user.User;
@@ -33,8 +31,8 @@ public class JobRequirementService {
     }
 
     @Transactional(readOnly = true)
-    public List<JobRequirementResponse> getJobRequirements(Long id){
-         return jobRequirementsRepository.findByJobIdOrderByDisplayOrderAsc(id)
+    public List<JobRequirementResponse> getJobRequirements(Long jobId){
+         return jobRequirementsRepository.findByJobIdOrderByDisplayOrderAsc(jobId)
                  .stream().map(JobRequirementResponse::from)
                  .toList();
     }
