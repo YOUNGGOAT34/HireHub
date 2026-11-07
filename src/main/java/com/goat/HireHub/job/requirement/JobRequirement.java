@@ -1,5 +1,7 @@
-package com.goat.HireHub.job;
+package com.goat.HireHub.job.requirement;
 
+import com.goat.HireHub.job.Job;
+import com.goat.HireHub.job.RequirementType;
 import jakarta.persistence.*;
 
 @Entity

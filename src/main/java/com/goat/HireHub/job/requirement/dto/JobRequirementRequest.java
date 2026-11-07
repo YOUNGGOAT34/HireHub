@@ -1,5 +1,6 @@
-package com.goat.HireHub.job;
+package com.goat.HireHub.job.requirement.dto;
 
+import com.goat.HireHub.job.RequirementType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 

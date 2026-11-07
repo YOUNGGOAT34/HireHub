@@ -1,8 +1,10 @@
-package com.goat.HireHub.job;
+package com.goat.HireHub.job.requirement;
 
+import com.goat.HireHub.job.requirement.dto.JobRequirementPatchRequest;
+import com.goat.HireHub.job.requirement.dto.JobRequirementRequest;
+import com.goat.HireHub.job.requirement.dto.JobRequirementResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
-import org.apache.coyote.Response;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;

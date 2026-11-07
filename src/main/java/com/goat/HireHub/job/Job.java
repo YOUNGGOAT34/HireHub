@@ -1,6 +1,7 @@
 package com.goat.HireHub.job;
 
 import com.goat.HireHub.company.Company;
+import com.goat.HireHub.job.requirement.JobRequirement;
 import com.goat.HireHub.skill.Skill;
 import jakarta.persistence.*;
 

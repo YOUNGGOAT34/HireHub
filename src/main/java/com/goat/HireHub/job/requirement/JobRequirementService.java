@@ -1,10 +1,15 @@
-package com.goat.HireHub.job;
+package com.goat.HireHub.job.requirement;
 
 import com.goat.HireHub.company.CompanyMembership;
 import com.goat.HireHub.company.CompanyService;
 import com.goat.HireHub.company.Role;
 import com.goat.HireHub.exception.ResourceNotFoundException;
+import com.goat.HireHub.job.Job;
+import com.goat.HireHub.job.JobService;
 import com.goat.HireHub.job.dto.JobResponse;
+import com.goat.HireHub.job.requirement.dto.JobRequirementPatchRequest;
+import com.goat.HireHub.job.requirement.dto.JobRequirementRequest;
+import com.goat.HireHub.job.requirement.dto.JobRequirementResponse;
 import com.goat.HireHub.security.SecurityUtils;
 import com.goat.HireHub.user.User;
 import org.springframework.transaction.annotation.Transactional;
