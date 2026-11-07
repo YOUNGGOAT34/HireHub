@@ -8,7 +8,7 @@ import com.goat.HireHub.exception.ResourceNotFoundException;
 import com.goat.HireHub.job.dto.JobResponse;
 import com.goat.HireHub.security.SecurityUtils;
 import com.goat.HireHub.user.User;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -31,21 +31,35 @@ public class JobRequirementService {
          this.companyService=companyService;
     }
 
-    public List<JobRequirementRespose> getJobRequirements(Long id){
+    @Transactional(readOnly = true)
+    public List<JobRequirementResponse> getJobRequirements(Long id){
          return jobRequirementsRepository.findByJobIdOrderByDisplayOrderAsc(id)
-                 .stream().map(JobRequirementRespose::from)
+                 .stream().map(JobRequirementResponse::from)
                  .toList();
     }
 
     @Transactional
-    public JobRequirementRespose updateJobRequirements(JobRequirementRequest request,
-                                                       Long jobId,Long requirementId){
+    public JobRequirementResponse addJobRequirement(Long jobId, JobRequirementRequest request){
+          Job job=jobService.findOrThrow(jobId);
+          authorizeAccess(job);
+          JobRequirement requirement=new JobRequirement();
+          requirement.setJob(job);
+          requirement.setRequirementType(request.requirementType());
+          requirement.setContent(request.content());
+          requirement.setDisplayOrder(request.position());
+          job.addRequirement(requirement);
+          return JobRequirementResponse.from(requirement);
+    }
+
+    @Transactional
+    public JobRequirementResponse updateJobRequirements(JobRequirementRequest request,
+                                                        Long jobId, Long requirementId){
         JobRequirement requirement=findOrThrow(requirementId);
         authorizeAccess(jobId);
         requirement.setContent(request.content());
         requirement.setRequirementType(request.requirementType());
         requirement.setDisplayOrder(request.position());
-        return JobRequirementRespose.from(requirement);
+        return JobRequirementResponse.from(requirement);
 
     }
 
@@ -62,6 +76,20 @@ public class JobRequirementService {
         }
 
     }
+
+    private void authorizeAccess(Job job){
+        Long companyId=job.getCompany().getId();
+        Company company=companyService.findOrThrow(companyId);
+        User currentUser=securityUtils.getCurrentUser();
+        CompanyMembership membership=companyService.findMemberShipOrThrow(currentUser.getId(),companyId);
+        if(membership.getRole() != Role.ADMIN && membership.getRole()!=Role.RECRUITER){
+            throw new org.springframework.security.access.AccessDeniedException(
+                    "Access Denied: Only a company recruiters and admin can modify job requirements belonging to that company."
+            );
+        }
+
+    }
+
 
     private JobRequirement findOrThrow(Long requirementId){
           return jobRequirementsRepository.findById(requirementId).orElseThrow(

@@ -1,8 +1,8 @@
 package com.goat.HireHub.job;
 
-public record JobRequirementRespose(Long id,RequirementType requirementType,Integer position,String content) {
-     public static JobRequirementRespose from(JobRequirement requirement){
-          return new JobRequirementRespose(
+public record JobRequirementResponse(Long id, RequirementType requirementType, Integer position, String content) {
+     public static JobRequirementResponse from(JobRequirement requirement){
+          return new JobRequirementResponse(
                   requirement.getId(),
                   requirement.getRequirementType(),
                   requirement.getDisplayOrder(),

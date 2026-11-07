@@ -7,7 +7,7 @@ import com.goat.HireHub.security.SecurityUtils;
 import com.goat.HireHub.user.SearchStatus;
 import com.goat.HireHub.user.User;
 import com.goat.HireHub.user.UserRepository;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import com.goat.HireHub.profile.dto.FullProfileResponse;
 import com.goat.HireHub.profile.dto.ProfileSummaryResponse;
 import com.goat.HireHub.profile.dto.ProfileSummaryUpdateRequest;
@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
+@Transactional(readOnly = true)
 public class CandidateProfileService {
     private final UserRepository userRepository;
     private final SecurityUtils securityUtils;

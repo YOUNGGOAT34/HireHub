@@ -5,7 +5,7 @@ import com.goat.HireHub.security.SecurityUtils;
 import com.goat.HireHub.user.User;
 import com.goat.HireHub.experience.dto.ExperienceRequest;
 import com.goat.HireHub.experience.dto.ExperienceResponse;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import com.goat.HireHub.profile.CandidateProfile;
 import com.goat.HireHub.profile.CandidateProfileService;
 import org.springframework.security.access.AccessDeniedException;
@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
+@Transactional(readOnly = true)
 public class ExperienceService {
 
     private final ExperienceRepository experienceRepository;

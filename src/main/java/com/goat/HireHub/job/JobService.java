@@ -9,7 +9,7 @@ import com.goat.HireHub.job.dto.JobResponse;
 import com.goat.HireHub.job.dto.JobUpdateRequest;
 import com.goat.HireHub.security.SecurityUtils;
 import com.goat.HireHub.user.User;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -22,6 +22,7 @@ import java.util.Optional;
 
 
 @Service
+@Transactional(readOnly = true)
 public class JobService {
 
     private final JobRepository jobRepository;
@@ -73,6 +74,7 @@ public class JobService {
         job.setCompany(company);
         return JobResponse.from(jobRepository.save(job));
     }
+
 
 
 
@@ -133,7 +135,7 @@ public class JobService {
         return company;
     }
 
-    private Job findOrThrow(Long id){
+    public Job findOrThrow(Long id){
         return jobRepository.findById(id)
                 .orElseThrow(()->new ResourceNotFoundException("job",id));
     }

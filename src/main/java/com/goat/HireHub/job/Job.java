@@ -93,6 +93,7 @@ public class Job {
            requirement.setJob(this);
     }
 
+
     public void removeRequirement(JobRequirement requirement){
            requirements.remove(requirement);
            requirement.setJob(null);

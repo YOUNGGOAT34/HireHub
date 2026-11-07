@@ -5,7 +5,7 @@ import com.goat.HireHub.education.dto.EducationResponse;
 import com.goat.HireHub.exception.ResourceNotFoundException;
 import com.goat.HireHub.security.SecurityUtils;
 import com.goat.HireHub.user.User;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import com.goat.HireHub.profile.CandidateProfile;
 import com.goat.HireHub.profile.CandidateProfileService;
 import org.springframework.stereotype.Service;
@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
+@Transactional(readOnly = true)
 public class EducationService {
     private final SecurityUtils securityUtils;
     private final EducationRepository educationRepository;
