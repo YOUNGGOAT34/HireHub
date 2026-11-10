@@ -17,8 +17,8 @@ public class Job {
        @Id
        @GeneratedValue(strategy = GenerationType.SEQUENCE,generator = "jobs_seq")
        @SequenceGenerator(
-               name = "experiences_seq_gen",
-               sequenceName = "experiences_seq",
+               name = "jobs_seq",
+               sequenceName = "jobs_seq",
                allocationSize = 50
        )
        @Column(name="job_id")

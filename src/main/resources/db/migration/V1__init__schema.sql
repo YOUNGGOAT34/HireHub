@@ -41,7 +41,8 @@ CREATE TABLE company_memberships(
     membership_id BIGINT primary key DEFAULT nextval('company_memberships_seq'),
     user_id BIGINT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
     company_id BIGINT NOT NULL REFERENCES companies(company_id),
-    role VARCHAR(50) NOT NULL
+    role VARCHAR(50) NOT NULL,
+    UNIQUE(user_id,company_id)
 
 );
 
@@ -123,6 +124,8 @@ CREATE index idx_job_skill_id ON job_skills (skill_id);
 create index company_name_idx on companies (company_name);
 CREATE INDEX idx_company_name_trgm ON companies USING gin (company_name gin_trgm_ops);
 
+-- company_memberships
+CREATE INDEX idx_company_memberships_company_id ON company_memberships(company_id);
 -- users
 CREATE INDEX idx_users_first_name_id ON users (first_name, user_id);
 CREATE INDEX idx_users_last_name_id ON users (last_name, user_id);

@@ -8,10 +8,15 @@ import jakarta.persistence.*;
 @Table(name="job_requirements")
 public class JobRequirement{
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE,generator = "job_requirements_seq")
+    @SequenceGenerator(
+            name = "job_requirements_seq",
+            sequenceName = "job_requirements_seq",
+            allocationSize = 50
+    )
     @Column(name="requirement_id")
      private Long id;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY,optional = false)
     @JoinColumn(name="job_id",nullable = false)
     private Job job;
     @Column(name="display_order")

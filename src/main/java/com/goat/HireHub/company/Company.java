@@ -1,7 +1,7 @@
 package com.goat.HireHub.company;
 
+import com.goat.HireHub.company.membership.CompanyMembership;
 import com.goat.HireHub.job.Job;
-import com.goat.HireHub.user.User;
 import jakarta.persistence.*;
 
 import java.util.List;

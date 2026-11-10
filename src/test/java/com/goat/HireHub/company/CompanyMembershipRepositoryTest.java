@@ -2,6 +2,8 @@ package com.goat.HireHub.company;
 
 import com.goat.HireHub.PostgresTestBase;
 import com.goat.HireHub.TestData;
+import com.goat.HireHub.company.membership.CompanyMembership;
+import com.goat.HireHub.company.membership.CompanyMembershipRepository;
 import com.goat.HireHub.user.User;
 import com.goat.HireHub.user.UserRepository;
 import jakarta.persistence.EntityManager;
@@ -20,7 +22,8 @@ import static org.junit.jupiter.api.Assertions.*;
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 class CompanyMembershipRepositoryTest extends PostgresTestBase {
 
-    @Autowired CompanyMembershipRepository membershipRepository;
+    @Autowired
+    CompanyMembershipRepository membershipRepository;
     @Autowired CompanyRepository companyRepository;
     @Autowired
     UserRepository userRepository;

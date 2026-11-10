@@ -1,9 +1,11 @@
 package com.goat.HireHub.company;
 
-import com.goat.HireHub.company.dto.CompanyMemberResponse;
+import com.goat.HireHub.company.membership.dto.CompanyMemberResponse;
 import com.goat.HireHub.company.dto.CompanyPatchRequest;
 import com.goat.HireHub.company.dto.CompanyRequest;
 import com.goat.HireHub.company.dto.CompanyResponse;
+import com.goat.HireHub.company.membership.CompanyMembership;
+import com.goat.HireHub.company.membership.CompanyMembershipRepository;
 import com.goat.HireHub.exception.ConflictException;
 import com.goat.HireHub.exception.ResourceNotFoundException;
 import com.goat.HireHub.security.SecurityUtils;
@@ -11,13 +13,9 @@ import com.goat.HireHub.user.User;
 import com.goat.HireHub.user.UserRepository;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestParam;
-
-import java.util.List;
 
 @Service
 @Transactional(readOnly = true)

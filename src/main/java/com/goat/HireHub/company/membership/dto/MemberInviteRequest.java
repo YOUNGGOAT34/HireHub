@@ -1,4 +1,4 @@
-package com.goat.HireHub.company.dto;
+package com.goat.HireHub.company.membership.dto;
 
 import com.goat.HireHub.company.Role;
 import jakarta.validation.constraints.Email;

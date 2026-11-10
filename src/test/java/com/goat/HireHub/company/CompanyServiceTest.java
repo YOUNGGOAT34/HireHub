@@ -1,9 +1,10 @@
 package com.goat.HireHub.company;
 
-import com.goat.HireHub.company.*;
 import com.goat.HireHub.company.dto.CompanyPatchRequest;
 import com.goat.HireHub.company.dto.CompanyRequest;
 import com.goat.HireHub.company.dto.CompanyResponse;
+import com.goat.HireHub.company.membership.CompanyMembership;
+import com.goat.HireHub.company.membership.CompanyMembershipRepository;
 import com.goat.HireHub.exception.ConflictException;
 import com.goat.HireHub.exception.ResourceNotFoundException;
 import com.goat.HireHub.security.SecurityUtils;

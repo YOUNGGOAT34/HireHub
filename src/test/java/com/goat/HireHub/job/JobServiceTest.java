@@ -1,7 +1,7 @@
 package com.goat.HireHub.job;
 
 import com.goat.HireHub.company.Company;
-import com.goat.HireHub.company.CompanyMembership;
+import com.goat.HireHub.company.membership.CompanyMembership;
 import com.goat.HireHub.company.CompanyService;
 import com.goat.HireHub.company.Role;
 import com.goat.HireHub.exception.ResourceNotFoundException;

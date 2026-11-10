@@ -1,7 +1,7 @@
 package com.goat.HireHub.job;
 
 import com.goat.HireHub.company.*;
-import com.goat.HireHub.company.dto.CompanyResponse;
+import com.goat.HireHub.company.membership.CompanyMembership;
 import com.goat.HireHub.exception.ResourceNotFoundException;
 import com.goat.HireHub.job.dto.JobPatchRequest;
 import com.goat.HireHub.job.dto.JobRequest;
@@ -14,11 +14,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.math.BigDecimal;
-import java.util.List;
-import java.util.Optional;
 
 
 @Service
@@ -138,6 +135,10 @@ public class JobService {
     public Job findOrThrow(Long id){
         return jobRepository.findById(id)
                 .orElseThrow(()->new ResourceNotFoundException("job",id));
+    }
+
+    public boolean existsById(Long jobId){
+         return jobRepository.existsById(jobId);
     }
 
 }
