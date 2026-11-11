@@ -4,14 +4,18 @@ import com.goat.HireHub.company.Role;
 import com.goat.HireHub.exception.ResourceNotFoundException;
 import com.goat.HireHub.job.Job;
 import com.goat.HireHub.job.JobService;
+import com.goat.HireHub.job.RequirementType;
 import com.goat.HireHub.job.requirement.dto.JobRequirementPatchRequest;
 import com.goat.HireHub.job.requirement.dto.JobRequirementRequest;
 import com.goat.HireHub.job.requirement.dto.JobRequirementResponse;
+import com.goat.HireHub.job.requirement.dto.JobRequirementsResponse;
 import com.goat.HireHub.security.SecurityUtils;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class JobRequirementService {
@@ -31,10 +35,22 @@ public class JobRequirementService {
     }
 
     @Transactional(readOnly = true)
-    public List<JobRequirementResponse> getJobRequirements(Long jobId){
-         return jobRequirementsRepository.findByJobIdOrderByDisplayOrderAsc(jobId)
-                 .stream().map(JobRequirementResponse::from)
-                 .toList();
+    public JobRequirementsResponse getJobRequirements(Long jobId){
+        Map<RequirementType,List<JobRequirementResponse>> groupedRequirements=jobRequirementsRepository.findByJobIdOrderByDisplayOrderAsc(jobId)
+                 .stream()
+                .collect(Collectors.groupingBy(
+                        JobRequirement::getRequirementType,
+                        Collectors.mapping(JobRequirementResponse::from,Collectors.toList())
+                ));
+
+        return new JobRequirementsResponse(
+             jobId,
+             groupedRequirements.getOrDefault(RequirementType.RESPONSIBILITY,List.of()),
+             groupedRequirements.getOrDefault(RequirementType.QUALIFICATION,List.of()),
+             groupedRequirements.getOrDefault(RequirementType.PREFERRED_QUALIFICATION,List.of()),
+             groupedRequirements.getOrDefault(RequirementType.NICE_TO_HAVE,List.of())
+        );
+
     }
 
     @Transactional

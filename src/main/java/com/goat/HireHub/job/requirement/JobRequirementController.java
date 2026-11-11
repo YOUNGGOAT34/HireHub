@@ -3,6 +3,7 @@ package com.goat.HireHub.job.requirement;
 import com.goat.HireHub.job.requirement.dto.JobRequirementPatchRequest;
 import com.goat.HireHub.job.requirement.dto.JobRequirementRequest;
 import com.goat.HireHub.job.requirement.dto.JobRequirementResponse;
+import com.goat.HireHub.job.requirement.dto.JobRequirementsResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import org.springframework.http.HttpStatus;
@@ -22,7 +23,7 @@ public class JobRequirementController {
     }
 
     @GetMapping
-    public ResponseEntity<List<JobRequirementResponse>> getJobRequirements(
+    public ResponseEntity<JobRequirementsResponse> getJobRequirements(
                @PathVariable @Positive(message = "job id must be greater than zero")
                Long jobId
     ){
