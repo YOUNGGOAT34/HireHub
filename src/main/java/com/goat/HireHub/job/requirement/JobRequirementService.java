@@ -86,33 +86,37 @@ public class JobRequirementService {
     public JobRequirementResponse patchJobRequirement(Long jobId,
                                                       Long requirementId,
                                                       JobRequirementPatchRequest request){
+      authorizeAccess(jobId);
+      JobRequirement requirement=findOrThrow(requirementId,jobId);
 
-          authorizeAccess(jobId);
-          JobRequirement requirement=findOrThrow(requirementId,jobId);
+        RequirementType newRequirementType=request.requirementType();
+        RequirementType oldRequirementType=requirement.getRequirementType();
 
         Integer position=request.position();
         Integer oldPosition=requirement.getDisplayOrder();
 
-        RequirementType requirementType=request.requirementType();
-        RequirementType oldRequirement=requirement.getRequirementType();
+      if(request.content()!=null){
+          requirement.setContent(request.content());
+      }
 
-          if(request.content()!=null){
-              requirement.setContent(request.content());
-          }
-
-
-          if(requirementType!=null && !requirementType.equals(oldRequirement)){
-               Integer nextPosition= jobRequirementsRepository.nextPosition(jobId,requirementType.name());
-               requirement.setRequirementType(requirementType);
+          if(newRequirementType!=null && !newRequirementType.equals(oldRequirementType)){
+              Integer nextPosition= jobRequirementsRepository.nextPosition(jobId,newRequirementType.name());
+               jobRequirementsRepository.shiftPositionForRequirementPatch(jobId,oldRequirementType.name(),oldPosition);
+               requirement.setRequirementType(newRequirementType);
                requirement.setDisplayOrder(nextPosition);
-               jobRequirementsRepository.shiftPositionForRequirementPatch(jobId,oldRequirement.name(),oldPosition);
-
+               oldRequirementType=newRequirementType;
+               oldPosition=nextPosition;
           }
 
 
-          if(position!=null &&!oldPosition.equals(position)){
-               jobRequirementsRepository.shiftPositionForPositionPatch(jobId,position,oldPosition,requirement.getRequirementType().name());
-               requirement.setDisplayOrder(position);
+          if(position!=null){
+              int nextPosition= jobRequirementsRepository.nextPosition(jobId,oldRequirementType.name());
+              int maxValidPosition = (newRequirementType != null && newRequirementType != oldRequirementType) ? nextPosition : nextPosition - 1;
+              if(position>maxValidPosition) position=maxValidPosition;
+              if(!oldPosition.equals(position)){
+                  jobRequirementsRepository.shiftPositionForPositionPatch(jobId,position,oldPosition, oldRequirementType.name());
+                   requirement.setDisplayOrder(position);
+              }
           }
 
           return JobRequirementResponse.from(requirement);
