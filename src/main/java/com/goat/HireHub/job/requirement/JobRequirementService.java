@@ -61,7 +61,6 @@ public class JobRequirementService {
           requirement.setJob(job);
           requirement.setRequirementType(request.requirementType());
           requirement.setContent(request.content());
-
           Integer position= request.position();
           if (position==null){
               position=jobRequirementsRepository.nextPosition(jobId,request.requirementType().name());

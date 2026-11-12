@@ -1,14 +1,12 @@
 package com.goat.HireHub.job.requirement.dto;
 
 import com.goat.HireHub.job.RequirementType;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 
 public record JobRequirementRequest(
          @NotNull(message = "job requirement type is required")
          RequirementType requirementType,
+         @Min(value = 1,message = "position must be greater than 0")
          Integer position,
          @NotBlank(message = "job requirement content cannot be blank")
          @Pattern(regexp = ".*\\S.*", message = "content cannot be blank")
