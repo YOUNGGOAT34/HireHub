@@ -21,7 +21,6 @@ public class JobRequirementService {
     private final SecurityUtils securityUtils;
     private final JobService jobService;
 
-
     public JobRequirementService(JobRequirementsRepository jobRequirementsRepository,
                                  SecurityUtils securityUtils,
                                  JobService jobService
@@ -34,7 +33,13 @@ public class JobRequirementService {
 
     @Transactional(readOnly = true)
     public JobRequirementsResponse getJobRequirements(Long jobId){
-        Map<RequirementType,List<JobRequirementResponse>> groupedRequirements=jobRequirementsRepository.findByJobIdOrderByDisplayOrderAsc(jobId)
+        List<JobRequirement> requirements=jobRequirementsRepository.findByJobIdOrderByDisplayOrderAsc(jobId);
+        if(requirements.isEmpty()){
+            if(!jobService.existsById(jobId)){
+                throw new ResourceNotFoundException("job",jobId);
+            }
+        }
+        Map<RequirementType,List<JobRequirementResponse>> groupedRequirements=requirements
                  .stream()
                 .collect(Collectors.groupingBy(
                         JobRequirement::getRequirementType,
