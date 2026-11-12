@@ -1,6 +1,6 @@
 package com.goat.HireHub.job.requirement.dto;
 
-import com.goat.HireHub.job.RequirementType;
+import com.goat.HireHub.job.requirement.RequirementType;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;

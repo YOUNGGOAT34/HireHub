@@ -3,7 +3,6 @@ import com.goat.HireHub.company.Role;
 import com.goat.HireHub.exception.ResourceNotFoundException;
 import com.goat.HireHub.job.Job;
 import com.goat.HireHub.job.JobService;
-import com.goat.HireHub.job.RequirementType;
 import com.goat.HireHub.job.requirement.dto.JobRequirementPatchRequest;
 import com.goat.HireHub.job.requirement.dto.JobRequirementRequest;
 import com.goat.HireHub.job.requirement.dto.JobRequirementResponse;
@@ -90,19 +89,26 @@ public class JobRequirementService {
 
           authorizeAccess(jobId);
           JobRequirement requirement=findOrThrow(requirementId,jobId);
+
+        Integer position=request.position();
+        Integer oldPosition=requirement.getDisplayOrder();
+
+        RequirementType requirementType=request.requirementType();
+        RequirementType oldRequirement=requirement.getRequirementType();
+
           if(request.content()!=null){
               requirement.setContent(request.content());
           }
 
-          if(request.requirementType()!=null){
+
+          if(requirementType!=null && !requirementType.equals(oldRequirement)){
                requirement.setRequirementType(request.requirementType());
+               jobRequirementsRepository.shiftPositionForRequirementPatch(jobId,oldRequirement.name(),oldPosition);
           }
 
-          Integer position=request.position();
-          Integer oldPosition=requirement.getDisplayOrder();
 
           if(position!=null &&!oldPosition.equals(position)){
-               jobRequirementsRepository.shiftPositionForPatch(jobId,position,oldPosition,requirement.getRequirementType().name());
+               jobRequirementsRepository.shiftPositionForPositionPatch(jobId,position,oldPosition,requirement.getRequirementType().name());
                requirement.setDisplayOrder(position);
           }
 

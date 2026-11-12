@@ -29,7 +29,7 @@ public interface JobRequirementsRepository extends JpaRepository<JobRequirement,
             """,
     nativeQuery = true)
     int nextPosition(@Param("job_id")Long jobId, @Param("requirement_type")String type);
-    @Modifying(clearAutomatically = true)
+    @Modifying(flushAutomatically = true)
     @Query(value = """
              UPDATE job_requirements
              SET display_order=display_order+1
@@ -54,5 +54,17 @@ public interface JobRequirementsRepository extends JpaRepository<JobRequirement,
                     AND GREATEST( :oldPosition, :newPosition)
             """,
     nativeQuery = true)
-    void shiftPositionForPatch(@Param("jobId")Long jobId, @Param("newPosition")Integer newPosition, @Param("oldPosition")Integer oldPosition, @Param("type")String type);
+    void shiftPositionForPositionPatch(@Param("jobId")Long jobId, @Param("newPosition")Integer newPosition, @Param("oldPosition")Integer oldPosition, @Param("type")String type);
+    @Modifying(flushAutomatically = true)
+    @Query(value = """
+             UPDATE job_requirements
+             SET display_order=display_order-1
+             WHERE job_id= :jobId AND requirement_type= :type AND display_order> :position
+            """,
+            nativeQuery = true
+    )
+    void shiftPositionForRequirementPatch(@Param("jobId")Long jobId,
+                                          @Param("type")String type,
+                                          @Param("position") Integer position
+                                          );
 }

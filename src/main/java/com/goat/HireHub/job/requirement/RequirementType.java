@@ -1,4 +1,4 @@
-package com.goat.HireHub.job;
+package com.goat.HireHub.job.requirement;
 
 public enum RequirementType {
     QUALIFICATION,
