@@ -1,7 +1,6 @@
 package com.goat.HireHub.job.requirement;
 
 import com.goat.HireHub.company.Role;
-import com.goat.HireHub.job.RequirementType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -38,5 +37,15 @@ public interface JobRequirementsRepository extends JpaRepository<JobRequirement,
             """,
             nativeQuery = true
       )
-    void shiftPositionDown(@Param("job_id")Long jobId,@Param("type")String type,@Param("starting_position")Integer startingPosition);
+    void shiftPositionDownForPost(@Param("job_id")Long jobId, @Param("type")String type, @Param("starting_position")Integer startingPosition);
+    @Query(value= """
+              UPDATE job_requirements
+              SET display_order=CASE
+                    WHEN display_order= :oldPosition THEN :newPosition
+                    ELSE display_order+1
+              END
+              WHERE requirement_type= :type AND display_order BETWEEN :newPosition AND :oldPosition
+            """,
+    nativeQuery = true)
+    void shiftPositionDownForPatch(@Param("newPosition")Integer newPosition,@Param("oldPosition")Integer oldPosition,@Param("type")String type);
 }

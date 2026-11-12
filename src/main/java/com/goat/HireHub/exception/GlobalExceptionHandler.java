@@ -83,7 +83,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(org.springframework.security.access.AccessDeniedException.class)
     public ProblemDetail handleAccessDenied(
             org.springframework.security.access.AccessDeniedException ex) {
-       return problem(HttpStatus.FORBIDDEN,"Access denied","You do not have permission to perform this action");
+       return problem(HttpStatus.FORBIDDEN,"Access denied",ex.getMessage());
     }
 
     //validation exceptions

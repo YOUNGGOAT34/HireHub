@@ -1,5 +1,4 @@
 package com.goat.HireHub.job.requirement;
-import com.goat.HireHub.company.CompanyService;
 import com.goat.HireHub.company.Role;
 import com.goat.HireHub.exception.ResourceNotFoundException;
 import com.goat.HireHub.job.Job;
@@ -65,7 +64,7 @@ public class JobRequirementService {
           if (position==null){
               position=jobRequirementsRepository.nextPosition(jobId,request.requirementType().name());
           }else{
-              jobRequirementsRepository.shiftPositionDown(jobId,request.requirementType().name(),position);
+              jobRequirementsRepository.shiftPositionDownForPost(jobId,request.requirementType().name(),position);
           }
           requirement.setDisplayOrder(position);
           JobRequirement savedRequirement=jobRequirementsRepository.save(requirement);
@@ -88,6 +87,7 @@ public class JobRequirementService {
     public JobRequirementResponse patchJobRequirement(Long jobId,
                                                       Long requirementId,
                                                       JobRequirementPatchRequest request){
+
           authorizeAccess(jobId);
           JobRequirement requirement=findOrThrow(requirementId,jobId);
           if(request.content()!=null){
@@ -98,12 +98,13 @@ public class JobRequirementService {
                requirement.setRequirementType(request.requirementType());
           }
 
-          if(request.position()!=null){
-              requirement.setDisplayOrder(request.position());
+          Integer position=request.position();
+          Integer oldPosition=requirement.getDisplayOrder();
+
+          if(position!=null &&!oldPosition.equals(position)){
+               jobRequirementsRepository.shiftPositionDownForPatch(position,oldPosition,requirement.getRequirementType().name());
           }
-
           return JobRequirementResponse.from(requirement);
-
     }
 
     @Transactional
@@ -114,6 +115,7 @@ public class JobRequirementService {
     }
 
     private void authorizeAccess(Long jobId){
+
         Long currentUserId=securityUtils.getCurrentUser().getId();
         Role role=jobRequirementsRepository.findRoleForJob(jobId,currentUserId).orElse(null);
         if(role==null){
