@@ -54,7 +54,7 @@ public interface JobRequirementsRepository extends JpaRepository<JobRequirement,
                     AND GREATEST( :oldPosition, :newPosition)
             """,
     nativeQuery = true)
-    void shiftPositionForPositionPatch(@Param("jobId")Long jobId, @Param("newPosition")Integer newPosition, @Param("oldPosition")Integer oldPosition, @Param("type")String type);
+    void shiftPositionForPositionPatchOrPut(@Param("jobId")Long jobId, @Param("newPosition")Integer newPosition, @Param("oldPosition")Integer oldPosition, @Param("type")String type);
     @Modifying(flushAutomatically = true)
     @Query(value = """
              UPDATE job_requirements
@@ -63,8 +63,8 @@ public interface JobRequirementsRepository extends JpaRepository<JobRequirement,
             """,
             nativeQuery = true
     )
-    void shiftPositionForRequirementPatch(@Param("jobId")Long jobId,
-                                          @Param("type")String type,
-                                          @Param("position") Integer position
+    void shiftPositionForRequirementPatchOrPut(@Param("jobId")Long jobId,
+                                               @Param("type")String type,
+                                               @Param("position") Integer position
                                           );
 }
