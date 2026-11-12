@@ -102,8 +102,10 @@ public class JobRequirementService {
           Integer oldPosition=requirement.getDisplayOrder();
 
           if(position!=null &&!oldPosition.equals(position)){
-               jobRequirementsRepository.shiftPositionDownForPatch(position,oldPosition,requirement.getRequirementType().name());
+               jobRequirementsRepository.shiftPositionForPatch(jobId,position,oldPosition,requirement.getRequirementType().name());
+               requirement.setDisplayOrder(position);
           }
+
           return JobRequirementResponse.from(requirement);
     }
 
@@ -120,7 +122,7 @@ public class JobRequirementService {
         Role role=jobRequirementsRepository.findRoleForJob(jobId,currentUserId).orElse(null);
         if(role==null){
              if(!jobService.existsById(jobId)){
-                 throw new ResourceNotFoundException("job not found");
+                 throw new ResourceNotFoundException("job not found",jobId);
              }
              throw new org.springframework.security.access.AccessDeniedException(
                     "Access Denied: you are not a member of the company that posted this job."
@@ -137,7 +139,7 @@ public class JobRequirementService {
 
     private JobRequirement findOrThrow(Long requirementId,Long jobId){
           return jobRequirementsRepository.findByIdAndJobId(requirementId,jobId).orElseThrow(
-                  ()->new ResourceNotFoundException("job requirement")
+                  ()->new ResourceNotFoundException("job requirement",requirementId)
           );
     }
 

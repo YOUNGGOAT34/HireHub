@@ -2,6 +2,7 @@ package com.goat.HireHub.job.requirement;
 
 import com.goat.HireHub.company.Role;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -28,6 +29,7 @@ public interface JobRequirementsRepository extends JpaRepository<JobRequirement,
             """,
     nativeQuery = true)
     int nextPosition(@Param("job_id")Long jobId, @Param("requirement_type")String type);
+    @Modifying(clearAutomatically = true)
     @Query(value = """
              UPDATE job_requirements
              SET display_order=display_order+1
@@ -38,14 +40,19 @@ public interface JobRequirementsRepository extends JpaRepository<JobRequirement,
             nativeQuery = true
       )
     void shiftPositionDownForPost(@Param("job_id")Long jobId, @Param("type")String type, @Param("starting_position")Integer startingPosition);
+    @Modifying(flushAutomatically = true)
     @Query(value= """
               UPDATE job_requirements
               SET display_order=CASE
                     WHEN display_order= :oldPosition THEN :newPosition
-                    ELSE display_order+1
+                    WHEN :oldPosition> :newPosition THEN display_order+1
+                    ELSE display_order-1
               END
-              WHERE requirement_type= :type AND display_order BETWEEN :newPosition AND :oldPosition
+              WHERE job_id= :jobId 
+                    AND requirement_type= :type 
+                    AND display_order BETWEEN LEAST( :newPosition, :oldPosition) 
+                    AND GREATEST( :oldPosition, :newPosition)
             """,
     nativeQuery = true)
-    void shiftPositionDownForPatch(@Param("newPosition")Integer newPosition,@Param("oldPosition")Integer oldPosition,@Param("type")String type);
+    void shiftPositionForPatch(@Param("jobId")Long jobId, @Param("newPosition")Integer newPosition, @Param("oldPosition")Integer oldPosition, @Param("type")String type);
 }
