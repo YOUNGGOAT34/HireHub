@@ -80,7 +80,6 @@ public class JobRequirementService {
         RequirementType oldRequirementType=requirement.getRequirementType();
         Integer position=request.position();
         requirement.setContent(request.content());
-
         if(newRequirementType!=null && !newRequirementType.equals(oldRequirementType)){
            updateRequirement(jobId,requirement,newRequirementType);
         }
@@ -125,6 +124,7 @@ public class JobRequirementService {
          authorizeAccess(jobId);
          JobRequirement requirement=findOrThrow(requirementId, jobId);
          jobRequirementsRepository.delete(requirement);
+         jobRequirementsRepository.shiftPositionForRequirementPatchOrPutOrDelete(jobId,requirement.getRequirementType().name(),requirement.getDisplayOrder());
     }
 
     private void authorizeAccess(Long jobId){
@@ -174,7 +174,7 @@ public class JobRequirementService {
 
             ){
         Integer nextPosition= jobRequirementsRepository.nextPosition(jobId,newRequirementType.name());
-        jobRequirementsRepository.shiftPositionForRequirementPatchOrPut(jobId,requirement.getRequirementType().name(), requirement.getDisplayOrder());
+        jobRequirementsRepository.shiftPositionForRequirementPatchOrPutOrDelete(jobId,requirement.getRequirementType().name(), requirement.getDisplayOrder());
         requirement.setRequirementType(newRequirementType);
         requirement.setDisplayOrder(nextPosition);
         requirement.setRequirementType(newRequirementType);

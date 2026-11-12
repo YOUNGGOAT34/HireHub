@@ -63,8 +63,8 @@ public interface JobRequirementsRepository extends JpaRepository<JobRequirement,
             """,
             nativeQuery = true
     )
-    void shiftPositionForRequirementPatchOrPut(@Param("jobId")Long jobId,
-                                               @Param("type")String type,
-                                               @Param("position") Integer position
+    void shiftPositionForRequirementPatchOrPutOrDelete(@Param("jobId")Long jobId,
+                                                       @Param("type")String type,
+                                                       @Param("position") Integer position
                                           );
 }
