@@ -102,8 +102,11 @@ public class JobRequirementService {
 
 
           if(requirementType!=null && !requirementType.equals(oldRequirement)){
-               requirement.setRequirementType(request.requirementType());
+               Integer nextPosition= jobRequirementsRepository.nextPosition(jobId,requirementType.name());
+               requirement.setRequirementType(requirementType);
+               requirement.setDisplayOrder(nextPosition);
                jobRequirementsRepository.shiftPositionForRequirementPatch(jobId,oldRequirement.name(),oldPosition);
+
           }
 
 
