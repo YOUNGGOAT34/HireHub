@@ -1,5 +1,6 @@
 package com.goat.HireHub.job.dto;
 
+import com.goat.HireHub.job.WorkPlaceType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -13,6 +14,8 @@ public record  JobRequest(
                           @Size(max=1000) @NotBlank (message="job description is required") String description,
                           @Positive(message = "salary must be greater than zero") BigDecimal salary,
                           @NotNull Long companyId,
+                          @NotNull
+                          WorkPlaceType workPlaceType,
                           @NotBlank(message = "job url is required")
                           @URL(message = "must be a valid url")
                           String url,

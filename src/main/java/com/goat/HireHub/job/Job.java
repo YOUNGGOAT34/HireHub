@@ -38,6 +38,15 @@ public class Job {
        private String url;
        @Column(name="created_at",nullable = false,updatable = false)
        private Instant createdAt;
+       @Column(name="work_place_type",nullable = false)
+       @Enumerated(EnumType.STRING)
+       private WorkPlaceType workPlaceType;
+      @Column(name="experience_level",nullable = false)
+      @Enumerated(EnumType.STRING)
+       private ExperienceLevel experienceLevel;
+        @Column(name="employment_type",nullable = false)
+        @Enumerated(EnumType.STRING)
+        private EmploymentType employmentType;
        @OneToMany(mappedBy = "job",cascade =CascadeType.ALL,orphanRemoval = true)
        @OrderBy("displayOrder ASC")
        private List<JobRequirement> requirements=new ArrayList<>();
@@ -117,5 +126,15 @@ public class Job {
     public String getLocation(){
            return this.location;
     }
+
+    public void setWorkPlaceType(WorkPlaceType workPlaceType){
+           this.workPlaceType=workPlaceType;
+    }
+
+    public WorkPlaceType getWorkPlaceType(){
+           return this.workPlaceType;
+    }
+
+
 
 }

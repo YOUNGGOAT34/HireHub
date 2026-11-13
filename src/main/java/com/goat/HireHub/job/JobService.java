@@ -45,6 +45,7 @@ public class JobService {
             BigDecimal minSalary,
             BigDecimal maxSalary,
             String companyName,
+            String location,
             Long companyId,
             Pageable pageable
           ){
@@ -54,6 +55,7 @@ public class JobService {
                 .and(JobSpecification.salaryAtLeast(minSalary))
                 .and(JobSpecification.byCompany(companyName))
                 .and(JobSpecification.salaryAtMost(maxSalary))
+                .and(JobSpecification.byLocation(location))
                 .and(JobSpecification.byCompanyId(companyId));
 
         return jobRepository.findAll(jobSpecification,pageable).map(JobResponse::from);
@@ -71,9 +73,9 @@ public class JobService {
         job.setCompany(company);
         job.setLocation(request.location());
         job.setUrl(request.url());
+        job.setWorkPlaceType(request.workPlaceType());
         return JobResponse.from(jobRepository.save(job));
     }
-
 
     public JobResponse getById(Long id){
             return JobResponse.from(findOrThrow(id));
@@ -96,6 +98,7 @@ public class JobService {
         savedJob.setSalary(updatedJob.salary());
         savedJob.setUrl(updatedJob.url());
         savedJob.setLocation(updatedJob.location());
+        savedJob.setWorkPlaceType(updatedJob.workPlaceType());
         return JobResponse.from(savedJob);
     }
 
@@ -123,6 +126,11 @@ public class JobService {
         if(updatedJob.location()!=null){
             savedJob.setLocation(updatedJob.location());
         }
+
+        if(updatedJob.workPlaceType()!=null){
+            savedJob.setWorkPlaceType(updatedJob.workPlaceType());
+        }
+
         return JobResponse.from(savedJob);
     }
 

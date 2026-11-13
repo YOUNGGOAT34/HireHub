@@ -1,5 +1,6 @@
 package com.goat.HireHub.job.dto;
 
+import com.goat.HireHub.job.WorkPlaceType;
 import jakarta.validation.constraints.*;
 import org.hibernate.validator.constraints.URL;
 
@@ -16,5 +17,7 @@ public record  JobUpdateRequest(
         String url,
         @NotBlank(message = "job location is required")
         @Pattern(regexp = ".*\\S.*", message = "location cannot be empty or whitespace if provided")
-        String location
+        String location,
+        @NotNull
+        WorkPlaceType workPlaceType
       ){ }

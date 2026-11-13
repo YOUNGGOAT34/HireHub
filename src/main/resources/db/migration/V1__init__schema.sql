@@ -26,7 +26,8 @@ CREATE TABLE jobs(
     company_id BIGINT NOT NULL REFERENCES companies(company_id),
     job_url TEXT UNIQUE NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    location VARCHAR(100) NOT NULL
+    location VARCHAR(100) NOT NULL,
+    work_place_type VARCHAR(20) NOT NULL
 );
 
 -- users
