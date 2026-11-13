@@ -27,7 +27,9 @@ CREATE TABLE jobs(
     job_url TEXT UNIQUE NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     location VARCHAR(100) NOT NULL,
-    work_place_type VARCHAR(20) NOT NULL
+    workplace_type VARCHAR(20) NOT NULL,
+    employment_type VARCHAR(20) NOT NULL,
+    experience_level VARCHAR(20) NOT NULL
 );
 
 -- users

@@ -38,7 +38,7 @@ public class Job {
        private String url;
        @Column(name="created_at",nullable = false,updatable = false)
        private Instant createdAt;
-       @Column(name="work_place_type",nullable = false)
+       @Column(name="workplace_type",nullable = false)
        @Enumerated(EnumType.STRING)
        private WorkPlaceType workPlaceType;
       @Column(name="experience_level",nullable = false)
