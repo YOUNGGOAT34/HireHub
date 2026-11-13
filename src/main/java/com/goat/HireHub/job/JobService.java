@@ -26,7 +26,6 @@ public class JobService {
     private final SecurityUtils securityUtils;
     private final CompanyService companyService;
 
-
     public JobService(JobRepository jobRep,
                       SecurityUtils securityUtils,
                       CompanyService companyService){
@@ -74,6 +73,8 @@ public class JobService {
         job.setLocation(request.location());
         job.setUrl(request.url());
         job.setWorkPlaceType(request.workPlaceType());
+        job.setEmploymentType(request.employmentType());
+        job.setExperienceLevel(request.experienceLevel());
         return JobResponse.from(jobRepository.save(job));
     }
 
@@ -99,6 +100,8 @@ public class JobService {
         savedJob.setUrl(updatedJob.url());
         savedJob.setLocation(updatedJob.location());
         savedJob.setWorkPlaceType(updatedJob.workPlaceType());
+        savedJob.setExperienceLevel(updatedJob.experienceLevel());
+        savedJob.setEmploymentType(updatedJob.employmentType());
         return JobResponse.from(savedJob);
     }
 
@@ -129,6 +132,14 @@ public class JobService {
 
         if(updatedJob.workPlaceType()!=null){
             savedJob.setWorkPlaceType(updatedJob.workPlaceType());
+        }
+
+        if(updatedJob.employmentType()!=null){
+            savedJob.setEmploymentType(updatedJob.employmentType());
+        }
+
+        if(updatedJob.experienceLevel()!=null){
+            savedJob.setExperienceLevel(updatedJob.experienceLevel());
         }
 
         return JobResponse.from(savedJob);
