@@ -135,6 +135,20 @@ public class Job {
            return this.workPlaceType;
     }
 
+    public void setExperienceLevel(ExperienceLevel experienceLevel){
+           this.experienceLevel=experienceLevel;
+    }
 
+    public ExperienceLevel getExperienceLevel(){
+            return this.experienceLevel;
+    }
+
+    public void setEmploymentType(EmploymentType employmentType){
+        this.employmentType=employmentType;
+    }
+
+    public EmploymentType getEmploymentType(){
+        return this.employmentType;
+    }
 
 }

@@ -1,5 +1,7 @@
 package com.goat.HireHub.job.dto;
 
+import com.goat.HireHub.job.EmploymentType;
+import com.goat.HireHub.job.ExperienceLevel;
 import com.goat.HireHub.job.WorkPlaceType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -19,5 +21,7 @@ public record JobPatchRequest(
         String url,
         @Pattern(regexp = ".*\\S.*", message = "location cannot be empty or whitespace if provided")
         String location,
-        WorkPlaceType workPlaceType
+        WorkPlaceType workPlaceType,
+        EmploymentType employmentType,
+        ExperienceLevel experienceLevel
 ) { }
