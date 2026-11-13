@@ -54,4 +54,25 @@ public class JobSpecification {
             return criteriaBuilder.equal(criteriaBuilder.lower(root.get("location")),location.trim().toLowerCase());
         };
     }
+
+    public static Specification<Job> byWorkPlaceType(WorkPlaceType workPlaceType) {
+        return (root,query,criteriaBuilder)->{
+            if(workPlaceType==null) return null;
+            return criteriaBuilder.equal(root.get("workPlaceType"),workPlaceType);
+        };
+    }
+
+    public static Specification<Job> byExperienceLevel(ExperienceLevel experienceLevel) {
+        return (root,query,criteriaBuilder)->{
+            if(experienceLevel==null) return null;
+            return criteriaBuilder.equal(root.get("experienceLevel"),experienceLevel);
+        };
+    }
+
+    public static Specification<Job> byEmplymentType(EmploymentType employmentType) {
+        return (root,query,criteriaBuilder)->{
+            if(employmentType==null) return null;
+            return criteriaBuilder.equal(root.get("employmentType"),employmentType);
+        };
+    }
 }

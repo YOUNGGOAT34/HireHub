@@ -46,6 +46,9 @@ public class JobService {
             String companyName,
             String location,
             Long companyId,
+            WorkPlaceType workPlaceType,
+            ExperienceLevel experienceLevel,
+            EmploymentType employmentType,
             Pageable pageable
           ){
 
@@ -55,7 +58,11 @@ public class JobService {
                 .and(JobSpecification.byCompany(companyName))
                 .and(JobSpecification.salaryAtMost(maxSalary))
                 .and(JobSpecification.byLocation(location))
-                .and(JobSpecification.byCompanyId(companyId));
+                .and(JobSpecification.byCompanyId(companyId))
+                .and(JobSpecification.byWorkPlaceType(workPlaceType))
+                .and(JobSpecification.byExperienceLevel(experienceLevel))
+                .and(JobSpecification.byEmplymentType(employmentType));
+
 
         return jobRepository.findAll(jobSpecification,pageable).map(JobResponse::from);
 
