@@ -69,10 +69,10 @@ public class JobService {
         job.setDescription(request.description());
         job.setSalary(request.salary());
         job.setCompany(company);
+        job.setLocation(request.location());
+        job.setUrl(request.url());
         return JobResponse.from(jobRepository.save(job));
     }
-
-
 
 
     public JobResponse getById(Long id){
@@ -94,7 +94,8 @@ public class JobService {
         savedJob.setDescription(updatedJob.description());
         savedJob.setTitle(updatedJob.title());
         savedJob.setSalary(updatedJob.salary());
-
+        savedJob.setUrl(updatedJob.url());
+        savedJob.setLocation(updatedJob.location());
         return JobResponse.from(savedJob);
     }
 
@@ -115,6 +116,13 @@ public class JobService {
             savedJob.setDescription(updatedJob.description());
         }
 
+        if(updatedJob.url()!=null){
+            savedJob.setUrl(updatedJob.url());
+        }
+
+        if(updatedJob.location()!=null){
+            savedJob.setLocation(updatedJob.location());
+        }
         return JobResponse.from(savedJob);
     }
 

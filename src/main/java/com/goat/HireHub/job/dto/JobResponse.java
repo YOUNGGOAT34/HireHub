@@ -3,9 +3,28 @@ package com.goat.HireHub.job.dto;
 import com.goat.HireHub.job.Job;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 
-public record JobResponse(Long id, String title, String description, BigDecimal salary,Long companyId,String companyName) {
+public record JobResponse(Long id,
+                          String title,
+                          String description,
+                          BigDecimal salary,
+                          Long companyId,
+                          String companyName,
+                          String location,
+                          String url,
+                          Instant createdAt
+                          ) {
      public static JobResponse from(Job job){
-           return new JobResponse(job.getId(), job.getTitle(),job.getDescription(),job.getSalary(),job.getCompany().getId(),job.getCompany().getName());
+           return new JobResponse(job.getId(),
+                   job.getTitle(),
+                   job.getDescription(),
+                   job.getSalary(),
+                   job.getCompany().getId(),
+                   job.getCompany().getName(),
+                   job.getLocation(),
+                   job.getUrl(),
+                   job.getCreatedAt()
+           );
      }
 }

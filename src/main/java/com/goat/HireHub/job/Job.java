@@ -6,6 +6,7 @@ import com.goat.HireHub.skill.Skill;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -31,6 +32,12 @@ public class Job {
        @ManyToOne(fetch = FetchType.LAZY)
        @JoinColumn(name="company_id")
        private Company company;
+       @Column(name="location",nullable = false)
+       private String location;
+       @Column(name="job_url",nullable = false,unique = true,columnDefinition = "TEXT")
+       private String url;
+       @Column(name="created_at",nullable = false,updatable = false)
+       private Instant createdAt;
        @OneToMany(mappedBy = "job",cascade =CascadeType.ALL,orphanRemoval = true)
        @OrderBy("displayOrder ASC")
        private List<JobRequirement> requirements=new ArrayList<>();
@@ -44,11 +51,12 @@ public class Job {
 
        public Job(){}
 
-    public Job(BigDecimal salary, String description, String title,Company company) {
+    public Job(BigDecimal salary, String description, String title,Company company,String url) {
         this.salary = salary;
         this.description = description;
         this.title = title;
         this.company=company;
+        this.url=url;
     }
 
     public Long getId() {
@@ -90,5 +98,24 @@ public class Job {
     }
 
 
+    public void setUrl(String url){
+           this.url=url;
+    }
+
+    public String getUrl(){
+           return this.url;
+    }
+
+    public Instant getCreatedAt(){
+           return this.createdAt;
+    }
+
+    public void setLocation(String location){
+           this.location=location;
+    }
+
+    public String getLocation(){
+           return this.location;
+    }
 
 }

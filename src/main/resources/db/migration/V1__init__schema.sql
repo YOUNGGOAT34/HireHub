@@ -23,7 +23,10 @@ CREATE TABLE jobs(
     job_title VARCHAR(150) NOT NULL,
     job_description VARCHAR(500) NOT NULL,
     salary NUMERIC(12,2) CHECK(salary>=0),
-    company_id BIGINT NOT NULL REFERENCES companies(company_id)
+    company_id BIGINT NOT NULL REFERENCES companies(company_id),
+    job_url TEXT UNIQUE NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    location VARCHAR(100) NOT NULL
 );
 
 -- users
