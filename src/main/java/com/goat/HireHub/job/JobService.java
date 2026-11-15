@@ -8,6 +8,7 @@ import com.goat.HireHub.job.dto.JobRequest;
 import com.goat.HireHub.job.dto.JobResponse;
 import com.goat.HireHub.job.dto.JobUpdateRequest;
 import com.goat.HireHub.job.gemini.GeminiService;
+import com.goat.HireHub.job.requirement.JobRequirementsRepository;
 import com.goat.HireHub.security.SecurityUtils;
 import com.goat.HireHub.skill.Skill;
 import com.goat.HireHub.skill.SkillRepository;
@@ -19,6 +20,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -32,19 +34,20 @@ public class JobService {
     private final JobRepository jobRepository;
     private final SecurityUtils securityUtils;
     private final CompanyService companyService;
-    private final GeminiService geminiService;
+    private JobRequirementsRepository requirementsRepository;
     private final SkillRepository skillRepository;
 
     public JobService(JobRepository jobRep,
                       SecurityUtils securityUtils,
                       CompanyService companyService,
                        GeminiService geminiService,
-                      SkillRepository skillRepository
+                      SkillRepository skillRepository,
+                      JobRequirementsRepository requirementsRepository
                       ){
          this.jobRepository=jobRep;
          this.securityUtils=securityUtils;
          this.companyService=companyService;
-        this.geminiService=geminiService;
+        this.requirementsRepository=requirementsRepository;
         this.skillRepository=skillRepository;
     }
 
@@ -181,9 +184,8 @@ public class JobService {
     }
 
     @Transactional
-    public Set<String> addJobSkills(Long jobId){
+    public Set<String> saveJobSkills(Long jobId, List<String> rawSkills, Instant seenStaleInstanceSince){
         Job job=findOrThrow(jobId);
-        List<String> rawSkills=geminiService.getSkills(job);
         Set<String> uniqueSkills=new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
 
         for(String raw:rawSkills){
@@ -206,7 +208,7 @@ public class JobService {
 
         job.getJobSkills().clear();
         job.getJobSkills().addAll(skills);
-
+        requirementsRepository.clearStale(jobId,seenStaleInstanceSince);
         return uniqueSkills;
     }
 

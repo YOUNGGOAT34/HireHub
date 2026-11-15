@@ -57,6 +57,14 @@ public class Job {
        )
        private Set<Skill> jobSkills=new HashSet<>();
 
+        @Column(name = "skills_stale_since")
+        private Instant skillsStaleSince;
+
+        @Column(name = "skills_failures", nullable = false)
+        private int skillsFailures = 0;
+
+
+
        public Job(){}
 
     public Job(BigDecimal salary, String description, String title,Company company,String url) {
@@ -157,5 +165,7 @@ public class Job {
     public Set<Skill> getJobSkills(){
             return this.jobSkills;
     }
+
+    public Instant getSkillsStaleSince() { return skillsStaleSince; }
 
 }

@@ -61,10 +61,6 @@ public class JobController {
             return ResponseEntity.ok(jobService.getById(id));
       }
 
-      @PostMapping("/{id}/skills")
-      public ResponseEntity<Set<String>> preview(@PathVariable Long id){
-             return ResponseEntity.ok(jobService.addJobSkills(id));
-      }
 
       //search
     @GetMapping("/search")

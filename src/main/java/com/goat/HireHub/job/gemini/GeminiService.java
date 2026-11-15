@@ -43,8 +43,7 @@ public class GeminiService {
 
     }
 
-    public List<String> getSkills(Job job){
-        String requirements= requirementExtractor.extractJobRequirements(job);
+    public List<String> getSkills(String text){
 
         GenerateContentConfig config= GenerateContentConfig.builder()
                 .systemInstruction(Content.fromParts(Part.fromText(SYSTEM_PROMPT)))
@@ -52,11 +51,11 @@ public class GeminiService {
                 .temperature(0.0f)
                 .build();
         try{
-            GenerateContentResponse response=client.models.generateContent(model,requirements,config);
+            GenerateContentResponse response=client.models.generateContent(model,text,config);
             SkillExtractionResponse parsed=mapper.readValue(response.text(),SkillExtractionResponse.class);
             return parsed.skills()!=null?parsed.skills():List.of();
         }catch (Exception e){
-          throw new RuntimeException("Skill extraction failed");
+          throw new RuntimeException("Skill extraction failed",e);
         }
 
     }

@@ -94,6 +94,7 @@ public class JobRequirementService {
         if(position!=null){
             updatePosition(jobId,requirement,newRequirementType,position);
         }
+        jobRequirementsRepository.markSkillsStale(jobId,Instant.now());
         return JobRequirementResponse.from(requirement);
 
     }
@@ -109,7 +110,6 @@ public class JobRequirementService {
         RequirementType oldRequirementType=requirement.getRequirementType();
 
         Integer position=request.position();
-        Integer oldPosition=requirement.getDisplayOrder();
 
       if(request.content()!=null){
           requirement.setContent(request.content());
@@ -123,6 +123,8 @@ public class JobRequirementService {
               updatePosition(jobId,requirement,newRequirementType,position);
           }
 
+          jobRequirementsRepository.markSkillsStale(jobId,Instant.now());
+
           return JobRequirementResponse.from(requirement);
     }
 
@@ -132,6 +134,7 @@ public class JobRequirementService {
          JobRequirement requirement=findOrThrow(requirementId, jobId);
          jobRequirementsRepository.delete(requirement);
          jobRequirementsRepository.shiftPositionForRequirementPatchOrPutOrDelete(jobId,requirement.getRequirementType().name(),requirement.getDisplayOrder());
+         jobRequirementsRepository.markSkillsStale(jobId,Instant.now());
     }
 
     private void authorizeAccess(Long jobId){
@@ -187,5 +190,6 @@ public class JobRequirementService {
         requirement.setRequirementType(newRequirementType);
         requirement.setDisplayOrder(nextPosition);
     }
+
 
 }

@@ -18,18 +18,20 @@ public class RequirementExtractor {
 
     @Transactional(readOnly = true)
     public String extractJobRequirements(Job job){
+            List<JobRequirement> jobRequirements=job.getRequirements();
+            if(jobRequirements.isEmpty()) return null;
             StringBuilder requirements=new StringBuilder();
             requirements.append("job title: ").append(job.getTitle()).append("\n");
 
         Map<RequirementType, List<String>> requirementsByType=new EnumMap<>(RequirementType.class);
 
-        for (JobRequirement requirement :job.getRequirements()){
+        for (JobRequirement requirement :jobRequirements){
              requirementsByType.computeIfAbsent(requirement.getRequirementType(),
                      k->new ArrayList<>()).add(requirement.getContent());
         }
 
         appendSection(requirements,"Responsibilities",requirementsByType.get(RequirementType.RESPONSIBILITY));
-        appendSection(requirements,"Qualifications(required)",requirementsByType.get(RequirementType.QUALIFICATION));
+        appendSection(requirements,"Qualifications (required)",requirementsByType.get(RequirementType.QUALIFICATION));
         appendSection(requirements,"Preferred Qualifications",requirementsByType.get(RequirementType.PREFERRED_QUALIFICATION));
         appendSection(requirements,"Nice To Have",requirementsByType.get(RequirementType.NICE_TO_HAVE));
 
@@ -40,7 +42,7 @@ public class RequirementExtractor {
           if(items==null || items.isEmpty()) return;
           builder.append("\n").append(title).append(":\n");
           for(String item:items){
-              builder.append("-").append(item).append("\n");
+              builder.append("- ").append(item).append("\n");
           }
     }
 }
