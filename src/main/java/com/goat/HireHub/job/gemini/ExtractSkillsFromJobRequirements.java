@@ -42,7 +42,7 @@ public class ExtractSkillsFromJobRequirements {
         return requirements.toString();
     }
 
-    public void appendSection(StringBuilder builder,String title,List<String> items){
+    private void appendSection(StringBuilder builder,String title,List<String> items){
           if(items==null || items.isEmpty()) return;
           builder.append("\n").append(title).append(":\n");
           for(String item:items){
