@@ -13,11 +13,11 @@ import java.util.List;
 import java.util.Map;
 
 @Service
-public class ExtractSkillsFromJobRequirements {
+public class RequirementExtractor {
 
     private final JobService jobService;
 
-    public ExtractSkillsFromJobRequirements(JobService jobService){
+    public RequirementExtractor(JobService jobService){
            this.jobService=jobService;
     }
 

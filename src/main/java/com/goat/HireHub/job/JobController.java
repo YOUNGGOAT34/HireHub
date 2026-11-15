@@ -6,7 +6,6 @@ import com.goat.HireHub.job.dto.JobPatchRequest;
 import com.goat.HireHub.job.dto.JobRequest;
 import com.goat.HireHub.job.dto.JobResponse;
 import com.goat.HireHub.job.dto.JobUpdateRequest;
-import com.goat.HireHub.job.gemini.ExtractSkillsFromJobRequirements;
 import com.goat.HireHub.job.gemini.GeminiService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
@@ -62,9 +61,9 @@ public class JobController {
             return ResponseEntity.ok(jobService.getById(id));
       }
 
-      @PostMapping("/ask")
-      public String preview(@RequestBody String question){
-        return geminiService.getSkills(question);
+      @PostMapping("/{id}/skills")
+      public String preview(@PathVariable Long id){
+        return geminiService.getSkills(id);
       }
 
       //search

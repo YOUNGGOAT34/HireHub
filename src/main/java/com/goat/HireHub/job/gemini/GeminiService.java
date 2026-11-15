@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 public class GeminiService {
     private final Client client;
     private final String model;
-
+    private final RequirementExtractor requirementExtractor;
     private static final String SYSTEM_PROMPT = """
     You extract skills from job requirements.
     Rules:
@@ -24,20 +24,25 @@ public class GeminiService {
     { "skills": [string] }
     """;
 
-    public GeminiService(@Value("${gemini.model}") String model,Client client){
+    public GeminiService(@Value("${gemini.model}") String model,Client client,RequirementExtractor requirementExtractor){
          this.client=client;
          this.model=model;
+         this.requirementExtractor =requirementExtractor;
     }
 
-    public String getSkills(String requirements){
-
+    public String getSkills(Long id){
+        String requirements= requirementExtractor.extractJobRequirements(id);
         GenerateContentConfig config= GenerateContentConfig.builder()
                 .systemInstruction(Content.fromParts(Part.fromText(SYSTEM_PROMPT)))
                 .responseMimeType("application/json")
                 .temperature(0.0f)
                 .build();
+        try{
+            GenerateContentResponse response=client.models.generateContent(model,requirements,config);
+            return response.text();
+        }catch (Exception e){
+          throw new RuntimeException("Skill extraction failed");
+        }
 
-        GenerateContentResponse response=client.models.generateContent(model,requirements,config);
-        return response.text();
     }
 }
