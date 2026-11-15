@@ -6,6 +6,7 @@ import com.goat.HireHub.job.dto.JobPatchRequest;
 import com.goat.HireHub.job.dto.JobRequest;
 import com.goat.HireHub.job.dto.JobResponse;
 import com.goat.HireHub.job.dto.JobUpdateRequest;
+import com.goat.HireHub.job.gemini.ExtractSkillsFromJobRequirements;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Positive;
@@ -28,9 +29,12 @@ import java.util.Set;
 public class JobController {
 
     private final JobService jobService;
+    private final ExtractSkillsFromJobRequirements extractor;
 
-    public JobController(JobService service) {
+    public JobController(JobService service,ExtractSkillsFromJobRequirements extractor) {
+
         this.jobService = service;
+        this.extractor=extractor;
     }
 
     /*
@@ -56,6 +60,12 @@ public class JobController {
       public ResponseEntity<JobResponse> getById(@PathVariable Long id){
             return ResponseEntity.ok(jobService.getById(id));
       }
+
+      @GetMapping("/{id}/extract-requirements")
+      public String preview(@PathVariable Long id){
+              return extractor.extractJobRequirements(id);
+      }
+
       //search
     @GetMapping("/search")
     public Page<JobResponse> searchJobs(@RequestParam(required = false) String title,

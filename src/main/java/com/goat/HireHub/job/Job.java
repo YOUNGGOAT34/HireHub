@@ -4,7 +4,6 @@ import com.goat.HireHub.company.Company;
 import com.goat.HireHub.job.requirement.JobRequirement;
 import com.goat.HireHub.skill.Skill;
 import jakarta.persistence.*;
-
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -149,6 +148,10 @@ public class Job {
 
     public EmploymentType getEmploymentType(){
         return this.employmentType;
+    }
+
+    public List<JobRequirement> getRequirements(){
+           return this.requirements;
     }
 
 }
