@@ -46,6 +46,7 @@ public class GeminiService {
 
     public List<String> getSkills(Job job){
         String requirements= requirementExtractor.extractJobRequirements(job);
+
         GenerateContentConfig config= GenerateContentConfig.builder()
                 .systemInstruction(Content.fromParts(Part.fromText(SYSTEM_PROMPT)))
                 .responseMimeType("application/json")
