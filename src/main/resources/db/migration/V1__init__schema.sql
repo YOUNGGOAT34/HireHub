@@ -29,7 +29,9 @@ CREATE TABLE jobs(
     location VARCHAR(100) NOT NULL,
     workplace_type VARCHAR(20) NOT NULL,
     employment_type VARCHAR(20) NOT NULL,
-    experience_level VARCHAR(20) NOT NULL
+    experience_level VARCHAR(20) NOT NULL,
+    skills_stale_since TIMESTAMPTZ,
+    skills_failures INT NOT NULL DEFAULT 0
 );
 
 -- users
@@ -122,6 +124,8 @@ CREATE TABLE job_requirements(
 CREATE index idx_jobs_salary ON jobs (salary DESC NULLS last);
 CREATE index idx_companies_id ON jobs (company_id);
 CREATE INDEX idx_jobs_title_trgm ON jobs USING gin (job_title gin_trgm_ops);
+CREATE INDEX jobs_skills_stale_idx ON jobs (skills_stale_since)
+    WHERE skills_stale_since IS NOT NULL;
 
 -- job skills
 CREATE index idx_job_skill_id ON job_skills (skill_id);

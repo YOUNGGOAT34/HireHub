@@ -1,11 +1,13 @@
 package com.goat.HireHub.job.requirement;
 
 import com.goat.HireHub.company.Role;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
@@ -67,4 +69,47 @@ public interface JobRequirementsRepository extends JpaRepository<JobRequirement,
                                                        @Param("type")String type,
                                                        @Param("position") Integer position
                                           );
+
+    @Modifying
+    @Query(
+            value = """
+             UPDATE Job j
+             SET j.skillsStaleSince=null,j.skillsFailures=0
+             where j.job_id= :id and j.skillsStaleSince= :seen
+             """,
+            nativeQuery = true
+    )
+    int clearStale(@Param("id")Long id, @Param("seen") Instant seen);
+    @Modifying
+    @Query(value=
+            """
+            UPDATE Job j 
+            SET j.skillsFailures = j.skillsFailures + 1 
+            WHERE j.id = :id
+            """
+            ,nativeQuery = true
+    )
+    void recordFailure(@Param("id") Long id);
+    @Query(
+            value=
+                    """
+                    SELECT j.id from Job j
+                    WHERE j.skillsStaleSince is NOT NULL
+                      AND j.skillsStaleSince < :cutoff
+                      AND j.skillsFailures < 5
+                    order by j.skillsStaleSince
+                    """,
+            nativeQuery = true
+    )
+    List<Long> findDueForExtraction(@Param("cutoff") Instant cutoff, Pageable pageable);
+
+    @Modifying
+    @Query(value=
+            """
+               UPDATE Job j 
+               SET j.skillsStaleSince = :now, j.skillsFailures = 0 
+               WHERE j.id = :id
+              """
+    )
+    void markSkillsStale(@Param("id") Long id, @Param("now") Instant now);
 }

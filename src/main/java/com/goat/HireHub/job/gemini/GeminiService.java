@@ -1,6 +1,5 @@
 package com.goat.HireHub.job.gemini;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.goat.HireHub.job.Job;
 import com.goat.HireHub.job.gemini.dto.SkillExtractionResponse;
 import com.google.genai.Client;

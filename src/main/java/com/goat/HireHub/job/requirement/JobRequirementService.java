@@ -11,6 +11,7 @@ import com.goat.HireHub.security.SecurityUtils;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -71,6 +72,7 @@ public class JobRequirementService {
               jobRequirementsRepository.shiftPositionDownForPost(jobId,request.requirementType().name(),position);
           }
           requirement.setDisplayOrder(position);
+          jobRequirementsRepository.markSkillsStale(jobId, Instant.now());
           JobRequirement savedRequirement=jobRequirementsRepository.save(requirement);
           return JobRequirementResponse.from(savedRequirement);
     }
