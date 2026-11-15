@@ -15,15 +15,9 @@ import java.util.Map;
 @Service
 public class RequirementExtractor {
 
-    private final JobService jobService;
-
-    public RequirementExtractor(JobService jobService){
-           this.jobService=jobService;
-    }
 
     @Transactional(readOnly = true)
-    public String extractJobRequirements(Long jobId){
-            Job job=jobService.findOrThrow(jobId);
+    public String extractJobRequirements(Job job){
             StringBuilder requirements=new StringBuilder();
             requirements.append("job title: ").append(job.getTitle()).append("\n");
 

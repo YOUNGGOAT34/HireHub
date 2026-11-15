@@ -7,7 +7,10 @@ import com.goat.HireHub.job.dto.JobPatchRequest;
 import com.goat.HireHub.job.dto.JobRequest;
 import com.goat.HireHub.job.dto.JobResponse;
 import com.goat.HireHub.job.dto.JobUpdateRequest;
+import com.goat.HireHub.job.gemini.GeminiService;
 import com.goat.HireHub.security.SecurityUtils;
+import com.goat.HireHub.skill.Skill;
+import com.goat.HireHub.skill.SkillRepository;
 import com.goat.HireHub.user.User;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.Page;
@@ -16,6 +19,10 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 
 @Service
@@ -25,13 +32,20 @@ public class JobService {
     private final JobRepository jobRepository;
     private final SecurityUtils securityUtils;
     private final CompanyService companyService;
+    private final GeminiService geminiService;
+    private final SkillRepository skillRepository;
 
     public JobService(JobRepository jobRep,
                       SecurityUtils securityUtils,
-                      CompanyService companyService){
+                      CompanyService companyService,
+                       GeminiService geminiService,
+                      SkillRepository skillRepository
+                      ){
          this.jobRepository=jobRep;
          this.securityUtils=securityUtils;
          this.companyService=companyService;
+        this.geminiService=geminiService;
+        this.skillRepository=skillRepository;
     }
 
     public Page<JobResponse> getAll(Pageable pageable){
@@ -164,6 +178,36 @@ public class JobService {
         }
 
         return company;
+    }
+
+    @Transactional
+    public Set<String> addJobSkills(Long jobId){
+        Job job=findOrThrow(jobId);
+        List<String> rawSkills=geminiService.getSkills(job);
+        Set<String> uniqueSkills=new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
+
+        for(String raw:rawSkills){
+            if(raw==null) continue;
+
+            String skill=raw.trim();
+
+            if(!skill.isEmpty() && skill.length()<=100){
+                uniqueSkills.add(skill);
+            }
+        }
+
+        Set<Skill> skills=new HashSet<>();
+
+        for(String name:uniqueSkills){
+             Skill skill=skillRepository.findByNameIgnoreCase(name)
+                     .orElseGet(()->skillRepository.save(new Skill(name)));
+             skills.add(skill);
+        }
+
+        job.getJobSkills().clear();
+        job.getJobSkills().addAll(skills);
+
+        return uniqueSkills;
     }
 
     public Job findOrThrow(Long id){

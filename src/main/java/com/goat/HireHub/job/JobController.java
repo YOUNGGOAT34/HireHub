@@ -20,6 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Set;
 
 
@@ -29,12 +30,11 @@ import java.util.Set;
 public class JobController {
 
     private final JobService jobService;
-    private final GeminiService geminiService;
 
-    public JobController(JobService service,GeminiService geminiService) {
 
+    public JobController(JobService service) {
         this.jobService = service;
-        this.geminiService=geminiService;
+
     }
 
     /*
@@ -62,8 +62,8 @@ public class JobController {
       }
 
       @PostMapping("/{id}/skills")
-      public String preview(@PathVariable Long id){
-        return geminiService.getSkills(id);
+      public ResponseEntity<Set<String>> preview(@PathVariable Long id){
+             return ResponseEntity.ok(jobService.addJobSkills(id));
       }
 
       //search

@@ -154,4 +154,8 @@ public class Job {
            return this.requirements;
     }
 
+    public Set<Skill> getJobSkills(){
+            return this.jobSkills;
+    }
+
 }
