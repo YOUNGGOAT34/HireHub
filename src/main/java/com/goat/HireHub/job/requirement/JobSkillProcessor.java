@@ -13,9 +13,9 @@ import java.time.Instant;
 import java.util.List;
 
 @Service
-public class JobSkillService {
+public class JobSkillProcessor {
 
-    private static final Logger log = LoggerFactory.getLogger(JobSkillService.class);
+    private static final Logger log = LoggerFactory.getLogger(JobSkillProcessor.class);
 
     private record Snapshot(String text, Instant staleSince) {}
 
@@ -25,11 +25,11 @@ public class JobSkillService {
     private final JobRequirementsRepository repository;
     private final TransactionTemplate tx;
 
-    public JobSkillService(GeminiService geminiService,
-                           JobRequirementsRepository repository,
-                           JobService jobService,
-                           RequirementExtractor extractor,
-                           TransactionTemplate tx
+    public JobSkillProcessor(GeminiService geminiService,
+                             JobRequirementsRepository repository,
+                             JobService jobService,
+                             RequirementExtractor extractor,
+                             TransactionTemplate tx
                            ){
          this.gemini=geminiService;
          this.repository=repository;
