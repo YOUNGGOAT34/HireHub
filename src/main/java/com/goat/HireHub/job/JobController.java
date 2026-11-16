@@ -2,10 +2,7 @@ package com.goat.HireHub.job;
 
 
 import com.goat.HireHub.exception.BadRequestException;
-import com.goat.HireHub.job.dto.JobPatchRequest;
-import com.goat.HireHub.job.dto.JobRequest;
-import com.goat.HireHub.job.dto.JobResponse;
-import com.goat.HireHub.job.dto.JobUpdateRequest;
+import com.goat.HireHub.job.dto.*;
 import com.goat.HireHub.job.gemini.GeminiService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
@@ -39,10 +36,10 @@ public class JobController {
     */
     @GetMapping
 
-      public ResponseEntity<Slice<JobResponse>> getAll(@RequestParam(defaultValue = "0") @PositiveOrZero(message="Page must be 0 or greater")int page,
-                                                       @RequestParam(defaultValue = "10") @Max(value=50,message="size cannot exceed 50") @Positive(message="Size must be greater than zero") int size,
-                                                       @RequestParam(defaultValue = "desc")String direction,
-                                                       @RequestParam(defaultValue = "salary")String sortBy
+      public ResponseEntity<Slice<JobResponseSummary>> getAll(@RequestParam(defaultValue = "0") @PositiveOrZero(message="Page must be 0 or greater")int page,
+                                                              @RequestParam(defaultValue = "10") @Max(value=50,message="size cannot exceed 50") @Positive(message="Size must be greater than zero") int size,
+                                                              @RequestParam(defaultValue = "desc")String direction,
+                                                              @RequestParam(defaultValue = "salary")String sortBy
                                                       ){
         validateSortField(sortBy);
         Sort.Direction sortDirection=validateSortDirection(direction);

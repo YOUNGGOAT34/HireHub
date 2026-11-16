@@ -3,10 +3,7 @@ package com.goat.HireHub.job;
 import com.goat.HireHub.company.*;
 import com.goat.HireHub.company.membership.CompanyMembership;
 import com.goat.HireHub.exception.ResourceNotFoundException;
-import com.goat.HireHub.job.dto.JobPatchRequest;
-import com.goat.HireHub.job.dto.JobRequest;
-import com.goat.HireHub.job.dto.JobResponse;
-import com.goat.HireHub.job.dto.JobUpdateRequest;
+import com.goat.HireHub.job.dto.*;
 import com.goat.HireHub.job.gemini.GeminiService;
 import com.goat.HireHub.job.requirement.JobRequirementsRepository;
 import com.goat.HireHub.security.SecurityUtils;
@@ -52,8 +49,8 @@ public class JobService {
         this.skillRepository=skillRepository;
     }
 
-    public Slice<JobResponse> getAll(Pageable pageable){
-        return jobRepository.findAllBy(pageable).map(JobResponse::from);
+    public Slice<JobResponseSummary> getAll(Pageable pageable){
+        return jobRepository.findAllSummaries(pageable);
     }
 
     public Page<JobResponse> searchJobs(
