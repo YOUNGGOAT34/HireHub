@@ -42,8 +42,8 @@ public class JobController {
                                                               @RequestParam(defaultValue = "salary")String sortBy
                                                       ){
         validateSortField(sortBy);
-        Sort.Direction sortDirection=validateSortDirection(direction);
-        Pageable pageable=PageRequest.of(page,size, Sort.by(sortDirection,sortBy));
+        Sort.Direction sortDirection=validateSortDirection(direction.toLowerCase());
+        Pageable pageable=PageRequest.of(page,size, Sort.by(sortDirection,sortBy).and(Sort.by(sortDirection,"id")));
         return ResponseEntity.ok(jobService.getAll(pageable));
       }
 
@@ -58,7 +58,7 @@ public class JobController {
 
       //search
     @GetMapping("/search")
-    public Page<JobResponse> searchJobs(@RequestParam(required = false) String title,
+    public Slice<JobResponseSummary> searchJobs(@RequestParam(required = false) String title,
                                            @RequestParam(defaultValue = "0") @PositiveOrZero(message = "page must be positive") int page,
                                            @RequestParam(defaultValue = "10") @Max(value=50,message = "size cannot exceed 50") @Positive(message = "size must be greater than zero") int size,
                                            @RequestParam(defaultValue = "salary")String sortBy,
@@ -78,8 +78,8 @@ public class JobController {
             );
         }
 
-        Sort.Direction sortDirection=Sort.Direction.fromString(direction);
-          Pageable pageable=PageRequest.of(page,size, Sort.by(sortDirection,sortBy));
+          Sort.Direction sortDirection=Sort.Direction.fromString(direction.toLowerCase());
+          Pageable pageable=PageRequest.of(page,size, Sort.by(sortDirection,sortBy).and(Sort.by(sortDirection,"id")));
           return jobService.searchJobs(title,minSalary,maxSalary,companyName,location,companyId,workPlaceType,experienceLevel,employmentType,pageable);
     }
 

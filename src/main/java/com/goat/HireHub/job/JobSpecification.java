@@ -1,6 +1,5 @@
 package com.goat.HireHub.job;
 
-import org.springframework.beans.factory.BeanRegistry;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.math.BigDecimal;
@@ -74,5 +73,28 @@ public class JobSpecification {
             if(employmentType==null) return null;
             return criteriaBuilder.equal(root.get("employmentType"),employmentType);
         };
+    }
+
+    public static Specification<Job> withFilters(
+            String title,
+            BigDecimal minSalary,
+            BigDecimal maxSalary,
+            String location,
+            String companyName,
+            Long companyId,
+            WorkPlaceType workPlaceType,
+            ExperienceLevel experienceLevel,
+            EmploymentType employmentType
+    ){
+        return JobSpecification
+                .titleContains(title)
+                .and(JobSpecification.salaryAtLeast(minSalary))
+                .and(JobSpecification.byCompany(companyName))
+                .and(JobSpecification.salaryAtMost(maxSalary))
+                .and(JobSpecification.byLocation(location))
+                .and(JobSpecification.byCompanyId(companyId))
+                .and(JobSpecification.byWorkPlaceType(workPlaceType))
+                .and(JobSpecification.byExperienceLevel(experienceLevel))
+                .and(JobSpecification.byEmplymentType(employmentType));
     }
 }

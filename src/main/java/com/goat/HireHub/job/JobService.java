@@ -10,6 +10,8 @@ import com.goat.HireHub.security.SecurityUtils;
 import com.goat.HireHub.skill.Skill;
 import com.goat.HireHub.skill.SkillRepository;
 import com.goat.HireHub.user.User;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Slice;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.Page;
@@ -32,7 +34,7 @@ public class JobService {
     private final JobRepository jobRepository;
     private final SecurityUtils securityUtils;
     private final CompanyService companyService;
-    private JobRequirementsRepository requirementsRepository;
+    private final JobRequirementsRepository requirementsRepository;
     private final SkillRepository skillRepository;
 
     public JobService(JobRepository jobRep,
@@ -49,11 +51,13 @@ public class JobService {
         this.skillRepository=skillRepository;
     }
 
+    @Cacheable(value = "jobs", key = "#pageable.pageNumber + '-' + #pageable.pageSize + '-' + #pageable.sort.toString()")
     public Slice<JobResponseSummary> getAll(Pageable pageable){
         return jobRepository.findAllSummaries(pageable);
     }
 
-    public Page<JobResponse> searchJobs(
+    @Cacheable(value="jobs",key= "#pageable.pageNumber + '-' + #pageable.pageSize + '-' + #pageable.sort.toString()")
+    public Slice<JobResponseSummary> searchJobs(
             String title,
             BigDecimal minSalary,
             BigDecimal maxSalary,
@@ -66,24 +70,28 @@ public class JobService {
             Pageable pageable
           ){
 
-        Specification<Job> jobSpecification=JobSpecification
-                .titleContains(title)
-                .and(JobSpecification.salaryAtLeast(minSalary))
-                .and(JobSpecification.byCompany(companyName))
-                .and(JobSpecification.salaryAtMost(maxSalary))
-                .and(JobSpecification.byLocation(location))
-                .and(JobSpecification.byCompanyId(companyId))
-                .and(JobSpecification.byWorkPlaceType(workPlaceType))
-                .and(JobSpecification.byExperienceLevel(experienceLevel))
-                .and(JobSpecification.byEmplymentType(employmentType));
+        Specification<Job> jobSpecification=JobSpecification.withFilters(
+                    title,
+                minSalary,
+                maxSalary,
+                location,
+                companyName,
+                companyId,
+                workPlaceType,
+                experienceLevel,
+                employmentType
+        );
 
-
-        return jobRepository.findAll(jobSpecification,pageable).map(JobResponse::from);
-
+        return jobRepository.findBy(jobSpecification,
+                     query->query
+                             .as(JobResponseSummary.class)
+                             .slice(pageable)
+                );
 
     }
 
     @Transactional
+    @CacheEvict(value="jobs",allEntries = true)
     public JobResponse addJob(JobRequest request){
         Company company=authorizeAccess(request.companyId());
         Job job=new Job();
@@ -104,6 +112,7 @@ public class JobService {
     }
 
     @Transactional
+    @CacheEvict(value="jobs",allEntries = true)
     public void deleteById(Long id){
          Job savedJob=findOrThrow(id);
          authorizeAccess(savedJob.getCompany().getId());
@@ -111,6 +120,7 @@ public class JobService {
     }
 
     @Transactional
+    @CacheEvict(value="jobs",allEntries = true)
     public JobResponse updateJob(Long id, JobUpdateRequest updatedJob){
 
         Job savedJob=findOrThrow(id);
@@ -127,6 +137,7 @@ public class JobService {
     }
 
     @Transactional
+    @CacheEvict(value="jobs",allEntries = true)
     public JobResponse patchJob(Long id, JobPatchRequest updatedJob){
 
         Job savedJob=findOrThrow(id);

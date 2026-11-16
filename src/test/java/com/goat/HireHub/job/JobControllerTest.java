@@ -3,6 +3,7 @@ import com.goat.HireHub.ControllerBase;
 import com.goat.HireHub.exception.ResourceNotFoundException;
 import com.goat.HireHub.job.dto.JobRequest;
 import com.goat.HireHub.job.dto.JobResponse;
+import com.goat.HireHub.job.dto.JobResponseSummary;
 import com.goat.HireHub.security.JwtService;
 import com.goat.HireHub.security.SecurityConfig;
 import org.junit.jupiter.api.Test;
@@ -143,14 +144,14 @@ class JobControllerTest extends ControllerBase {
 
     @Test
     void search_noParams_appliesDefaultsAndNullFilters() throws Exception {
-        when(jobService.searchJobs(any(), any(), any(), any(), any(),any(),any(Pageable.class)))
+        when(jobService.searchJobs(any(), any(), any(), any(), any(),any(),any(),any(),any(),any(Pageable.class)))
                 .thenReturn(Page.empty());
 
         mockMvc.perform(get("/jobs/search")).andExpect(status().isOk());
 
         ArgumentCaptor<Pageable> captor = ArgumentCaptor.forClass(Pageable.class);
         verify(jobService).searchJobs(
-                isNull(), isNull(), isNull(), isNull(), isNull(),isNull(), captor.capture());
+                isNull(), isNull(), isNull(), isNull(), isNull(),isNull(),isNull(),isNull(),isNull(),captor.capture());
         Pageable p = captor.getValue();
         assertEquals(0, p.getPageNumber());
         assertEquals(10, p.getPageSize());
@@ -160,10 +161,10 @@ class JobControllerTest extends ControllerBase {
 
     @Test
     void search_pageWithTwoJobs_serializesContentAndTotals() throws Exception {
-        Page<JobResponse> page = new PageImpl<>(
-                List.of(sampleJob(1L, "Java Dev"), sampleJob(2L, "Spring Dev")),
-                PageRequest.of(0, 10), 2);
-        when(jobService.searchJobs(any(), any(), any(), any(),any(), any(), any(Pageable.class)))
+        Slice<JobResponseSummary> page = new SliceImpl<>(
+                List.of(sampleJobSummary(1L, "Java Dev"), sampleJobSummary(2L, "Spring Dev")),
+                PageRequest.of(0, 10),false);
+        when(jobService.searchJobs(any(), any(), any(), any(),any(), any(),any(),any(),any(),any(Pageable.class)))
                 .thenReturn(page);
 
         mockMvc.perform(get("/jobs/search"))
@@ -179,7 +180,7 @@ class JobControllerTest extends ControllerBase {
 
     @Test
     void search_noResults_returns200WithEmptyContent() throws Exception {
-        when(jobService.searchJobs(any(), any(), any(), any(),any(), any(), any(Pageable.class)))
+        when(jobService.searchJobs(any(), any(), any(), any(),any(), any(),any(),any(),any(), any(Pageable.class)))
                 .thenReturn(Page.empty());
 
         mockMvc.perform(get("/jobs/search").param("title", "nothing-matches"))
@@ -449,8 +450,13 @@ class JobControllerTest extends ControllerBase {
     //helpers
 
 
+    private JobResponseSummary sampleJobSummary(Long id, String title) {
+        return new JobResponseSummary(id, title, new BigDecimal("50000"), 1L, "Safaricom","Nairobi",EmploymentType.FULL_TIME,ExperienceLevel.ENTRY_LEVEL,WorkPlaceType.ON_SITE,"https//:example.com", Instant.now());
+    }
+
+
     private JobResponse sampleJob(Long id, String title) {
-        return new JobResponse(id, title, "Build APIs", new BigDecimal("50000"), 1L, "Safaricom","Nairobi","https//:example.com", Instant.now());
+        return new JobResponse(id, title, "Build APIs", new BigDecimal("50000"), 1L, "Safaricom","Nairobi",EmploymentType.FULL_TIME,ExperienceLevel.ENTRY_LEVEL,WorkPlaceType.ON_SITE,"https//:example.com", Instant.now());
     }
 
 
