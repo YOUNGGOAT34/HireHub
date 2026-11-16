@@ -128,6 +128,8 @@ CREATE INDEX jobs_skills_stale_idx ON jobs (skills_stale_since)
     WHERE skills_stale_since IS NOT NULL;
 CREATE INDEX idx_jobs_location_salary ON jobs(LOWER(location),salary DESC NULLS FIRST,job_id DESC );
 CREATE INDEX idx_jobs_workplace_type_salary ON jobs(workplace_type,salary DESC NULLS FIRST,job_id DESC );
+CREATE INDEX idx_jobs_employment_type_salary ON jobs(employment_type,salary DESC NULLS FIRST,job_id DESC );
+CREATE INDEX idx_jobs_experience_level_salary ON jobs(experience_level,salary DESC NULLS FIRST,job_id DESC );
 
 -- job skills
 CREATE index idx_job_skill_id ON job_skills (skill_id);
