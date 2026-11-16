@@ -35,7 +35,7 @@ public class JobSpecification {
      public static Specification<Job> byCompany(String companyName){
           return (root,query,criteriaBuilder)->{
                if(companyName==null || companyName.isBlank()) return null;
-               return criteriaBuilder.equal(criteriaBuilder.lower(root.get("company").get("name")),companyName.trim().toLowerCase());
+               return criteriaBuilder.like(criteriaBuilder.lower(root.get("company").get("name")),companyName.trim().toLowerCase());
           };
      }
 
