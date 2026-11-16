@@ -73,9 +73,9 @@ public interface JobRequirementsRepository extends JpaRepository<JobRequirement,
     @Modifying
     @Query(
             value = """
-             UPDATE Job j
-             SET j.skillsStaleSince=null,j.skillsFailures=0
-             where j.job_id= :id and j.skillsStaleSince= :seen
+             UPDATE jobs
+             SET skills_stale_since=null,skills_failures=0
+             where job_id= :id and skills_stale_since= :seen
              """,
             nativeQuery = true
     )
@@ -83,9 +83,9 @@ public interface JobRequirementsRepository extends JpaRepository<JobRequirement,
     @Modifying
     @Query(value=
             """
-            UPDATE Job j 
-            SET j.skillsFailures = j.skillsFailures + 1 
-            WHERE j.id = :id
+            UPDATE jobs 
+            SET skills_failures = skills_failures + 1 
+            WHERE job_id = :id
             """
             ,nativeQuery = true
     )
@@ -93,11 +93,11 @@ public interface JobRequirementsRepository extends JpaRepository<JobRequirement,
     @Query(
             value=
                     """
-                    SELECT j.id from Job j
-                    WHERE j.skillsStaleSince is NOT NULL
-                      AND j.skillsStaleSince < :cutoff
-                      AND j.skillsFailures < 5
-                    order by j.skillsStaleSince
+                    SELECT j.job_id from jobs j
+                    WHERE j.skills_stale_since is NOT NULL
+                      AND j.skills_stale_since < :cutoff
+                      AND j.skills_failures < 5
+                    order by j.skills_stale_since
                     """,
             nativeQuery = true
     )
@@ -106,10 +106,11 @@ public interface JobRequirementsRepository extends JpaRepository<JobRequirement,
     @Modifying
     @Query(value=
             """
-               UPDATE Job j 
-               SET j.skillsStaleSince = :now, j.skillsFailures = 0 
-               WHERE j.id = :id
-              """
+               UPDATE jobs 
+               SET skills_stale_since = :now, skills_stale_since = 0 
+               WHERE job_id = :id
+              """,
+            nativeQuery = true
     )
     void markSkillsStale(@Param("id") Long id, @Param("now") Instant now);
 }

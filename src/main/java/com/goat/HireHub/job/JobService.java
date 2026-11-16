@@ -184,7 +184,7 @@ public class JobService {
     }
 
     @Transactional
-    public Set<String> saveJobSkills(Long jobId, List<String> rawSkills, Instant seenStaleInstanceSince){
+    public void saveJobSkills(Long jobId, List<String> rawSkills, Instant seenStaleInstanceSince){
         Job job=findOrThrow(jobId);
         Set<String> uniqueSkills=new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
 
@@ -209,7 +209,6 @@ public class JobService {
         job.getJobSkills().clear();
         job.getJobSkills().addAll(skills);
         requirementsRepository.clearStale(jobId,seenStaleInstanceSince);
-        return uniqueSkills;
     }
 
     public Job findOrThrow(Long id){
