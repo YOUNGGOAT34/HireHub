@@ -10,7 +10,6 @@ import com.goat.HireHub.job.requirement.dto.JobRequirementsResponse;
 import com.goat.HireHub.security.SecurityUtils;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
-
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
@@ -31,7 +30,6 @@ public class JobRequirementService {
          this.jobService=jobService;
 
     }
-
     @Transactional(readOnly = true)
     public JobRequirementsResponse getJobRequirements(Long jobId){
         List<JobRequirement> requirements=jobRequirementsRepository.findByJobIdOrderByDisplayOrderAsc(jobId);
@@ -190,6 +188,5 @@ public class JobRequirementService {
         requirement.setRequirementType(newRequirementType);
         requirement.setDisplayOrder(nextPosition);
     }
-
 
 }

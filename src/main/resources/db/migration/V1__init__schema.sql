@@ -121,7 +121,7 @@ CREATE TABLE job_requirements(
 
 -- indexes
 -- jobs
-CREATE index idx_jobs_salary ON jobs (salary DESC NULLS last);
+CREATE index idx_jobs_salary ON jobs (salary DESC NULLS FIRST);
 CREATE index idx_companies_id ON jobs (company_id);
 CREATE INDEX idx_jobs_title_trgm ON jobs USING gin (job_title gin_trgm_ops);
 CREATE INDEX jobs_skills_stale_idx ON jobs (skills_stale_since)

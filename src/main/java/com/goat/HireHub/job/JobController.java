@@ -11,10 +11,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -42,10 +39,10 @@ public class JobController {
     */
     @GetMapping
 
-      public ResponseEntity<Page<JobResponse>> getAll(@RequestParam(defaultValue = "0") @PositiveOrZero(message="Page must be 0 or greater")int page,
-                                                      @RequestParam(defaultValue = "10") @Max(value=50,message="size cannot exceed 50") @PositiveOrZero(message="Size must be greater than zero") int size,
-                                                      @RequestParam(defaultValue = "desc")String direction,
-                                                      @RequestParam(defaultValue = "salary")String sortBy
+      public ResponseEntity<Slice<JobResponse>> getAll(@RequestParam(defaultValue = "0") @PositiveOrZero(message="Page must be 0 or greater")int page,
+                                                       @RequestParam(defaultValue = "10") @Max(value=50,message="size cannot exceed 50") @Positive(message="Size must be greater than zero") int size,
+                                                       @RequestParam(defaultValue = "desc")String direction,
+                                                       @RequestParam(defaultValue = "salary")String sortBy
                                                       ){
         validateSortField(sortBy);
         Sort.Direction sortDirection=validateSortDirection(direction);
@@ -126,7 +123,7 @@ public class JobController {
         Set<String> validDirections=Set.of("desc","asc");
         if(!validDirections.contains(direction)){
             throw new BadRequestException(
-                    "Invalid sort field: " + direction
+                    "Invalid sort direction: " + direction
             );
         }
         return Sort.Direction.fromString(direction);

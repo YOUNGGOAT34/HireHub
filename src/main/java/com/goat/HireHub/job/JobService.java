@@ -13,6 +13,7 @@ import com.goat.HireHub.security.SecurityUtils;
 import com.goat.HireHub.skill.Skill;
 import com.goat.HireHub.skill.SkillRepository;
 import com.goat.HireHub.user.User;
+import org.springframework.data.domain.Slice;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -51,9 +52,8 @@ public class JobService {
         this.skillRepository=skillRepository;
     }
 
-    public Page<JobResponse> getAll(Pageable pageable){
-
-        return jobRepository.findAll(pageable).map(JobResponse::from);
+    public Slice<JobResponse> getAll(Pageable pageable){
+        return jobRepository.findAllBy(pageable).map(JobResponse::from);
     }
 
     public Page<JobResponse> searchJobs(
