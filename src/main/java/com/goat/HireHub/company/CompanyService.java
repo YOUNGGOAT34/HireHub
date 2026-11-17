@@ -12,6 +12,8 @@ import com.goat.HireHub.exception.ResourceNotFoundException;
 import com.goat.HireHub.security.SecurityUtils;
 import com.goat.HireHub.user.User;
 import com.goat.HireHub.user.UserRepository;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Slice;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.Page;
@@ -37,7 +39,7 @@ public class CompanyService {
           this.userRepository=userRepository;
      }
 
-
+     @Cacheable(value="companies",key="{#pageable.pageNumber,#pageable.pageSize,#pageable.sort}")
      public Slice<CompanyResponseSummary> getAllCompanies(Pageable pageable){
          return companyRepository.findAllSummaries(pageable);
      }
@@ -53,6 +55,7 @@ public class CompanyService {
      }
 
      @Transactional
+     @CacheEvict(value="companies",allEntries = true)
      public void deleteById(Long id){
          authorizeAccess(id);
          companyRepository.deleteById(id);
@@ -64,6 +67,7 @@ public class CompanyService {
      }
 
      @Transactional
+     @CacheEvict(value="companies",allEntries = true)
      public CompanyResponse addCompany(CompanyRequest company){
          User currentUser=securityUtils.getCurrentUser();
          Company newCompany=new Company();
@@ -76,6 +80,7 @@ public class CompanyService {
      }
 
      @Transactional
+     @CacheEvict(value="companies",allEntries = true)
      public CompanyResponse updateCompany(Long id,CompanyRequest updatedCompany){
          Company savedCompany=authorizeAccess(id);
 
@@ -85,6 +90,7 @@ public class CompanyService {
      }
 
      @Transactional
+     @CacheEvict(value="companies",allEntries = true)
      public  CompanyResponse patchCompany(Long id, CompanyPatchRequest updatedCompany){
          Company savedCompany=authorizeAccess(id);
          if (updatedCompany.name()!=null){
