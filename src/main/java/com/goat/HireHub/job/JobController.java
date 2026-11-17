@@ -3,7 +3,6 @@ package com.goat.HireHub.job;
 
 import com.goat.HireHub.exception.BadRequestException;
 import com.goat.HireHub.job.dto.*;
-import com.goat.HireHub.job.gemini.GeminiService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Positive;
@@ -14,7 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import java.math.BigDecimal;
-import java.util.List;
 import java.util.Set;
 
 

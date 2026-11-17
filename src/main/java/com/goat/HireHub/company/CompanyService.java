@@ -1,5 +1,6 @@
 package com.goat.HireHub.company;
 
+import com.goat.HireHub.company.dto.CompanyResponseSummary;
 import com.goat.HireHub.company.membership.dto.CompanyMemberResponse;
 import com.goat.HireHub.company.dto.CompanyPatchRequest;
 import com.goat.HireHub.company.dto.CompanyRequest;
@@ -11,6 +12,7 @@ import com.goat.HireHub.exception.ResourceNotFoundException;
 import com.goat.HireHub.security.SecurityUtils;
 import com.goat.HireHub.user.User;
 import com.goat.HireHub.user.UserRepository;
+import org.springframework.data.domain.Slice;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -36,8 +38,8 @@ public class CompanyService {
      }
 
 
-     public Page<CompanyResponse> getAllCompanies( Pageable pageable){
-         return companyRepository.findAll(pageable).map(CompanyResponse::from);
+     public Slice<CompanyResponseSummary> getAllCompanies(Pageable pageable){
+         return companyRepository.findAllSummaries(pageable);
      }
 
      public Page<CompanyResponse> searchCompany(String name,Pageable pageable){

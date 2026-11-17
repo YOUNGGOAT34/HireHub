@@ -18,7 +18,7 @@ public class Company {
              allocationSize = 50
      )
      @Column(name="company_id")
-     private Long Id;
+     private Long id;
      @Column(name="company_name",nullable = false)
      private String name;
      @Column(name="company_description",nullable = false)
@@ -36,11 +36,11 @@ public class Company {
      }
 
      public Long getId() {
-          return Id;
+          return id;
      }
 
      public void setId(Long id) {
-          Id = id;
+          this.id = id;
      }
 
      public String getName() {
