@@ -1,5 +1,6 @@
 package com.goat.HireHub.company.membership;
 
+import com.goat.HireHub.company.membership.dto.CompanyMemberResponse;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -16,12 +17,12 @@ public interface CompanyMembershipRepository extends JpaRepository<CompanyMember
                 u.id,
                 u.firstName,
                 u.lastName,
-                u.role
+                cm.role
              )
              FROM CompanyMembership cm 
              JOIN cm.user u
               WHERE cm.company.id = :companyId
              """
     )
-    Slice<CompanyMembership> findMembershipsByCompanyId(@Param("companyId") Long companyId, Pageable pageable);
+    Slice<CompanyMemberResponse> findMembershipsByCompanyId(@Param("companyId") Long companyId, Pageable pageable);
 }

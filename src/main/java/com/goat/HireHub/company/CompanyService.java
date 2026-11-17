@@ -142,12 +142,18 @@ public class CompanyService {
      }
 
      //company members
+    @Cacheable(value="companyMembers",key="{#id,#pageable.pageNumber,#pageable.pageSize,#pageable.sort}")
     public Slice<CompanyMemberResponse> getMembers(Long id,Pageable pageable){
-        findOrThrow(id);
-        return companyMembershipRepository.findMembershipsByCompanyId(id,pageable).map(CompanyMemberResponse::from);
+
+        Slice<CompanyMemberResponse> members=companyMembershipRepository.findMembershipsByCompanyId(id,pageable);
+        if(members.isEmpty() && !companyRepository.existsById(id)){
+            throw new ResourceNotFoundException("company",id);
+        }
+        return members;
     }
 
      @Transactional
+//     @CacheEvict(value="companyMembers",allEntries = true)
      public CompanyMemberResponse addMember(Long companyId, String email, Role role){
             Company company=authorizeAccess(companyId);
             User targetUser=userRepository.findByEmailIgnoreCase(email)
@@ -158,7 +164,7 @@ public class CompanyService {
             }
 
             CompanyMembership companyMembership=new CompanyMembership(targetUser,company,role);
-            return companyMembershipRepository.save(companyMembership);
+            return CompanyMemberResponse.from(companyMembershipRepository.save(companyMembership));
      }
 
 

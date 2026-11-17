@@ -8,4 +8,13 @@ public record CompanyMemberResponse(
         String firstName,
         String lastName,
         Role role
-) {}
+) {
+    public static CompanyMemberResponse from(CompanyMembership membership) {
+        return new CompanyMemberResponse(
+                membership.getUser().getId(),
+                membership.getUser().getFirstName(),
+                membership.getUser().getLastName(),
+                membership.getRole()
+        );
+    }
+}
