@@ -15,6 +15,7 @@ import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabas
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -94,35 +95,37 @@ class CompanyMembershipRepositoryTest extends PostgresTestBase {
 
     @Test
     void findMembershipsByCompanyId_pagesThroughOnlyThatCompanysMembers() {
-        Page<CompanyMembership> first = membershipRepository
+        Slice<CompanyMembership> first = membershipRepository
                 .findMembershipsByCompanyId(companyA.getId(), PageRequest.of(0, 2));
-        Page<CompanyMembership> second = membershipRepository
+        Slice<CompanyMembership> second = membershipRepository
                 .findMembershipsByCompanyId(companyA.getId(), PageRequest.of(1, 2));
 
-        assertEquals(3, first.getTotalElements());
-        assertEquals(2, first.getTotalPages());
         assertEquals(2, first.getContent().size());
+        assertTrue(first.hasNext());
         assertEquals(1, second.getContent().size());
-        assertTrue(second.isLast());
+        assertFalse(second.hasNext());
+
     }
 
     @Test
     void findMembershipsByCompanyId_doesNotMixInOtherCompanies() {
-        Page<CompanyMembership> page = membershipRepository
+        Slice<CompanyMembership> page = membershipRepository
                 .findMembershipsByCompanyId(companyB.getId(), PageRequest.of(0, 10));
 
-        assertEquals(1, page.getTotalElements());
+        assertEquals(1, page.getContent().size());
+        assertFalse(page.hasNext());
+        assertEquals(companyB.getId(), page.getContent().get(0).getCompany().getId());
     }
 
     @Test
     void findMembershipsByCompanyId_forACompanyWithNoMembers_isEmpty() {
         Company empty = companyRepository.save(TestData.company("Empty Co"));
 
-        Page<CompanyMembership> page = membershipRepository
+        Slice<CompanyMembership> page = membershipRepository
                 .findMembershipsByCompanyId(empty.getId(), PageRequest.of(0, 10));
 
         assertTrue(page.isEmpty());
-        assertEquals(0, page.getTotalElements());
+        assertEquals(0, page.getContent().size());
     }
 
 

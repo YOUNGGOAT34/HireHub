@@ -13,7 +13,9 @@ import com.goat.HireHub.security.SecurityUtils;
 import com.goat.HireHub.user.User;
 import com.goat.HireHub.user.UserRepository;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.*;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.jpa.domain.Specification;
@@ -44,7 +46,7 @@ public class CompanyService {
          return companyRepository.findAllSummaries(pageable);
      }
 
-//     @Cacheable(value="companies",key="{#name,#pageable.pageNumber,#pageable.pageSize,#pageable.sort}")
+     @Cacheable(value="companySearch",key="{#name?.trim()?.toLowerCase(),#pageable.pageNumber,#pageable.pageSize,#pageable.sort}")
      public Slice<CompanyResponseSummary> searchCompany(String name,Pageable pageable){
          String keyword=(name==null)?"":name.trim();
          String escaped = keyword
@@ -73,26 +75,26 @@ public class CompanyService {
          return new SliceImpl<>(results,pageable,hasNext);
 
      }
-
+     @Cacheable(value="company",key = "#id")
      public CompanyResponse getCompanyById(Long id){
          Company company=findOrThrow(id);
          return CompanyResponse.from(company);
      }
-
      @Transactional
-     @CacheEvict(value="companies",allEntries = true)
+     @Caching(
+         evict={
+                 @CacheEvict(value={"companies","companySearch"},allEntries = true),
+                 @CacheEvict(value="company",key="#id")
+         }
+
+     )
      public void deleteById(Long id){
          authorizeAccess(id);
          companyRepository.deleteById(id);
      }
 
-     public Page<CompanyMemberResponse> getMembers(Long id,Pageable pageable){
-           findOrThrow(id);
-           return companyMembershipRepository.findMembershipsByCompanyId(id,pageable).map(CompanyMemberResponse::from);
-     }
-
      @Transactional
-     @CacheEvict(value="companies",allEntries = true)
+     @CacheEvict(value={"companies","companySearch"},allEntries = true)
      public CompanyResponse addCompany(CompanyRequest company){
          User currentUser=securityUtils.getCurrentUser();
          Company newCompany=new Company();
@@ -105,7 +107,13 @@ public class CompanyService {
      }
 
      @Transactional
-     @CacheEvict(value="companies",allEntries = true)
+     @Caching(
+            evict = {
+                    @CacheEvict(value={"companies","companySearch"},allEntries = true)
+            },
+             put=@CachePut(value="company",key="#id")
+     )
+
      public CompanyResponse updateCompany(Long id,CompanyRequest updatedCompany){
          Company savedCompany=authorizeAccess(id);
 
@@ -115,7 +123,11 @@ public class CompanyService {
      }
 
      @Transactional
-     @CacheEvict(value="companies",allEntries = true)
+     @Caching(
+         evict=@CacheEvict(value="companies",allEntries = true),
+         put=@CachePut(value="company",key="#id")
+
+     )
      public  CompanyResponse patchCompany(Long id, CompanyPatchRequest updatedCompany){
          Company savedCompany=authorizeAccess(id);
          if (updatedCompany.name()!=null){
@@ -129,6 +141,12 @@ public class CompanyService {
          return CompanyResponse.from(savedCompany);
      }
 
+     //company members
+    public Slice<CompanyMemberResponse> getMembers(Long id,Pageable pageable){
+        findOrThrow(id);
+        return companyMembershipRepository.findMembershipsByCompanyId(id,pageable).map(CompanyMemberResponse::from);
+    }
+
      @Transactional
      public CompanyMemberResponse addMember(Long companyId, String email, Role role){
             Company company=authorizeAccess(companyId);
@@ -140,7 +158,7 @@ public class CompanyService {
             }
 
             CompanyMembership companyMembership=new CompanyMembership(targetUser,company,role);
-            return CompanyMemberResponse.from(companyMembershipRepository.save(companyMembership));
+            return companyMembershipRepository.save(companyMembership);
      }
 
 

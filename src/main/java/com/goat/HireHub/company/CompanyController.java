@@ -56,7 +56,7 @@ public class CompanyController {
      }
 
      @GetMapping("/{id}/members")
-     public ResponseEntity<Page<CompanyMemberResponse>> getAllMembers(@PathVariable @Positive(message = "company id must be greater than 0") Long id){
+     public ResponseEntity<Slice<CompanyMemberResponse>> getAllMembers(@PathVariable @Positive(message = "company id must be greater than 0") Long id){
            Pageable pageable=PageRequest.of(0,10);
            return ResponseEntity.ok(companyService.getMembers(id,pageable));
      }
