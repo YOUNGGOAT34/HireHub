@@ -3,6 +3,7 @@ package com.goat.HireHub.company;
 import com.goat.HireHub.ControllerBase;
 import com.goat.HireHub.company.dto.CompanyRequest;
 import com.goat.HireHub.company.dto.CompanyResponse;
+import com.goat.HireHub.company.dto.CompanyResponseSummary;
 import com.goat.HireHub.exception.BadRequestException;
 import com.goat.HireHub.exception.ConflictException;
 import com.goat.HireHub.exception.ResourceNotFoundException;
@@ -128,9 +129,9 @@ class CompanyControllerTest extends ControllerBase{
 
     @Test
     void search_pageWithTwoCompanies_serializesContentAndTotals() throws Exception {
-        Page<CompanyResponse> page = new PageImpl<>(
-                List.of(sampleCompany(1L, "Safaricom"), sampleCompany(2L, "Equity")),
-                PageRequest.of(0, 10), 2);
+        Slice<CompanyResponseSummary> page = new SliceImpl<>(
+                List.of(sampleCompanySummary(1L, "Safaricom"), sampleCompanySummary(2L, "Equity")),
+                PageRequest.of(0, 10), false);
         when(companyService.searchCompany(any(), any(Pageable.class))).thenReturn(page);
 
         mockMvc.perform(get("/companies/search"))
@@ -524,6 +525,10 @@ class CompanyControllerTest extends ControllerBase{
 
     private CompanyResponse sampleCompany(Long id, String name) {
         return new CompanyResponse(id, name, "Telecom company");
+    }
+
+    private CompanyResponseSummary sampleCompanySummary(Long id, String name) {
+        return new CompanyResponseSummary(id, name);
     }
 
 

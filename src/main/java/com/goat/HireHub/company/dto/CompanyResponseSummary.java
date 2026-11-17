@@ -1,2 +1,2 @@
 package com.goat.HireHub.company.dto;
-public record CompanyResponseSummary(Long id, String companyName){}
+public record CompanyResponseSummary(Long id, String name){}

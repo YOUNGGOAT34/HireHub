@@ -136,7 +136,7 @@ CREATE index idx_job_skill_id ON job_skills (skill_id);
 
 -- companies
 create index company_name_idx on companies (company_name);
-CREATE INDEX idx_company_name_trgm ON companies USING gin (company_name gin_trgm_ops);
+CREATE INDEX idx_company_name_trgm ON companies USING gin (LOWER(company_name) gin_trgm_ops);
 
 -- company_memberships
 CREATE INDEX idx_company_memberships_company_id ON company_memberships(company_id);

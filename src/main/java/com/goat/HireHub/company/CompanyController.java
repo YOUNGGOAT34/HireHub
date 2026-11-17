@@ -37,7 +37,7 @@ public class CompanyController {
      }
 
      @GetMapping("/search")
-     public ResponseEntity<Page<CompanyResponse>> searchCompany(@RequestParam(defaultValue = "0") @PositiveOrZero(message="Page must be 0 or greater")int page,
+     public ResponseEntity<Slice<CompanyResponseSummary>> searchCompany(@RequestParam(defaultValue = "0") @PositiveOrZero(message="Page must be 0 or greater")int page,
                                                                 @RequestParam(defaultValue = "10")
                                                                 @Max(value=50,message = "size cannot exceed 50")
                                                                 @Positive(message = "Size must be at least 1")int size,

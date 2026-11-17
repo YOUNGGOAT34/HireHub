@@ -14,12 +14,12 @@ import com.goat.HireHub.user.User;
 import com.goat.HireHub.user.UserRepository;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.*;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @Transactional(readOnly = true)
@@ -44,9 +44,34 @@ public class CompanyService {
          return companyRepository.findAllSummaries(pageable);
      }
 
-     public Page<CompanyResponse> searchCompany(String name,Pageable pageable){
-         Specification<Company> spec=CompanySpecification.nameContains(name);
-         return companyRepository.findAll(spec,pageable).map(CompanyResponse::from);
+//     @Cacheable(value="companies",key="{#name,#pageable.pageNumber,#pageable.pageSize,#pageable.sort}")
+     public Slice<CompanyResponseSummary> searchCompany(String name,Pageable pageable){
+         String keyword=(name==null)?"":name.trim();
+         String escaped = keyword
+                 .replace("\\", "\\\\")
+                 .replace("%", "\\%")
+                 .replace("_", "\\_");
+
+         String pattern = "%" + escaped + "%";
+
+         int pageSize= pageable.getPageSize();
+         Sort.Order order=pageable.getSort().iterator().next();
+         String direction=order.isDescending()?"DESC":"ASC";
+         String sortBy=switch(order.getProperty()){
+             case "id"->"id";
+             default -> "name";
+         };
+
+         List<CompanyResponseSummary> results=companyRepository.searchAndThenSort(pattern,sortBy,direction,pageSize+1,pageable.getOffset());
+
+         boolean hasNext=results.size()>pageSize;
+
+         if(hasNext){
+             results=results.subList(0,pageSize);
+         }
+
+         return new SliceImpl<>(results,pageable,hasNext);
+
      }
 
      public CompanyResponse getCompanyById(Long id){
