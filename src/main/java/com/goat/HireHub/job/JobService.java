@@ -93,7 +93,21 @@ public class JobService {
 
     }
 
+    @Cacheable(value="job",key="#id")
+    public JobResponse getById(Long id){
+            return JobResponse.from(findWithCompanyOrThrow(id));
+    }
+
     @Transactional
+    @CacheEvict(value="job",key="#id")
+    public void deleteById(Long id){
+         Long companyId=jobRepository.findCompanyByJobId(id).orElseThrow(
+                 ()->new ResourceNotFoundException("job",id)
+         );
+         authorizeAccess(companyId);
+         requirementsRepository.deleteAllByJobId(id);
+        jobRepository.deleteJobById(id);
+    }
     public JobResponse addJob(JobRequest request){
         Company company=companyService.findOrThrow(request.companyId());
         authorizeAccess(request.companyId());
@@ -110,23 +124,10 @@ public class JobService {
         return JobResponse.from(jobRepository.save(job));
     }
 
-    @Cacheable(value="job",key="#id")
-    public JobResponse getById(Long id){
-            return JobResponse.from(findOrThrow(id));
-    }
-    @Transactional
-    @CacheEvict(value="job",key="#id")
-    public void deleteById(Long id){
-         Job savedJob=findOrThrow(id);
-         authorizeAccess(savedJob.getCompany().getId());
-        jobRepository.delete(savedJob);
-    }
-
     @Transactional
     @CachePut(value="job",key="#id")
     public JobResponse updateJob(Long id, JobUpdateRequest updatedJob){
-
-        Job savedJob=findOrThrow(id);
+        Job savedJob=findWithCompanyOrThrow(id);
         authorizeAccess(savedJob.getCompany().getId());
         savedJob.setDescription(updatedJob.description());
         savedJob.setTitle(updatedJob.title());
@@ -142,8 +143,7 @@ public class JobService {
     @Transactional
     @CachePut(value="job",key="#id")
     public JobResponse patchJob(Long id, JobPatchRequest updatedJob){
-
-        Job savedJob=findOrThrow(id);
+        Job savedJob=findWithCompanyOrThrow(id);
         authorizeAccess(savedJob.getCompany().getId());
         if(updatedJob.salary()!=null){
             savedJob.setSalary((updatedJob.salary()));
@@ -168,7 +168,6 @@ public class JobService {
         if(updatedJob.workPlaceType()!=null){
             savedJob.setWorkPlaceType(updatedJob.workPlaceType());
         }
-
         if(updatedJob.employmentType()!=null){
             savedJob.setEmploymentType(updatedJob.employmentType());
         }
@@ -181,10 +180,14 @@ public class JobService {
     }
 
 
-    private void authorizeAccess(Long id){
+    private void authorizeAccess(Long companyId){
         Long currentUserId=securityUtils.getCurrentUser().id();
-        CompanyMembership membership=companyService.findMemberShipOrThrow(currentUserId, id);
-        if(membership.getRole() != Role.ADMIN && membership.getRole()!=Role.RECRUITER){
+        Role role=companyService.findRole(currentUserId, companyId);
+        if(role==null){
+             throw new org.springframework.security.access.AccessDeniedException(
+                     "Access Denied: You do not work for this company.");
+        }
+        if(role != Role.ADMIN && role!=Role.RECRUITER){
             throw new org.springframework.security.access.AccessDeniedException(
                     "Access Denied: Only a company recruiters and admin can post or modify jobs belonging to that company."
             );
@@ -222,6 +225,12 @@ public class JobService {
 
     public Job findOrThrow(Long id){
         return jobRepository.findById(id)
+                .orElseThrow(()->new ResourceNotFoundException("job",id));
+    }
+
+    //if access to any field of the company is needed
+    public Job findWithCompanyOrThrow(Long id){
+        return jobRepository.findWithCompanyById(id)
                 .orElseThrow(()->new ResourceNotFoundException("job",id));
     }
 

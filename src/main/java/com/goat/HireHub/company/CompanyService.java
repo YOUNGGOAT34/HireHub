@@ -180,10 +180,14 @@ public class CompanyService {
                 .orElseThrow(()->new ResourceNotFoundException("company",id));
     }
 
-    public CompanyMembership findMemberShipOrThrow(Long userId,Long companyId){
+    private CompanyMembership findMemberShipOrThrow(Long userId,Long companyId){
         return companyMembershipRepository.findByUserIdAndCompanyId(userId,companyId)
                 .orElseThrow(()-> new org.springframework.security.access.AccessDeniedException(
                         "Access Denied: You do not work for this company."));
+    }
+
+    public Role findRole(Long userId,Long companyId){
+         return companyMembershipRepository.findRoleByUserIdAndCompanyId(userId,companyId).orElse(null);
     }
 
     private Company authorizeAccess(Long id){

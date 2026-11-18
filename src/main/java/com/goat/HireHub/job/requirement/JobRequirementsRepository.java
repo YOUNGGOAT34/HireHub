@@ -113,4 +113,7 @@ public interface JobRequirementsRepository extends JpaRepository<JobRequirement,
             nativeQuery = true
     )
     void markSkillsStale(@Param("id") Long id, @Param("now") Instant now);
+    @Modifying(clearAutomatically = true)
+    @Query("DELETE FROM JobRequirement r WHERE r.job.id= :jobId")
+    void deleteAllByJobId(@Param("jobId")Long jobId);
 }

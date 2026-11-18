@@ -26,7 +26,8 @@ public class CacheConfiguration {
                          builder("companyMembers",1000,Duration.ofMinutes(15)),
                          builder("companies",500,Duration.ofMinutes(10)),
                          builder("jobs",1000,Duration.ofMinutes(10)),
-                         builder("job",1000,Duration.ofMinutes(10))
+                         builder("job",1000,Duration.ofMinutes(10)),
+                         builder("authUsers",1000,Duration.ofMinutes(5))
                  )
          );
          return manager;
