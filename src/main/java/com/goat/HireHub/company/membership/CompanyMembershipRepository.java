@@ -32,6 +32,6 @@ public interface CompanyMembershipRepository extends JpaRepository<CompanyMember
     )
     Slice<CompanyMemberResponse> findMembershipsByCompanyId(@Param("companyId") Long companyId, Pageable pageable);
     @Modifying
-    @Query("DELETE FROM CompanyMembership cm WHERE cm.user.id= :userId AND cm.company.id= :companyId")
+    @Query("DELETE FROM CompanyMembership cm WHERE cm.user.id= :userId AND cm.company.id= :companyId AND cm.role <> com.goat.HireHub.company.Role.ADMIN")
     int deleteByUserIdAndCompanyId(@Param("userId")Long userId,@Param("companyId")Long companyId);
 }

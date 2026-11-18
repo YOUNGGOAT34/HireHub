@@ -4,7 +4,7 @@ import com.goat.HireHub.company.dto.*;
 import com.goat.HireHub.company.membership.dto.CompanyMemberResponse;
 import com.goat.HireHub.company.membership.CompanyMembership;
 import com.goat.HireHub.company.membership.CompanyMembershipRepository;
-import com.goat.HireHub.company.membership.MemberAddedEvent;
+import com.goat.HireHub.company.membership.MemberAddedOrDeletedEvent;
 import com.goat.HireHub.exception.ConflictException;
 import com.goat.HireHub.exception.ResourceNotFoundException;
 import com.goat.HireHub.security.AuthenticatedUser;
@@ -95,6 +95,7 @@ public class CompanyService {
      public void deleteById(Long id){
          authorizeAccess(id);
          companyRepository.deleteById(id);
+         publisher.publishEvent(new MemberAddedOrDeletedEvent(id));
      }
 
      @Transactional
@@ -174,7 +175,7 @@ public class CompanyService {
 
              throw new ConflictException(email+" is already a member of this company");
          }
-            publisher.publishEvent(new MemberAddedEvent(companyId));
+            publisher.publishEvent(new MemberAddedOrDeletedEvent(companyId));
             return new CompanyMemberResponse(targetUser.getId(),targetUser.getFirstName(),targetUser.getLastName(),role);
      }
 
@@ -182,8 +183,15 @@ public class CompanyService {
      public void deleteMemberById(Long userId,Long companyId){
           authorizeAccess(companyId);
           if(companyMembershipRepository.deleteByUserIdAndCompanyId(userId,companyId)==0){
-              throw new ResourceNotFoundException("member not found",userId);
+              Role role=companyMembershipRepository.findRoleByUserIdAndCompanyId(userId,companyId).orElseThrow(
+                      ()->new ResourceNotFoundException("member not found",userId)
+              );
+
+
+                  throw new ConflictException("Admins cannot be removed,change their role first");
+
           }
+          publisher.publishEvent(new MemberAddedOrDeletedEvent(companyId));
      }
 
     public Company findOrThrow(Long id){
@@ -205,7 +213,7 @@ public class CompanyService {
         }
         if(role != Role.ADMIN){
             throw new org.springframework.security.access.AccessDeniedException(
-                    "Access Denied: Only a company admin can delete this company."
+                    "Access Denied: Only a company admins can perform this action."
             );
         }
 

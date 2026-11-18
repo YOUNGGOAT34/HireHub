@@ -1,6 +1,6 @@
 package com.goat.HireHub.config;
 
-import com.goat.HireHub.company.membership.MemberAddedEvent;
+import com.goat.HireHub.company.membership.MemberAddedOrDeletedEvent;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.caffeine.CaffeineCache;
 import org.springframework.stereotype.Service;
@@ -27,7 +27,7 @@ public class CacheEviction {
          }
      }
      @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT,fallbackExecution = true)
-     public void handleMemberAddedEvent(MemberAddedEvent event){
+     public void handleMemberAddedEvent(MemberAddedOrDeletedEvent event){
          evictCompanyMembers(event.id());
      }
 }
