@@ -3,8 +3,8 @@ package com.goat.HireHub.education;
 import com.goat.HireHub.education.dto.EducationRequest;
 import com.goat.HireHub.education.dto.EducationResponse;
 import com.goat.HireHub.exception.ResourceNotFoundException;
+import com.goat.HireHub.security.AuthenticatedUser;
 import com.goat.HireHub.security.SecurityUtils;
-import com.goat.HireHub.user.User;
 import org.springframework.transaction.annotation.Transactional;
 import com.goat.HireHub.profile.CandidateProfile;
 import com.goat.HireHub.profile.CandidateProfileService;
@@ -28,8 +28,8 @@ public class EducationService {
     //education
     @Transactional
     public EducationResponse addEducation(EducationRequest request) {
-        User loggedInUser =getCurrentUser();
-        CandidateProfile profile =candidateProfileService.getOrCreateCandidateProfile(loggedInUser);
+        Long loggedInUserId =getCurrentUser().id();
+        CandidateProfile profile =candidateProfileService.getOrCreateCandidateProfile(loggedInUserId);
         Education education = getEducation(request, profile);
         return EducationResponse.from(educationRepository.save(education));
     }
@@ -80,8 +80,8 @@ public class EducationService {
         Education education = educationRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Education timeline record not found with id: " + id));
 
-        User loggedInUser = securityUtils.getCurrentUser();
-        CandidateProfile loggedInProfile = loggedInUser.getCandidateProfile();
+        Long loggedInUserId = getCurrentUser().id();
+        CandidateProfile loggedInProfile = candidateProfileService.getOrCreateCandidateProfile(loggedInUserId);
 
         if (loggedInProfile==null || !loggedInProfile.getId().equals(education.getCandidateProfile().getId())) {
             throw new org.springframework.security.access.AccessDeniedException(
@@ -91,7 +91,7 @@ public class EducationService {
         return education;
     }
 
-    private User getCurrentUser(){
+    private AuthenticatedUser getCurrentUser(){
         return securityUtils.getCurrentUser();
     }
 }

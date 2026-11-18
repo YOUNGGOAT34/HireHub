@@ -1,6 +1,7 @@
 package com.goat.HireHub.experience;
 
 import com.goat.HireHub.exception.ResourceNotFoundException;
+import com.goat.HireHub.security.AuthenticatedUser;
 import com.goat.HireHub.security.SecurityUtils;
 import com.goat.HireHub.user.User;
 import com.goat.HireHub.experience.dto.ExperienceRequest;
@@ -31,8 +32,8 @@ public class ExperienceService {
 
     @Transactional
     public ExperienceResponse addExperience(ExperienceRequest request){
-        User user=securityUtils.getCurrentUser();
-        CandidateProfile profile=candidateProfileService.getOrCreateCandidateProfile(user);
+        Long userId=securityUtils.getCurrentUser().id();
+        CandidateProfile profile=candidateProfileService.getOrCreateCandidateProfile(userId);
         Experience experience=new Experience();
         experience.setJobTitle(request.jobTitle());
         experience.setCurrent(request.isCurrent());
@@ -73,8 +74,8 @@ public class ExperienceService {
 
     private Experience authorizeExperienceAction(Long id, String action){
         Experience experience=findOrThrow(id);
-        User loggedInUser=securityUtils.getCurrentUser();
-        CandidateProfile profile=loggedInUser.getCandidateProfile();
+        Long loggedInUserId=securityUtils.getCurrentUser().id();
+        CandidateProfile profile=candidateProfileService.getOrCreateCandidateProfile(loggedInUserId);
 
         if (profile== null || !profile.getId().equals(experience.getCandidateProfile().getId())) {
             throw new AccessDeniedException(

@@ -11,6 +11,7 @@ import com.goat.HireHub.skill.Skill;
 import com.goat.HireHub.skill.SkillRepository;
 import com.goat.HireHub.user.User;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Slice;
 import org.springframework.transaction.annotation.Transactional;
@@ -93,9 +94,9 @@ public class JobService {
     }
 
     @Transactional
-    @CacheEvict(value="jobs",allEntries = true)
     public JobResponse addJob(JobRequest request){
-        Company company=authorizeAccess(request.companyId());
+        Company company=companyService.findOrThrow(request.companyId());
+        authorizeAccess(request.companyId());
         Job job=new Job();
         job.setTitle(request.title());
         job.setDescription(request.description());
@@ -109,12 +110,12 @@ public class JobService {
         return JobResponse.from(jobRepository.save(job));
     }
 
+    @Cacheable(value="job",key="#id")
     public JobResponse getById(Long id){
             return JobResponse.from(findOrThrow(id));
     }
-
     @Transactional
-    @CacheEvict(value="jobs",allEntries = true)
+    @CacheEvict(value="job",key="#id")
     public void deleteById(Long id){
          Job savedJob=findOrThrow(id);
          authorizeAccess(savedJob.getCompany().getId());
@@ -122,7 +123,7 @@ public class JobService {
     }
 
     @Transactional
-    @CacheEvict(value="jobs",allEntries = true)
+    @CachePut(value="job",key="#id")
     public JobResponse updateJob(Long id, JobUpdateRequest updatedJob){
 
         Job savedJob=findOrThrow(id);
@@ -139,7 +140,7 @@ public class JobService {
     }
 
     @Transactional
-    @CacheEvict(value="jobs",allEntries = true)
+    @CachePut(value="job",key="#id")
     public JobResponse patchJob(Long id, JobPatchRequest updatedJob){
 
         Job savedJob=findOrThrow(id);
@@ -180,17 +181,15 @@ public class JobService {
     }
 
 
-    private Company authorizeAccess(Long id){
-        Company company=companyService.findOrThrow(id);
-        User currentUser=securityUtils.getCurrentUser();
-        CompanyMembership membership=companyService.findMemberShipOrThrow(currentUser.getId(), id);
+    private void authorizeAccess(Long id){
+        Long currentUserId=securityUtils.getCurrentUser().id();
+        CompanyMembership membership=companyService.findMemberShipOrThrow(currentUserId, id);
         if(membership.getRole() != Role.ADMIN && membership.getRole()!=Role.RECRUITER){
             throw new org.springframework.security.access.AccessDeniedException(
                     "Access Denied: Only a company recruiters and admin can post or modify jobs belonging to that company."
             );
         }
 
-        return company;
     }
 
     @Transactional

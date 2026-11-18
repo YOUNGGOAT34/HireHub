@@ -24,7 +24,7 @@ public class UserFeedService {
     }
     //feed
     public Page<UserFeedResponse> getRecommendedJobs(Pageable pageable){
-        Long loggedUserId=securityUtils.getCurrentUser().getId();
+        Long loggedUserId=securityUtils.getCurrentUser().id();
         Page<UserFeed> recommendedJobsPage=userFeedRepository.getRecommendedJobs(pageable,loggedUserId);
 
         if(recommendedJobsPage.isEmpty()){

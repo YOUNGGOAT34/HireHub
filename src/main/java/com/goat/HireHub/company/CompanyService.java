@@ -10,6 +10,7 @@ import com.goat.HireHub.company.membership.CompanyMembershipRepository;
 import com.goat.HireHub.company.membership.MemberAddedEvent;
 import com.goat.HireHub.exception.ConflictException;
 import com.goat.HireHub.exception.ResourceNotFoundException;
+import com.goat.HireHub.security.AuthenticatedUser;
 import com.goat.HireHub.security.SecurityUtils;
 import com.goat.HireHub.user.User;
 import com.goat.HireHub.user.UserRepository;
@@ -101,12 +102,13 @@ public class CompanyService {
      @Transactional
      @CacheEvict(value={"companies","companySearch"},allEntries = true)
      public CompanyResponse addCompany(CompanyRequest company){
-         User currentUser=securityUtils.getCurrentUser();
+         Long currentUserId=getCurrentUser().id();
+         User userProxy=userRepository.getReferenceById(currentUserId);
          Company newCompany=new Company();
          newCompany.setName(company.name());
          newCompany.setDescription(company.description());
          Company savedCompany=companyRepository.save(newCompany);
-         CompanyMembership companyMembership=new CompanyMembership(currentUser,savedCompany,Role.ADMIN);
+         CompanyMembership companyMembership=new CompanyMembership(userProxy,savedCompany,Role.ADMIN);
          companyMembershipRepository.save(companyMembership);
          return CompanyResponse.from(savedCompany);
      }
@@ -186,8 +188,8 @@ public class CompanyService {
 
     private Company authorizeAccess(Long id){
         Company company=findOrThrow(id);
-        User currentUser=securityUtils.getCurrentUser();
-        CompanyMembership membership=findMemberShipOrThrow(currentUser.getId(), id);
+        Long currentUserId= getCurrentUser().id();
+        CompanyMembership membership=findMemberShipOrThrow(currentUserId, id);
 
         if(membership.getRole() != Role.ADMIN){
             throw new org.springframework.security.access.AccessDeniedException(
@@ -196,5 +198,9 @@ public class CompanyService {
         }
 
         return company;
+    }
+
+    private AuthenticatedUser getCurrentUser(){
+         return securityUtils.getCurrentUser();
     }
 }

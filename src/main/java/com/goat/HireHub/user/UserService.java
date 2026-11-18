@@ -133,14 +133,8 @@ public class UserService {
      }
 
 
-
-
-
-
-
-
      private User getCurrentUser(){
-          return securityUtils.getCurrentUser();
+          return getById(securityUtils.getCurrentUser().id());
      }
 
 

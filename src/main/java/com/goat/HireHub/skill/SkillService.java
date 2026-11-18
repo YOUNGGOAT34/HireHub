@@ -3,6 +3,7 @@ package com.goat.HireHub.skill;
 import com.goat.HireHub.exception.ConflictException;
 import com.goat.HireHub.exception.ResourceNotFoundException;
 import com.goat.HireHub.profile.CandidateProfileRepository;
+import com.goat.HireHub.security.AuthenticatedUser;
 import com.goat.HireHub.security.SecurityUtils;
 import com.goat.HireHub.skill.dto.SkillRequest;
 import com.goat.HireHub.skill.dto.SkillResponse;
@@ -52,7 +53,7 @@ public class SkillService {
     @Transactional
     public SkillResponse addSkillToProfile(SkillRequest skillRequest){
 
-        User loggedInUser = getCurrentUser();
+        Long loggedInUser = getCurrentUser().id();
         CandidateProfile profile =candidateProfileService.getOrCreateCandidateProfile(loggedInUser);
 
         String cleanSkillName=skillRequest.name().trim();
@@ -71,9 +72,9 @@ public class SkillService {
 
     @Transactional
     public void removeSkillFromProfile(Long skillId){
-        User loggedInUser = getCurrentUser();
-        CandidateProfile profile = candidateProfileRepository.findById(loggedInUser.getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Profile", loggedInUser.getId()));
+        Long loggedInUserId = getCurrentUser().id();
+        CandidateProfile profile = candidateProfileRepository.findById(loggedInUserId)
+                .orElseThrow(() -> new ResourceNotFoundException("Profile", loggedInUserId));
 
         Skill skill = skillRepository.findById(skillId)
                 .orElseThrow(() -> new ResourceNotFoundException("Skill record not found in system taxonomy registry", skillId));
@@ -83,7 +84,7 @@ public class SkillService {
         }
     }
 
-    private User getCurrentUser(){
+    private AuthenticatedUser getCurrentUser(){
         return securityUtils.getCurrentUser();
     }
 }

@@ -136,7 +136,7 @@ public class JobRequirementService {
     }
 
     private void authorizeAccess(Long jobId){
-        Long currentUserId=securityUtils.getCurrentUser().getId();
+        Long currentUserId=securityUtils.getCurrentUser().id();
         Role role=jobRequirementsRepository.findRoleForJob(jobId,currentUserId).orElse(null);
         if(role==null){
              if(!jobService.existsById(jobId)){

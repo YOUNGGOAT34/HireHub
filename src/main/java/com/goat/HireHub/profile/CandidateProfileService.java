@@ -50,8 +50,8 @@ public class CandidateProfileService {
 
     @Transactional
     public ProfileSummaryResponse updateMainProfile(ProfileSummaryUpdateRequest request) {
-        User loggedInUser = securityUtils.getCurrentUser();
-        CandidateProfile profile = getOrCreateCandidateProfile(loggedInUser);
+        Long loggedInUserId = securityUtils.getCurrentUser().id();
+        CandidateProfile profile = getOrCreateCandidateProfile(loggedInUserId);
         profile.setSummary(request.summary());
         profile.setHeadline(request.headline());
         profile.setSearchStatus(request.searchStatus());
@@ -60,11 +60,11 @@ public class CandidateProfileService {
 
 
         @Transactional
-        public CandidateProfile getOrCreateCandidateProfile(User user) {
-            return candidateProfileRepository.findById(user.getId())
+        public CandidateProfile getOrCreateCandidateProfile(Long userId) {
+            return candidateProfileRepository.findById(userId)
                     .orElseGet(() -> {
                         CandidateProfile p = new CandidateProfile();
-                        p.setUser(user);
+                        p.setUser(userRepository.getReferenceById(userId));
                         p.setSearchStatus(SearchStatus.OPEN_TO_WORK);
                         p.setHeadline("Software Professional");
                         return candidateProfileRepository.save(p);
