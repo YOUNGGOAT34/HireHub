@@ -19,10 +19,10 @@ public interface CompanyMembershipRepository extends JpaRepository<CompanyMember
                 u.lastName,
                 cm.role
              )
-             FROM CompanyMembership cm 
+             FROM CompanyMembership cm\s
              JOIN cm.user u
               WHERE cm.company.id = :companyId
-             """
+            \s"""
     )
     Slice<CompanyMemberResponse> findMembershipsByCompanyId(@Param("companyId") Long companyId, Pageable pageable);
 }

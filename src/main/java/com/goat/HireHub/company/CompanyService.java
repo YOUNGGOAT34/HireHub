@@ -7,6 +7,7 @@ import com.goat.HireHub.company.dto.CompanyRequest;
 import com.goat.HireHub.company.dto.CompanyResponse;
 import com.goat.HireHub.company.membership.CompanyMembership;
 import com.goat.HireHub.company.membership.CompanyMembershipRepository;
+import com.goat.HireHub.company.membership.MemberAddedEvent;
 import com.goat.HireHub.exception.ConflictException;
 import com.goat.HireHub.exception.ResourceNotFoundException;
 import com.goat.HireHub.security.SecurityUtils;
@@ -16,9 +17,9 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.*;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -30,15 +31,19 @@ public class CompanyService {
      private final CompanyMembershipRepository companyMembershipRepository;
      private final SecurityUtils securityUtils;
      private final UserRepository userRepository;
+    private final ApplicationEventPublisher publisher;
 
      public CompanyService(CompanyRepository companyRepository,
                            CompanyMembershipRepository companyMembershipRepository,
                            SecurityUtils securityUtils,
-                           UserRepository userRepository){
+                           UserRepository userRepository,
+                           ApplicationEventPublisher publisher
+                           ){
           this.companyRepository=companyRepository;
           this.companyMembershipRepository=companyMembershipRepository;
           this.securityUtils=securityUtils;
           this.userRepository=userRepository;
+          this.publisher=publisher;
      }
 
      @Cacheable(value="companies",key="{#pageable.pageNumber,#pageable.pageSize,#pageable.sort}")
@@ -153,9 +158,9 @@ public class CompanyService {
     }
 
      @Transactional
-//     @CacheEvict(value="companyMembers",allEntries = true)
      public CompanyMemberResponse addMember(Long companyId, String email, Role role){
             Company company=authorizeAccess(companyId);
+
             User targetUser=userRepository.findByEmailIgnoreCase(email)
                             .orElseThrow(()->new ResourceNotFoundException("user"));
             boolean isMember=companyMembershipRepository.findByUserIdAndCompanyId(targetUser.getId(),companyId).isPresent();
@@ -164,6 +169,7 @@ public class CompanyService {
             }
 
             CompanyMembership companyMembership=new CompanyMembership(targetUser,company,role);
+            publisher.publishEvent(new MemberAddedEvent(companyId));
             return CompanyMemberResponse.from(companyMembershipRepository.save(companyMembership));
      }
 
