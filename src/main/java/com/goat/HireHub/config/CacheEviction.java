@@ -3,7 +3,6 @@ package com.goat.HireHub.config;
 import com.goat.HireHub.company.membership.MemberAddedEvent;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.caffeine.CaffeineCache;
-import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
@@ -14,6 +13,7 @@ import java.util.Objects;
 @Service
 public class CacheEviction {
      private final CacheManager cacheManager;
+
 
      public CacheEviction(CacheManager cacheManager){
          this.cacheManager=cacheManager;

@@ -160,7 +160,6 @@ public class CompanyService {
      @Transactional
      public CompanyMemberResponse addMember(Long companyId, String email, Role role){
             Company company=authorizeAccess(companyId);
-
             User targetUser=userRepository.findByEmailIgnoreCase(email)
                             .orElseThrow(()->new ResourceNotFoundException("user"));
             boolean isMember=companyMembershipRepository.findByUserIdAndCompanyId(targetUser.getId(),companyId).isPresent();

@@ -55,7 +55,10 @@ public class JobService {
         return jobRepository.findAllSummaries(pageable);
     }
 
-    @Cacheable(value="jobs",key= "#pageable.pageNumber + '-' + #pageable.pageSize + '-' + #pageable.sort.toString()")
+    @Cacheable(value="jobSearch",key= "{#title?.trim()?.toLowerCase()?:''," +
+            "#minSalary?.stripTrailingZeros(),#maxSalary?.stripTrailingZeros(),#companyName?.trim()?.toLowerCase()?:'',#location?.trim()?.toLowerCase()?:''," +
+            "#companyId,#workPlaceType,#experienceLevel,#employmentType,#pageable.pageNumber,#pageable.pageSize,#pageable.sort" +
+            "}")
     public Slice<JobResponseSummary> searchJobs(
             String title,
             BigDecimal minSalary,
