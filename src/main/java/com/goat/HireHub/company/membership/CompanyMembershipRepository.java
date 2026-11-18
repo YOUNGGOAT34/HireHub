@@ -5,6 +5,7 @@ import com.goat.HireHub.company.membership.dto.CompanyMemberResponse;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -30,4 +31,7 @@ public interface CompanyMembershipRepository extends JpaRepository<CompanyMember
             \s"""
     )
     Slice<CompanyMemberResponse> findMembershipsByCompanyId(@Param("companyId") Long companyId, Pageable pageable);
+    @Modifying
+    @Query("DELETE FROM CompanyMembership cm WHERE cm.user.id= :userId AND cm.company.id= :companyId")
+    int deleteByUserIdAndCompanyId(@Param("userId")Long userId,@Param("companyId")Long companyId);
 }

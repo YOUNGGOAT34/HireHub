@@ -80,6 +80,16 @@ public class CompanyController {
               return ResponseEntity.noContent().build();
      }
 
+     @DeleteMapping("/{companyId}/members/{userId}")
+     public  ResponseEntity<Void> deleteCompanyMember(
+             @PathVariable @Positive(message = "user id must be greater than zero") Long userId,
+             @PathVariable @Positive(message="company id must be greater than zero")Long companyId
+     ){
+         companyService.deleteMemberById(userId,companyId);
+         return ResponseEntity.noContent().build();
+
+     }
+
      @PutMapping("/{id}")
     public ResponseEntity<CompanyResponse> updateCompany(@PathVariable @Positive(message="Id must be greater than zero") Long id,@Valid @RequestBody CompanyRequest updatedCompany){
               return ResponseEntity.ok(companyService.updateCompany(id,updatedCompany));

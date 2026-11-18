@@ -178,6 +178,13 @@ public class CompanyService {
             return new CompanyMemberResponse(targetUser.getId(),targetUser.getFirstName(),targetUser.getLastName(),role);
      }
 
+     @Transactional
+     public void deleteMemberById(Long userId,Long companyId){
+          authorizeAccess(companyId);
+          if(companyMembershipRepository.deleteByUserIdAndCompanyId(userId,companyId)==0){
+              throw new ResourceNotFoundException("member not found",userId);
+          }
+     }
 
     public Company findOrThrow(Long id){
         return companyRepository.findById(id)
