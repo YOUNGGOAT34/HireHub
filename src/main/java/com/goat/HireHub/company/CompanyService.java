@@ -1,10 +1,7 @@
 package com.goat.HireHub.company;
 
-import com.goat.HireHub.company.dto.CompanyResponseSummary;
+import com.goat.HireHub.company.dto.*;
 import com.goat.HireHub.company.membership.dto.CompanyMemberResponse;
-import com.goat.HireHub.company.dto.CompanyPatchRequest;
-import com.goat.HireHub.company.dto.CompanyRequest;
-import com.goat.HireHub.company.dto.CompanyResponse;
 import com.goat.HireHub.company.membership.CompanyMembership;
 import com.goat.HireHub.company.membership.CompanyMembershipRepository;
 import com.goat.HireHub.company.membership.MemberAddedEvent;
@@ -19,6 +16,7 @@ import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.*;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
@@ -122,8 +120,8 @@ public class CompanyService {
      )
 
      public CompanyResponse updateCompany(Long id,CompanyRequest updatedCompany){
-         Company savedCompany=authorizeAccess(id);
-
+         authorizeAccess(id);
+         Company savedCompany=findOrThrow(id);
           savedCompany.setDescription(updatedCompany.description());
           savedCompany.setName(updatedCompany.name());
           return CompanyResponse.from(savedCompany);
@@ -136,7 +134,8 @@ public class CompanyService {
 
      )
      public  CompanyResponse patchCompany(Long id, CompanyPatchRequest updatedCompany){
-         Company savedCompany=authorizeAccess(id);
+         authorizeAccess(id);
+         Company savedCompany=findOrThrow(id);
          if (updatedCompany.name()!=null){
               savedCompany.setName(updatedCompany.name());
          }
@@ -161,17 +160,22 @@ public class CompanyService {
 
      @Transactional
      public CompanyMemberResponse addMember(Long companyId, String email, Role role){
-            Company company=authorizeAccess(companyId);
-            User targetUser=userRepository.findByEmailIgnoreCase(email)
+            authorizeAccess(companyId);
+            UserSummary targetUser=userRepository.findByEmailIgnoreCase(email)
                             .orElseThrow(()->new ResourceNotFoundException("user"));
-            boolean isMember=companyMembershipRepository.findByUserIdAndCompanyId(targetUser.getId(),companyId).isPresent();
-            if(isMember){
-                 throw new ConflictException(email+"is already a member of this company");
-            }
 
-            CompanyMembership companyMembership=new CompanyMembership(targetUser,company,role);
+            CompanyMembership companyMembership=new CompanyMembership(
+                    userRepository.getReferenceById(targetUser.getId()),
+                    companyRepository.getReferenceById(companyId)
+                    ,role);
+         try{
+             companyMembershipRepository.saveAndFlush(companyMembership);
+         }catch(DataIntegrityViolationException e){
+
+             throw new ConflictException(email+" is already a member of this company");
+         }
             publisher.publishEvent(new MemberAddedEvent(companyId));
-            return CompanyMemberResponse.from(companyMembershipRepository.save(companyMembership));
+            return new CompanyMemberResponse(targetUser.getId(),targetUser.getFirstName(),targetUser.getLastName(),role);
      }
 
 
@@ -180,28 +184,24 @@ public class CompanyService {
                 .orElseThrow(()->new ResourceNotFoundException("company",id));
     }
 
-    private CompanyMembership findMemberShipOrThrow(Long userId,Long companyId){
-        return companyMembershipRepository.findByUserIdAndCompanyId(userId,companyId)
-                .orElseThrow(()-> new org.springframework.security.access.AccessDeniedException(
-                        "Access Denied: You do not work for this company."));
-    }
-
     public Role findRole(Long userId,Long companyId){
          return companyMembershipRepository.findRoleByUserIdAndCompanyId(userId,companyId).orElse(null);
     }
 
-    private Company authorizeAccess(Long id){
-        Company company=findOrThrow(id);
-        Long currentUserId= getCurrentUser().id();
-        CompanyMembership membership=findMemberShipOrThrow(currentUserId, id);
+    private void authorizeAccess(Long id){
 
-        if(membership.getRole() != Role.ADMIN){
+        Long currentUserId= getCurrentUser().id();
+        Role role=companyMembershipRepository.findRoleByUserIdAndCompanyId(currentUserId,id).orElse(null);
+        if(role==null){
+            throw new org.springframework.security.access.AccessDeniedException(
+                    "Access Denied: You do not work for this company.");
+        }
+        if(role != Role.ADMIN){
             throw new org.springframework.security.access.AccessDeniedException(
                     "Access Denied: Only a company admin can delete this company."
             );
         }
 
-        return company;
     }
 
     private AuthenticatedUser getCurrentUser(){

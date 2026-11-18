@@ -11,7 +11,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.Optional;
 
 public interface CompanyMembershipRepository extends JpaRepository<CompanyMembership,Long> {
-    Optional<CompanyMembership> findByUserIdAndCompanyId(Long userId,Long companyId);
+
     @Query(
           "SELECT cm.role from CompanyMembership cm WHERE cm.user.id= :userId AND cm.company.id= :companyId"
     )

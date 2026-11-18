@@ -1,4 +1,5 @@
 package com.goat.HireHub.user;
+import com.goat.HireHub.company.dto.UserSummary;
 import com.goat.HireHub.security.AuthenticatedUser;
 import com.goat.HireHub.user.dto.UserResponse;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -10,7 +11,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User,Long>, JpaSpecificationExecutor<User> {
-      Optional<User> findByEmailIgnoreCase(String email);
+      Optional<UserSummary> findByEmailIgnoreCase(String email);
       Boolean existsByEmailIgnoreCase(String email);
       @Query(
               """
