@@ -124,19 +124,20 @@ public class JobService {
     }
 
     @Transactional
-    @CachePut(value="job",key="#id")
-    public JobResponse updateJob(Long id, JobUpdateRequest updatedJob){
-        Job savedJob=findWithCompanyOrThrow(id);
-        authorizeAccess(savedJob.getCompany().getId());
-        savedJob.setDescription(updatedJob.description());
-        savedJob.setTitle(updatedJob.title());
-        savedJob.setSalary(updatedJob.salary());
-        savedJob.setUrl(updatedJob.url());
-        savedJob.setLocation(updatedJob.location());
-        savedJob.setWorkPlaceType(updatedJob.workPlaceType());
-        savedJob.setExperienceLevel(updatedJob.experienceLevel());
-        savedJob.setEmploymentType(updatedJob.employmentType());
-        return JobResponse.from(savedJob);
+    @CacheEvict(value="job",key="#id")
+    public void updateJob(Long id, JobUpdateRequest updatedJob){
+        Long companyId=jobRepository.findCompanyIdByJobId(id)
+                .orElseThrow(()->new ResourceNotFoundException("job",id));
+        authorizeAccess(companyId);
+        jobRepository.patchJob(id,updatedJob.salary(),
+                updatedJob.title(),
+                updatedJob.description(),
+                updatedJob.url(),
+                updatedJob.location(),
+                updatedJob.workPlaceType().name(),
+                updatedJob.employmentType().name(),
+                updatedJob.experienceLevel().name()
+        );
     }
 
     @Transactional
@@ -155,7 +156,7 @@ public class JobService {
                         .orElseThrow(()->new ResourceNotFoundException("job",id));
 
         authorizeAccess(companyId);
-        jobRepository.updateJob(id,updatedJob.salary(),
+        jobRepository.patchJob(id,updatedJob.salary(),
                      updatedJob.title(),
                 updatedJob.description(),
                 updatedJob.url(),
@@ -164,7 +165,6 @@ public class JobService {
                 updatedJob.employmentType().name(),
                 updatedJob.experienceLevel().name()
                 );
-
     }
 
 

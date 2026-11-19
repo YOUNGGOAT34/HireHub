@@ -123,7 +123,7 @@ public class CompanyService {
 
      public void updateCompany(Long id,CompanyRequest updatedCompany){
           authorizeAccess(id);
-          companyRepository.patchCompany(id,updatedCompany.name(),updatedCompany.description());
+          companyRepository.updateCompany(id,updatedCompany.name(),updatedCompany.description());
      }
 
      @Transactional

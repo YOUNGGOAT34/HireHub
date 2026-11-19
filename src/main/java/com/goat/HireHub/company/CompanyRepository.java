@@ -66,4 +66,23 @@ public interface CompanyRepository extends JpaRepository<Company,Long>, JpaSpeci
                       @Param("name") String name,
                       @Param("description") String description
                       );
+
+
+    @Modifying
+    @Query(value= """
+               UPDATE companies
+                        SET company_name= :name,
+                            company_description= :description,
+                        WHERE company_id= :id
+                        AND(
+                             company_name IS DISTINCT FROM  :name
+                             OR company_description IS DISTINCT FROM  :description
+                        )
+            """,nativeQuery = true)
+    void updateCompany(@Param("id")Long companyId,
+                      @Param("name") String name,
+                      @Param("description") String description
+    );
+
+
 }

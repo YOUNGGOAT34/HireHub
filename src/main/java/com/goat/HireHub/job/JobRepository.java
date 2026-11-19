@@ -67,14 +67,51 @@ public interface JobRepository extends JpaRepository<Job,Long>, JpaSpecification
                    \s""",
             nativeQuery = true
     )
-    void updateJob(@Param("jobId")Long jobId,
-                   @Param("salary")BigDecimal salary,
-                   @Param("title")String title,
-                   @Param("description")String description,
-                   @Param("url") String url,
-                   @Param("location") String location,
-                   @Param("workplaceType")String workplaceType,
-                   @Param("employmentType") String employmentType,
-                   @Param("experienceLevel")String experienceLevel
+    void patchJob(@Param("jobId")Long jobId,
+                  @Param("salary")BigDecimal salary,
+                  @Param("title")String title,
+                  @Param("description")String description,
+                  @Param("url") String url,
+                  @Param("location") String location,
+                  @Param("workplaceType")String workplaceType,
+                  @Param("employmentType") String employmentType,
+                  @Param("experienceLevel")String experienceLevel
                      );
+
+    @Modifying
+    @Query(
+            value= """
+                     UPDATE jobs
+                     SET salary= :salary,
+                         job_title= :title,
+                         job_description= :description,
+                         job_url= :url,
+                         location= :location,
+                         workplace_type= :workplaceType,
+                         employment_type= :employmentType,
+                         experience_level= :experienceLevel    \s
+                     WHERE job_id= :jobId
+                     AND(
+                          salary IS DISTINCT FROM  :salary
+                          OR job_title IS DISTINCT FROM  :title
+                          OR job_description IS DISTINCT FROM  :description
+                          OR job_url IS DISTINCT FROM  :url
+                          OR location IS DISTINCT FROM  :location
+                          OR workplace_type IS DISTINCT FROM  :workplaceType
+                          OR employment_type IS DISTINCT FROM  :employmentType
+                          OR experience_level IS DISTINCT FROM  :experienceLevel
+                     )
+                   \s""",
+            nativeQuery = true
+    )
+    void updateJob(@Param("jobId")Long jobId,
+                  @Param("salary")BigDecimal salary,
+                  @Param("title")String title,
+                  @Param("description")String description,
+                  @Param("url") String url,
+                  @Param("location") String location,
+                  @Param("workplaceType")String workplaceType,
+                  @Param("employmentType") String employmentType,
+                  @Param("experienceLevel")String experienceLevel
+    );
 }

@@ -93,8 +93,9 @@ public class JobController {
       }
 
       @PutMapping("/{id}")
-    public ResponseEntity<JobResponse> updateJob(@PathVariable Long id,@Valid @RequestBody JobUpdateRequest updatedJob){
-        return ResponseEntity.status(HttpStatus.OK).body(jobService.updateJob(id, updatedJob));
+    public ResponseEntity<Void> updateJob(@PathVariable Long id,@Valid @RequestBody JobUpdateRequest updatedJob){
+        jobService.updateJob(id, updatedJob);
+        return ResponseEntity.noContent().build();
       }
 
       @PatchMapping("/{id}")
