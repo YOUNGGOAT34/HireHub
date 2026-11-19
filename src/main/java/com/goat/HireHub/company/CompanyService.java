@@ -116,17 +116,14 @@ public class CompanyService {
      @Transactional
      @Caching(
             evict = {
-                    @CacheEvict(value={"companies","companySearch"},allEntries = true)
-            },
-             put=@CachePut(value="company",key="#id")
+                    @CacheEvict(value={"companies","companySearch"},allEntries = true),
+                    @CacheEvict(value="company",key="#id")
+            }
      )
 
-     public CompanyResponse updateCompany(Long id,CompanyRequest updatedCompany){
-         authorizeAccess(id);
-         Company savedCompany=findOrThrow(id);
-          savedCompany.setDescription(updatedCompany.description());
-          savedCompany.setName(updatedCompany.name());
-          return CompanyResponse.from(savedCompany);
+     public void updateCompany(Long id,CompanyRequest updatedCompany){
+          authorizeAccess(id);
+          companyRepository.patchCompany(id,updatedCompany.name(),updatedCompany.description());
      }
 
      @Transactional

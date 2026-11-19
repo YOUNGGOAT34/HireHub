@@ -104,8 +104,9 @@ public class CompanyController {
      }
 
      @PutMapping("/{id}")
-    public ResponseEntity<CompanyResponse> updateCompany(@PathVariable @Positive(message="Id must be greater than zero") Long id,@Valid @RequestBody CompanyRequest updatedCompany){
-              return ResponseEntity.ok(companyService.updateCompany(id,updatedCompany));
+    public ResponseEntity<Void> updateCompany(@PathVariable @Positive(message="Id must be greater than zero") Long id,@Valid @RequestBody CompanyRequest updatedCompany){
+              companyService.updateCompany(id,updatedCompany);
+              return ResponseEntity.noContent().build();
 
      }
 
