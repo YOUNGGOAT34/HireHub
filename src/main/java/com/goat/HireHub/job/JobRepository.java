@@ -5,6 +5,7 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
 
+import java.math.BigDecimal;
 import java.util.Optional;
 
 public interface JobRepository extends JpaRepository<Job,Long>, JpaSpecificationExecutor<Job> {
@@ -39,5 +40,41 @@ public interface JobRepository extends JpaRepository<Job,Long>, JpaSpecification
     @Query("DELETE FROM Job j WHERE j.id= :id ")
     void deleteJobById(@Param("id")Long id);
     @Query(value="SELECT company_id FROM jobs WHERE job_id= :id",nativeQuery = true)
-    Optional<Long> findCompanyByJobId(@Param("id")Long jobId);
+    Optional<Long> findCompanyIdByJobId(@Param("id")Long jobId);
+    @Modifying
+    @Query(
+            value= """
+                     UPDATE jobs
+                     SET salary=COALESCE( :salary,salary),
+                         job_title=COALESCE( :title,job_title),
+                         job_description=COALESCE( :description,job_description),
+                         job_url=COALESCE( :url,job_url),
+                         location=COALESCE( :location,location),
+                         workplace_type=COALESCE( :workplaceType,workplace_type),
+                         employment_type=COALESCE( :employmentType,employment_type),
+                         experience_level=COALESCE( :experienceLevel,experience_level)    \s
+                     WHERE job_id= :jobId
+                     AND(
+                          salary IS DISTINCT FROM COALESCE( :salary,salary)
+                          OR job_title IS DISTINCT FROM COALESCE( :title,job_title)
+                          OR job_description IS DISTINCT FROM COALESCE( :description,job_description)
+                          OR job_url IS DISTINCT FROM COALESCE( :url,job_url)
+                          OR location IS DISTINCT FROM COALESCE( :location,location)
+                          OR workplace_type IS DISTINCT FROM COALESCE( :workplaceType,workplace_type)
+                          OR employment_type IS DISTINCT FROM COALESCE( :employmentType,employment_type)
+                          OR experience_level IS DISTINCT FROM COALESCE( :experienceLevel,experience_level)
+                     )
+                   \s""",
+            nativeQuery = true
+    )
+    void updateJob(@Param("jobId")Long jobId,
+                   @Param("salary")BigDecimal salary,
+                   @Param("title")String title,
+                   @Param("description")String description,
+                   @Param("url") String url,
+                   @Param("location") String location,
+                   @Param("workplaceType")String workplaceType,
+                   @Param("employmentType") String employmentType,
+                   @Param("experienceLevel")String experienceLevel
+                     );
 }

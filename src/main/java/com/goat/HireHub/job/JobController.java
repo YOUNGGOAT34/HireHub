@@ -98,8 +98,9 @@ public class JobController {
       }
 
       @PatchMapping("/{id}")
-      public ResponseEntity<JobResponse> patchJob(@PathVariable Long id,@Valid @RequestBody JobPatchRequest updatedJob) {
-          return ResponseEntity.ok(jobService.patchJob(id, updatedJob));
+      public ResponseEntity<Void> patchJob(@PathVariable Long id,@Valid @RequestBody JobPatchRequest updatedJob) {
+          jobService.patchJob(id, updatedJob);
+          return ResponseEntity.noContent().build();
       }
 
     private void validateSortField(String fieldName){

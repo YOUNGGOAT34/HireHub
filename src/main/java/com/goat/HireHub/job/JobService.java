@@ -1,7 +1,7 @@
 package com.goat.HireHub.job;
 
 import com.goat.HireHub.company.*;
-import com.goat.HireHub.company.membership.CompanyMembership;
+import com.goat.HireHub.exception.BadRequestException;
 import com.goat.HireHub.exception.ResourceNotFoundException;
 import com.goat.HireHub.job.dto.*;
 import com.goat.HireHub.job.gemini.GeminiService;
@@ -9,7 +9,6 @@ import com.goat.HireHub.job.requirement.JobRequirementsRepository;
 import com.goat.HireHub.security.SecurityUtils;
 import com.goat.HireHub.skill.Skill;
 import com.goat.HireHub.skill.SkillRepository;
-import com.goat.HireHub.user.User;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
@@ -101,7 +100,7 @@ public class JobService {
     @Transactional
     @CacheEvict(value="job",key="#id")
     public void deleteById(Long id){
-         Long companyId=jobRepository.findCompanyByJobId(id).orElseThrow(
+         Long companyId=jobRepository.findCompanyIdByJobId(id).orElseThrow(
                  ()->new ResourceNotFoundException("job",id)
          );
          authorizeAccess(companyId);
@@ -141,42 +140,31 @@ public class JobService {
     }
 
     @Transactional
-    @CachePut(value="job",key="#id")
-    public JobResponse patchJob(Long id, JobPatchRequest updatedJob){
-        Job savedJob=findWithCompanyOrThrow(id);
-        authorizeAccess(savedJob.getCompany().getId());
-        if(updatedJob.salary()!=null){
-            savedJob.setSalary((updatedJob.salary()));
-        }
+    @CacheEvict(value="job",key="#id")
+    public void patchJob(Long id, JobPatchRequest updatedJob){
+        if(updatedJob.salary()==null && updatedJob.title()==null
+                && updatedJob.description()==null
+                && updatedJob.url()==null
+                &&updatedJob.location()==null
+                && updatedJob.workPlaceType()==null
+                && updatedJob.employmentType()==null
+                && updatedJob.experienceLevel()==null
+        ) throw new BadRequestException("empty patch body");
 
-        if(updatedJob.title()!=null){
-            savedJob.setTitle(updatedJob.title());
-        }
+        Long companyId=jobRepository.findCompanyIdByJobId(id)
+                        .orElseThrow(()->new ResourceNotFoundException("job",id));
 
-        if(updatedJob.description()!=null){
-            savedJob.setDescription(updatedJob.description());
-        }
+        authorizeAccess(companyId);
+        jobRepository.updateJob(id,updatedJob.salary(),
+                     updatedJob.title(),
+                updatedJob.description(),
+                updatedJob.url(),
+                updatedJob.location(),
+                updatedJob.workPlaceType().name(),
+                updatedJob.employmentType().name(),
+                updatedJob.experienceLevel().name()
+                );
 
-        if(updatedJob.url()!=null){
-            savedJob.setUrl(updatedJob.url());
-        }
-
-        if(updatedJob.location()!=null){
-            savedJob.setLocation(updatedJob.location());
-        }
-
-        if(updatedJob.workPlaceType()!=null){
-            savedJob.setWorkPlaceType(updatedJob.workPlaceType());
-        }
-        if(updatedJob.employmentType()!=null){
-            savedJob.setEmploymentType(updatedJob.employmentType());
-        }
-
-        if(updatedJob.experienceLevel()!=null){
-            savedJob.setExperienceLevel(updatedJob.experienceLevel());
-        }
-
-        return JobResponse.from(savedJob);
     }
 
 
