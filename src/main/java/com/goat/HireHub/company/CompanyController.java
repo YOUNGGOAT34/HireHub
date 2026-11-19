@@ -110,8 +110,10 @@ public class CompanyController {
      }
 
      @PatchMapping("/{id}")
-     public ResponseEntity<CompanyResponse> patchCompany(@PathVariable @Positive(message="Id must be greater than zero") Long id,@Valid @RequestBody CompanyPatchRequest updatedCompany){
-             return ResponseEntity.ok(companyService.patchCompany(id,updatedCompany));
+     public ResponseEntity<Void> patchCompany(@PathVariable("id") @Positive(message="Id must be greater than zero")
+                                                   Long companyId,@Valid @RequestBody CompanyPatchRequest updatedCompany){
+             companyService.patchCompany(companyId,updatedCompany);
+             return ResponseEntity.noContent().build();
      }
 
      private void validateSortField(String fieldName){

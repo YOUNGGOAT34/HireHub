@@ -14,9 +14,17 @@ import java.util.Optional;
 public interface CompanyMembershipRepository extends JpaRepository<CompanyMembership,Long> {
 
     @Query(
-          "SELECT cm.role from CompanyMembership cm WHERE cm.user.id= :userId AND cm.company.id= :companyId"
+         value= """
+                 SELECT COALESCE(cm.role,'NONE')
+                 FROM companies c
+                 LEFT JOIN company_memberships cm
+                       ON cm.company_id=c.company_id
+                       AND cm.user_id= :userId
+                 WHERE c.company_id= :companyId
+                 """,
+            nativeQuery = true
     )
-    Optional<Role> findRoleByUserIdAndCompanyId(@Param("userId")Long userId,@Param("companyId")Long companyId);
+    Optional<String> findRoleByUserIdAndCompanyId(@Param("userId")Long userId,@Param("companyId")Long companyId);
     @Query(value =
             """
              SELECT new com.goat.HireHub.company.membership.dto.CompanyMemberResponse(

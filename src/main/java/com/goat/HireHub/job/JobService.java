@@ -182,12 +182,12 @@ public class JobService {
 
     private void authorizeAccess(Long companyId){
         Long currentUserId=securityUtils.getCurrentUser().id();
-        Role role=companyService.findRole(currentUserId, companyId);
-        if(role==null){
+        String role=companyService.findRole(currentUserId, companyId);
+        if(role.equals("NONE")){
              throw new org.springframework.security.access.AccessDeniedException(
                      "Access Denied: You do not work for this company.");
         }
-        if(role != Role.ADMIN && role!=Role.RECRUITER){
+        if(!role.equals(Role.ADMIN.name()) && !role.equals(Role.RECRUITER.name())){
             throw new org.springframework.security.access.AccessDeniedException(
                     "Access Denied: Only a company recruiters and admin can post or modify jobs belonging to that company."
             );

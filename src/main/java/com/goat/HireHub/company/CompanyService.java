@@ -5,6 +5,7 @@ import com.goat.HireHub.company.membership.dto.CompanyMemberResponse;
 import com.goat.HireHub.company.membership.CompanyMembership;
 import com.goat.HireHub.company.membership.CompanyMembershipRepository;
 import com.goat.HireHub.company.membership.MemberAddedOrDeletedEvent;
+import com.goat.HireHub.exception.BadRequestException;
 import com.goat.HireHub.exception.ConflictException;
 import com.goat.HireHub.exception.ResourceNotFoundException;
 import com.goat.HireHub.security.AuthenticatedUser;
@@ -130,22 +131,18 @@ public class CompanyService {
 
      @Transactional
      @Caching(
-         evict=@CacheEvict(value="companies",allEntries = true),
-         put=@CachePut(value="company",key="#id")
-
+         evict={
+                 @CacheEvict(value="companies",allEntries = true),
+                 @CacheEvict(value="company",key="#companyId")
+         }
      )
-     public  CompanyResponse patchCompany(Long id, CompanyPatchRequest updatedCompany){
-         authorizeAccess(id);
-         Company savedCompany=findOrThrow(id);
-         if (updatedCompany.name()!=null){
-              savedCompany.setName(updatedCompany.name());
+     public  void patchCompany(Long companyId, CompanyPatchRequest updatedCompany){
+         if(updatedCompany.name() ==null&& updatedCompany.description()==null){
+              throw new BadRequestException("empty patch body");
          }
+         authorizeAccess(companyId);
+         companyRepository.patchCompany(companyId,updatedCompany.name(),updatedCompany.description());
 
-         if (updatedCompany.description()!=null){
-             savedCompany.setDescription(updatedCompany.description());
-         }
-
-         return CompanyResponse.from(savedCompany);
      }
 
      //company members
@@ -195,10 +192,11 @@ public class CompanyService {
      public void deleteMemberById(Long userId,Long companyId){
           authorizeAccess(companyId);
           if(companyMembershipRepository.deleteByUserIdAndCompanyId(userId,companyId)==0){
-              Role role=companyMembershipRepository.findRoleByUserIdAndCompanyId(userId,companyId).orElseThrow(
-                      ()->new ResourceNotFoundException("member not found",userId)
-              );
+              String role=companyMembershipRepository.findRoleByUserIdAndCompanyId(userId,companyId).orElse("NONE");
 
+                  if(role.equals("NONE")){
+                      throw new ResourceNotFoundException("member not found",userId);
+                  }
 
                   throw new ConflictException("Admins cannot be removed,change their role first");
 
@@ -211,19 +209,21 @@ public class CompanyService {
                 .orElseThrow(()->new ResourceNotFoundException("company",id));
     }
 
-    public Role findRole(Long userId,Long companyId){
-         return companyMembershipRepository.findRoleByUserIdAndCompanyId(userId,companyId).orElse(null);
+    public String findRole(Long userId,Long companyId){
+         return companyMembershipRepository.findRoleByUserIdAndCompanyId(userId,companyId).orElse("NONE");
     }
 
     private void authorizeAccess(Long companyId){
 
         Long currentUserId= getCurrentUser().id();
-        Role role=companyMembershipRepository.findRoleByUserIdAndCompanyId(currentUserId,companyId).orElse(null);
-        if(role==null){
+        String role=companyMembershipRepository.findRoleByUserIdAndCompanyId(currentUserId,companyId).orElseThrow(
+                ()-> new ResourceNotFoundException("company",companyId)
+        );
+        if(role.equals("NONE")){
             throw new org.springframework.security.access.AccessDeniedException(
                     "Access Denied: You do not work for this company.");
         }
-        if(role != Role.ADMIN){
+        if(!role.equals(Role.ADMIN.name())){
             throw new org.springframework.security.access.AccessDeniedException(
                     "Access Denied: Only a company admins can perform this action."
             );
