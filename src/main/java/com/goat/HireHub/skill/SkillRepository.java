@@ -23,6 +23,7 @@ public interface SkillRepository extends JpaRepository<Skill,Long> {
                     """,
             nativeQuery = true
     )
-    void insertMissingSkills(@Param("names")String skillNames);
+    void insertMissingSkills(@Param("names")String[] skillNames);
+
 
 }

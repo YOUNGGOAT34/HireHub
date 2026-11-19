@@ -114,4 +114,31 @@ public interface JobRepository extends JpaRepository<Job,Long>, JpaSpecification
                   @Param("employmentType") String employmentType,
                   @Param("experienceLevel")String experienceLevel
     );
+
+    @Modifying
+    @Query(
+            value= """
+                      INSERT INTO job_skills(job_id,skill_id)
+                      SELECT :jobId,s.skill_id FROM skills s
+                      WHERE LOWER(S.name)=ANY(CAST( :names AS text[]))
+                      ON CONFLICT DO NOTHING
+                    """,
+            nativeQuery = true
+    )
+    void linkSkillsToJob(@Param("jobId")Long jobId,@Param("names")String[] skillNames);
+    @Query(
+            value= """
+                     DELETE FROM job_skills js
+                     WHERE js.job_id= :jobId
+                     AND NOT EXISTS(
+                        SELECT 1 FROM skills s
+                        WHERE s.skill_id=js.skill_id
+                        AND LOWER(s.skill_name)=ANY(CAST( :names AS text[]))
+                     )
+                    \s
+                   \s""",
+            nativeQuery = true
+
+    )
+    void unlinkSkillsFromJob(@Param("jobId")Long jobId,@Param("names") String[] names);
 }

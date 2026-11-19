@@ -181,29 +181,23 @@ public class JobService {
     }
     @Transactional
     public void saveJobSkills(Long jobId, List<String> rawSkills, Instant seenStaleInstanceSince){
-        Job job=findOrThrow(jobId);
-        Set<String> uniqueSkills=new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
 
+        Set<String> uniqueSkills=new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
         for(String raw:rawSkills){
             if(raw==null) continue;
-
             String skill=raw.trim();
-
             if(!skill.isEmpty() && skill.length()<=100){
                 uniqueSkills.add(skill);
             }
         }
 
-        Set<Skill> skills=new HashSet<>();
-
-        for(String name:uniqueSkills){
-             Skill skill=skillRepository.findByNameIgnoreCase(name)
-                     .orElseGet(()->skillRepository.save(new Skill(name)));
-             skills.add(skill);
+        String[] names=uniqueSkills.toArray(String[]::new);
+        String[] lower=uniqueSkills.stream().map(String::toLowerCase).toArray(String[]::new);
+        if(names.length>0){
+           skillRepository.insertMissingSkills(names);
+           jobRepository.linkSkillsToJob(jobId,lower);
         }
-
-        job.getJobSkills().clear();
-        job.getJobSkills().addAll(skills);
+        jobRepository.unlinkSkillsFromJob(jobId,lower);
         requirementsRepository.clearStale(jobId,seenStaleInstanceSince);
     }
 
