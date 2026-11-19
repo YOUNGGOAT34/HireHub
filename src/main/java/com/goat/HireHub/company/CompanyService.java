@@ -179,6 +179,18 @@ public class CompanyService {
             return new CompanyMemberResponse(targetUser.getId(),targetUser.getFirstName(),targetUser.getLastName(),role);
      }
 
+     //change role here
+    @Transactional
+    public void changeRoleById(Long userId,Long companyId,Role newRole){
+         authorizeAccess(companyId);
+         if(companyMembershipRepository.updateMembershipRole(userId,companyId, newRole.name())==0){
+             throw new ResourceNotFoundException("member",userId);
+
+         }
+         publisher.publishEvent(new MemberAddedOrDeletedEvent(companyId));
+
+    }
+
      @Transactional
      public void deleteMemberById(Long userId,Long companyId){
           authorizeAccess(companyId);
@@ -203,10 +215,10 @@ public class CompanyService {
          return companyMembershipRepository.findRoleByUserIdAndCompanyId(userId,companyId).orElse(null);
     }
 
-    private void authorizeAccess(Long id){
+    private void authorizeAccess(Long companyId){
 
         Long currentUserId= getCurrentUser().id();
-        Role role=companyMembershipRepository.findRoleByUserIdAndCompanyId(currentUserId,id).orElse(null);
+        Role role=companyMembershipRepository.findRoleByUserIdAndCompanyId(currentUserId,companyId).orElse(null);
         if(role==null){
             throw new org.springframework.security.access.AccessDeniedException(
                     "Access Denied: You do not work for this company.");

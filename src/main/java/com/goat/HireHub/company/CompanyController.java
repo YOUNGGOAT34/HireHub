@@ -3,6 +3,7 @@ package com.goat.HireHub.company;
 import com.goat.HireHub.company.dto.*;
 import com.goat.HireHub.company.membership.dto.CompanyMemberResponse;
 import com.goat.HireHub.company.membership.dto.MemberInviteRequest;
+import com.goat.HireHub.company.membership.dto.MembershipPatchRequest;
 import com.goat.HireHub.exception.BadRequestException;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
@@ -80,10 +81,22 @@ public class CompanyController {
               return ResponseEntity.noContent().build();
      }
 
+     @PatchMapping("/members")
+     public ResponseEntity<Void> changeMemberRole(
+             @Valid @RequestBody MembershipPatchRequest request
+             ){
+           companyService.changeRoleById(request.userId(),
+                   request.companyId(),
+                   request.role());
+           return ResponseEntity.noContent().build();
+     }
+
      @DeleteMapping("/{companyId}/members/{userId}")
      public  ResponseEntity<Void> deleteCompanyMember(
-             @PathVariable @Positive(message = "user id must be greater than zero") Long userId,
-             @PathVariable @Positive(message="company id must be greater than zero")Long companyId
+             @PathVariable @Positive(message = "user id must be greater than zero")
+             Long userId,
+             @PathVariable @Positive(message="company id must be greater than zero")
+             Long companyId
      ){
          companyService.deleteMemberById(userId,companyId);
          return ResponseEntity.noContent().build();

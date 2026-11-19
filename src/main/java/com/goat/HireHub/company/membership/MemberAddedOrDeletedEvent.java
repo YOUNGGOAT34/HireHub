@@ -1,4 +1,4 @@
 package com.goat.HireHub.company.membership;
 
-public record MemberAddedOrDeletedEvent(Long id) {
+public record MemberAddedOrDeletedEvent(Long companyId) {
 }

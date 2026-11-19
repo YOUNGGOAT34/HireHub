@@ -28,6 +28,6 @@ public class CacheEviction {
      }
      @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT,fallbackExecution = true)
      public void handleMemberAddedEvent(MemberAddedOrDeletedEvent event){
-         evictCompanyMembers(event.id());
+         evictCompanyMembers(event.companyId());
      }
 }

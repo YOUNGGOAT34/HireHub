@@ -34,4 +34,18 @@ public interface CompanyMembershipRepository extends JpaRepository<CompanyMember
     @Modifying
     @Query("DELETE FROM CompanyMembership cm WHERE cm.user.id= :userId AND cm.company.id= :companyId AND cm.role <> com.goat.HireHub.company.Role.ADMIN")
     int deleteByUserIdAndCompanyId(@Param("userId")Long userId,@Param("companyId")Long companyId);
+    @Modifying
+    @Query(
+            value= """
+                      UPDATE company_memberships
+                      SET role= :newRole
+                      WHERE user_id= :userId
+                      AND company_id= :companyId
+                    """,
+            nativeQuery = true
+    )
+    int updateMembershipRole(@Param("userId")Long userId,
+                             @Param("companyId")Long companyId,
+                             @Param("newRole")String role
+                             );
 }
