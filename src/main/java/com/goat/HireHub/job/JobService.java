@@ -178,9 +178,7 @@ public class JobService {
                     "Access Denied: Only a company recruiters and admin can post or modify jobs belonging to that company."
             );
         }
-
     }
-
     @Transactional
     public void saveJobSkills(Long jobId, List<String> rawSkills, Instant seenStaleInstanceSince){
         Job job=findOrThrow(jobId);
