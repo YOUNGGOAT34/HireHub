@@ -4,13 +4,11 @@ import com.goat.HireHub.company.*;
 import com.goat.HireHub.exception.BadRequestException;
 import com.goat.HireHub.exception.ResourceNotFoundException;
 import com.goat.HireHub.job.dto.*;
-import com.goat.HireHub.job.gemini.GeminiService;
 import com.goat.HireHub.job.requirement.JobRequirementsRepository;
 import com.goat.HireHub.security.SecurityUtils;
 import com.goat.HireHub.skill.Skill;
 import com.goat.HireHub.skill.SkillRepository;
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Slice;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,7 +37,6 @@ public class JobService {
     public JobService(JobRepository jobRep,
                       SecurityUtils securityUtils,
                       CompanyService companyService,
-                       GeminiService geminiService,
                       SkillRepository skillRepository,
                       JobRequirementsRepository requirementsRepository
                       ){
@@ -162,9 +159,9 @@ public class JobService {
                 updatedJob.description(),
                 updatedJob.url(),
                 updatedJob.location(),
-                updatedJob.workPlaceType().name(),
-                updatedJob.employmentType().name(),
-                updatedJob.experienceLevel().name()
+                updatedJob.workPlaceType()==null?null:updatedJob.workPlaceType().name(),
+                updatedJob.employmentType()==null?null:updatedJob.employmentType().name(),
+                updatedJob.experienceLevel()==null?null:updatedJob.experienceLevel().name()
                 );
     }
 
