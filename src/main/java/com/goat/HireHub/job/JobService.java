@@ -107,6 +107,7 @@ public class JobService {
          requirementsRepository.deleteAllByJobId(id);
         jobRepository.deleteJobById(id);
     }
+    @Transactional
     public JobResponse addJob(JobRequest request){
         Company company=companyService.findOrThrow(request.companyId());
         authorizeAccess(request.companyId());
