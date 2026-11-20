@@ -1,4 +1,4 @@
-package com.goat.HireHub.company.dto;
+package com.goat.HireHub.user.dto;
 
 public interface UserSummary {
     Long getId();

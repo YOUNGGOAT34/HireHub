@@ -1,13 +1,14 @@
 package com.goat.HireHub.user;
-import com.goat.HireHub.company.dto.UserSummary;
+import com.goat.HireHub.user.dto.UserSummary;
 import com.goat.HireHub.security.AuthenticatedUser;
 import com.goat.HireHub.user.dto.UserResponse;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.util.List;
 import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User,Long>, JpaSpecificationExecutor<User> {
@@ -25,6 +26,13 @@ public interface UserRepository extends JpaRepository<User,Long>, JpaSpecificati
                       """
       )
       Optional<AuthenticatedUser> findAuthenticatedUserByEmail(@Param("email")String email);
-//      List<UserResponse> findByFirstNameContainingIgnoreCase(String firstName);
+
+    @Query(
+            value = """
+                      SELECT new com.goat.HireHub.user.dto.UserResponse(u.id,firstName,lastName,username)
+                      FROM User u
+                    """
+    )
+    Slice<UserResponse> findAllUsers(Pageable pageable);
 
 }

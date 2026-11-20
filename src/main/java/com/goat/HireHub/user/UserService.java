@@ -6,6 +6,8 @@ import com.goat.HireHub.experience.ExperienceRepository;
 import com.goat.HireHub.security.SecurityUtils;
 import com.goat.HireHub.skill.SkillRepository;
 import com.goat.HireHub.user.dto.*;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Slice;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -33,8 +35,9 @@ public class UserService {
      }
 
      //users
-     public Page<UserResponse> getAllUsers(Pageable pageable){
-          return userRepository.findAll(pageable).map(UserResponse::from);
+    @Cacheable(value="users",key="{#pageable.pageNumber,#pageable.pageSize,#pageable.sort}")
+     public Slice<UserResponse> getAllUsers(Pageable pageable){
+          return userRepository.findAllUsers(pageable);
      }
 
      public UserResponse getUserById(Long id){

@@ -8,10 +8,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -28,7 +25,7 @@ public class UserController {
       }
 
       @GetMapping
-      public ResponseEntity<Page<UserResponse>> getUsers(
+      public ResponseEntity<Slice<UserResponse>> getUsers(
               @RequestParam(defaultValue = "0") @PositiveOrZero(message = "Page number has to be zero or greater") int page,
               @RequestParam(defaultValue = "10") @Positive(message = "Page size must greater than zero") int size,
               @RequestParam(defaultValue = "firstName")String sortBy,
@@ -72,7 +69,7 @@ public class UserController {
 
      //helpers
      private void validateSortingField(String field){
-         Set<String> allowedSortFields=Set.of("firstName","lastName","email","username");
+         Set<String> allowedSortFields=Set.of("firstName","lastName","id","username");
          if (!allowedSortFields.contains(field)) {
              throw new BadRequestException(
                      "Invalid sort field: " + field
