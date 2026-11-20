@@ -43,12 +43,18 @@ public class UserController {
       }
 
       @GetMapping("/search")
-      public ResponseEntity<Page<UserResponse>> searchUsers(@RequestParam(required = false) String firstName,
+      public ResponseEntity<Slice<UserResponse>> searchUsers(@RequestParam(required = false) String firstName,
                                                   @RequestParam(required = false) String lastName,
                                                   @RequestParam(required = false) String username,
                                                   @RequestParam(defaultValue = "0") @PositiveOrZero(message = "page number must be zero or greater")int page,
-                                                  @RequestParam(defaultValue = "10") @Max(value =50) @Positive(message = "size must be greater than zero")int size){
-          Pageable pageable=PageRequest.of(page,size,Sort.by("id"));
+                                                  @RequestParam(defaultValue = "10") @Max(value =50) @Positive(message = "size must be greater than zero")int size,
+                                                   @RequestParam(defaultValue ="firstName")String sortBy,
+                                                   @RequestParam(defaultValue = "desc")String direction
+                                                             ){
+
+          validateSortingField(sortBy);
+          Sort.Direction sortDirection=validateSortDirection(direction);
+           Pageable pageable=PageRequest.of(page,size,Sort.by(sortDirection,sortBy).and(Sort.by("id")));
            return ResponseEntity.ok(userService.searchUsers(firstName,lastName,username,pageable));
       }
 

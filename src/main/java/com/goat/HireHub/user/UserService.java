@@ -6,7 +6,6 @@ import com.goat.HireHub.user.dto.*;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Slice;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -39,13 +38,18 @@ public class UserService {
             return getById(userId);
      }
 
-     public Page<UserResponse> searchUsers(String firstName,String lastName,String username,Pageable pageable){
-          Specification<User> spec=UserSpecification
-                  .firstNameMatches(firstName)
-                  .and(UserSpecification.lastNameMatches(lastName))
-                  .and(UserSpecification.usernameMatches(username));
+     @Cacheable(value="user",key="{#firstName?.trim()?.toLowerCase()," +
+             "#lastName?.trim()?.toLowerCase()," +
+             "#username,#pageable.pageNumber,#pageable.pageSize,#pageable.sort}")
+     public Slice<UserResponse> searchUsers(String firstName,String lastName,String username,Pageable pageable){
+          Specification<User> spec=UserSpecification.withFilters(firstName,lastName,username);
 
-           return userRepository.findAll(spec,pageable).map(UserResponse::from);
+          return userRepository.findBy(spec,
+                  q->q
+                          .as(UserResponse.class)
+                          .slice(pageable)
+
+          );
      }
 
      @Transactional

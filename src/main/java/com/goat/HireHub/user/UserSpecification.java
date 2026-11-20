@@ -29,4 +29,10 @@ public class UserSpecification {
 
     }
 
+    public static Specification<User>withFilters(String firstName,String lastName,String username){
+         return UserSpecification.firstNameMatches(firstName)
+                .and(UserSpecification.lastNameMatches(lastName))
+                .and(UserSpecification.usernameMatches(username));
+    }
+
 }

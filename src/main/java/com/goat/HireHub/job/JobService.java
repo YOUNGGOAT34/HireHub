@@ -86,7 +86,6 @@ public class JobService {
                              .as(JobResponseSummary.class)
                              .slice(pageable)
                 );
-
     }
 
     @Cacheable(value="job",key="#id")
