@@ -1,10 +1,7 @@
 package com.goat.HireHub.user;
-import com.goat.HireHub.education.EducationRepository;
 import com.goat.HireHub.exception.ConflictException;
 import com.goat.HireHub.exception.ResourceNotFoundException;
-import com.goat.HireHub.experience.ExperienceRepository;
 import com.goat.HireHub.security.SecurityUtils;
-import com.goat.HireHub.skill.SkillRepository;
 import com.goat.HireHub.user.dto.*;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Slice;
@@ -24,10 +21,7 @@ public class UserService {
 
      public UserService(UserRepository userRepository,
                         PasswordEncoder passwordEncoder,
-                        ExperienceRepository experienceRepository,
-                        EducationRepository educationRepository,
-                        SecurityUtils securityUtils,
-                        SkillRepository skillRepository){
+                        SecurityUtils securityUtils){
           this.userRepository=userRepository;
           this.passwordEncoder=passwordEncoder;
           this.securityUtils=securityUtils;
@@ -40,9 +34,9 @@ public class UserService {
           return userRepository.findAllUsers(pageable);
      }
 
-     public UserResponse getUserById(Long id){
-            User user=getById(id);
-            return UserResponse.from(user);
+     @Cacheable(value="user",key="{#userId}")
+     public UserResponse getUserById(Long userId){
+            return getById(userId);
      }
 
      public Page<UserResponse> searchUsers(String firstName,String lastName,String username,Pageable pageable){
@@ -56,13 +50,13 @@ public class UserService {
 
      @Transactional
      public void deleteUserById(){
-           User user= getCurrentUser();
+           User user= userRepository.findById(1L).orElse(null);
            userRepository.delete(user);
      }
 
      @Transactional
      public UserResponse updateUser(UserUpdateRequest userRequest){
-          User savedUser= getCurrentUser();
+         User savedUser= userRepository.findById(1L).orElse(null);
           String email=userRequest.email().toLowerCase().trim();
           if (!savedUser.getEmail().equals(email) && findByEmail(email)){
                throw new ConflictException("This email address is already taken by another account");
@@ -78,7 +72,7 @@ public class UserService {
 
      @Transactional
      public UserResponse patchUser(UserPatchRequest userRequest){
-          User savedUser= getCurrentUser();
+          User savedUser=userRepository.findById(1L).orElse(null);
           if (userRequest.email()!=null){
                String email=userRequest.email().toLowerCase().trim();
                if (!savedUser.getEmail().equals(email) && findByEmail(email)){
@@ -130,16 +124,13 @@ public class UserService {
             return userRepository.existsByEmailIgnoreCase(email);
      }
 
-     private User getById(Long id){
-           return userRepository.findById(id)
+     private UserResponse getById(Long id){
+           return userRepository.getUserById(id)
                    .orElseThrow(()->new ResourceNotFoundException("user",id));
      }
 
-
-     private User getCurrentUser(){
+     private UserResponse getCurrentUser(){
           return getById(securityUtils.getCurrentUser().id());
      }
-
-
 
 }

@@ -34,5 +34,13 @@ public interface UserRepository extends JpaRepository<User,Long>, JpaSpecificati
                     """
     )
     Slice<UserResponse> findAllUsers(Pageable pageable);
+    @Query(
+            value= """
+                     SELECT new com.goat.HireHub.user.dto.UserResponse(u.id,firstName,lastName,username)
+                     FROM User u
+                     WHERE u.id= :userId
+                    """
+    )
+    Optional<UserResponse> getUserById(@Param("userId")Long userId);
 
 }
