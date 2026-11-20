@@ -3,6 +3,7 @@ package com.goat.HireHub.user;
 
 import com.goat.HireHub.exception.BadRequestException;
 import com.goat.HireHub.feed.dto.UserFeed;
+import com.goat.HireHub.security.SecurityUtils;
 import com.goat.HireHub.user.dto.*;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
@@ -19,9 +20,13 @@ import java.util.Set;
 @Validated
 public class UserController {
       private final UserService userService;
+      private final SecurityUtils securityUtils;
 
-      public UserController(UserService userService){
+      public UserController(UserService userService,SecurityUtils securityUtils)
+      {
            this.userService=userService;
+           this.securityUtils=securityUtils;
+
       }
 
       @GetMapping
@@ -60,7 +65,8 @@ public class UserController {
 
       @DeleteMapping("/me")
       public ResponseEntity<Void> deleteById(){
-          userService.deleteUserById();
+          Long currentUserId=securityUtils.getCurrentUser().id();
+          userService.deleteUserById(currentUserId);
           return ResponseEntity.noContent().build();
       }
 

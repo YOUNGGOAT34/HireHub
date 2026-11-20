@@ -3,6 +3,7 @@ import com.goat.HireHub.exception.ConflictException;
 import com.goat.HireHub.exception.ResourceNotFoundException;
 import com.goat.HireHub.security.SecurityUtils;
 import com.goat.HireHub.user.dto.*;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Slice;
 import org.springframework.transaction.annotation.Transactional;
@@ -53,11 +54,10 @@ public class UserService {
      }
 
      @Transactional
-     public void deleteUserById(){
-           User user= userRepository.findById(1L).orElse(null);
-           userRepository.delete(user);
+     @CacheEvict(value="user",key ="#currentUserId")
+     public void deleteUserById(Long currentUserId){
+           userRepository.deleteUserById(currentUserId);
      }
-
      @Transactional
      public UserResponse updateUser(UserUpdateRequest userRequest){
          User savedUser= userRepository.findById(1L).orElse(null);
