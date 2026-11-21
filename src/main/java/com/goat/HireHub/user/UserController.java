@@ -78,9 +78,10 @@ public class UserController {
            return ResponseEntity.noContent().build();
      }
      @PatchMapping("/me")
-     public   ResponseEntity<UserResponse> patchUser(@RequestBody @Valid UserPatchRequest userPatchRequest){
+     public   ResponseEntity<Void> patchUser(@RequestBody @Valid UserPatchRequest userPatchRequest){
           AuthenticatedUser currentUser=securityUtils.getCurrentUser();
-         return ResponseEntity.ok(userService.patchUser(currentUser.id(),currentUser.email(),userPatchRequest));
+          userService.patchUser(currentUser.id(),currentUser.email(),userPatchRequest);
+         return ResponseEntity.noContent().build();
      }
 
      //helpers

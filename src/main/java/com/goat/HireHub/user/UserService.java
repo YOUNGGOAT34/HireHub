@@ -102,43 +102,49 @@ public class UserService {
      }
 
      @Transactional
-     public UserResponse patchUser(Long userId,String email,UserPatchRequest userRequest){
+     @Caching(
+           evict = {
+                   @CacheEvict(value="user",key = "#userId"),
+                   @CacheEvict(value="authUsers",key="#email.trim().toLowerCase()")
+           }
+     )
+     public void patchUser(Long userId,String email,UserPatchRequest userRequest){
          if(userRequest.email()==null
                  && userRequest.lastName()==null
                  && userRequest.firstName()==null
-         && userRequest.username()==null) throw new BadRequestException("empty patch body");
+         && userRequest.username()==null){
+             throw new BadRequestException("empty patch body");
+         }
 
-          User savedUser=userRepository.findById(1L).orElse(null);
-          if (userRequest.email()!=null){
-               String email=userRequest.email().toLowerCase().trim();
-               if (!savedUser.getEmail().equals(email) && findByEmail(email)){
-                    throw new ConflictException("This email address is already taken by another account");
-               }
+          try{
+               userRepository.patchUser(
+                        userId,
+                       userRequest.firstName(),
+                       userRequest.lastName(),
+                       userRequest.email(),
+                       userRequest.username()
+               );
+          }catch (DataIntegrityViolationException e){
+                if(e.getCause() instanceof ConstraintViolationException cve){
+                    String constraint=cve.getConstraintName();
 
-               savedUser.setEmail(email);
+                    if(constraint!=null){
+                          if(constraint.toLowerCase().contains("email_constraint")){
+                               throw new ConflictException("email already in use");
+                          }
+
+                          if(constraint.toLowerCase().contains("username_constraint")){
+                               throw new ConflictException("username already in use");
+                          }
+                    }
+
+                }
+
+                throw new ConflictException("email or username already in use");
           }
 
-          if(userRequest.lastName()!=null){
-               savedUser.setLastName(userRequest.lastName());
-          }
 
-          if (userRequest.firstName()!=null){
-               savedUser.setFirstName(userRequest.firstName());
-          }
-
-          if(userRequest.username()!=null){
-               savedUser.setUsername(userRequest.username());
-
-          }
-
-          if (userRequest.password() != null && !userRequest.password().isBlank()) {
-               String encodedPassword = passwordEncoder.encode(userRequest.password());
-               savedUser.setPasswordHash(encodedPassword);
-          }
-
-          return UserResponse.from(savedUser);
      }
-
 
 
      public UserResponse registerUser(UserRequest userRequest){

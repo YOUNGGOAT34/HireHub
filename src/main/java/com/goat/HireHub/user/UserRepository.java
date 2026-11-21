@@ -55,9 +55,28 @@ public interface UserRepository extends JpaRepository<User,Long>, JpaSpecificati
 
     @Modifying
     @Query(value= """
-               UPDATE users 
-            """)
-    void patchUser(@Param("userId")Long userId);
+               UPDATE users\s
+               SET first_name= COALESCE( :firstName,first_name),
+                    last_name= COALESCE( :lastName,last_name),
+                    email= COALESCE( :email,email),
+                    username= COALESCE( :username,username)
+               WHERE user_id= :userId
+               AND(
+                   first_name IS DISTINCT FROM COALESCE( :firstName,first_name)
+                   OR last_name IS DISTINCT FROM COALESCE( :lastName,last_name)
+                   OR email IS DISTINCT FROM COALESCE( :email,email)
+                   OR username IS DISTINCT FROM COALESCE( :username,username)
+               )
+              \s
+           \s""",
+            nativeQuery = true
+    )
+    void patchUser(@Param("userId")Long userId,
+                   @Param("firstName")String firstName,
+                   @Param("lastName")String lastName,
+                   @Param("email")String email,
+                   @Param("username")String username
+                   );
 
     @Modifying
     @Query(
