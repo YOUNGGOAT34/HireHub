@@ -84,21 +84,7 @@ public class UserService {
                       userRequest.username().trim().toLowerCase());
 
           }catch(DataIntegrityViolationException e){
-              if(e.getCause() instanceof ConstraintViolationException cve){
-                   String constraintName=cve.getConstraintName();
-
-                   if (constraintName !=null){
-                        if(constraintName.toLowerCase().contains("email_constraint")){
-                            throw new ConflictException("email is already in use");
-                        }
-                        if(constraintName.toLowerCase().contains("username_constraint")){
-                             throw new ConflictException("username already in use");
-                        }
-                   }
-              throw new ConflictException("email or username already in use");
-              }
-
-              throw e;
+              throwConflictViolationException(e);
           }
 
      }
@@ -126,24 +112,7 @@ public class UserService {
                        userRequest.username()==null?null:userRequest.username().trim().toLowerCase()
                );
           }catch (DataIntegrityViolationException e){
-                if(e.getCause() instanceof ConstraintViolationException cve){
-                    String constraint=cve.getConstraintName();
-
-                    if(constraint!=null){
-                          if(constraint.toLowerCase().contains("email_constraint")){
-                               throw new ConflictException("email already in use");
-                          }
-
-                          if(constraint.toLowerCase().contains("username_constraint")){
-                               throw new ConflictException("username already in use");
-                          }
-                    }
-
-                throw new ConflictException("email or username already in use");
-                }
-
-                throw e;
-
+               throwConflictViolationException(e);
           }
 
      }
@@ -160,23 +129,7 @@ public class UserService {
                       );
 
           }catch(DataIntegrityViolationException e){
-               if(e.getCause() instanceof ConstraintViolationException cve){
-                    String constraint=cve.getConstraintName();
-
-                    if(constraint!=null){
-                         if(constraint.trim().contains("email_constraint")){
-                             throw new ConflictException("email already in use");
-                         }
-
-                         if(constraint.trim().contains("username_constraint")){
-                             throw new ConflictException("username already in use");
-                         }
-                    }
-
-                    throw new ConflictException("email or username already in use");
-               }
-
-               throw e;
+               throwConflictViolationException(e);
          }
 
      }
@@ -188,6 +141,26 @@ public class UserService {
 
      private UserResponse getCurrentUser(){
           return getById(securityUtils.getCurrentUser().id());
+     }
+
+     private void throwConflictViolationException(DataIntegrityViolationException e){
+         if(e.getCause() instanceof ConstraintViolationException cve){
+             String constraint=cve.getConstraintName();
+
+             if(constraint!=null){
+                 if(constraint.trim().contains("email_constraint")){
+                     throw new ConflictException("email already in use");
+                 }
+
+                 if(constraint.trim().contains("username_constraint")){
+                     throw new ConflictException("username already in use");
+                 }
+             }
+
+             throw new ConflictException("email or username already in use");
+         }
+
+         throw e;
      }
 
 }
