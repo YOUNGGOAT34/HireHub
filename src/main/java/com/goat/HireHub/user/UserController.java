@@ -3,6 +3,7 @@ package com.goat.HireHub.user;
 
 import com.goat.HireHub.exception.BadRequestException;
 import com.goat.HireHub.feed.dto.UserFeed;
+import com.goat.HireHub.security.AuthenticatedUser;
 import com.goat.HireHub.security.SecurityUtils;
 import com.goat.HireHub.user.dto.*;
 import jakarta.validation.Valid;
@@ -71,12 +72,15 @@ public class UserController {
       }
 
       @PutMapping("/me")
-    public   ResponseEntity<UserResponse> updateUser(@RequestBody @Valid UserUpdateRequest userUpdateRequest){
-           return ResponseEntity.ok(userService.updateUser(userUpdateRequest));
+    public   ResponseEntity<Void> updateUser(@RequestBody @Valid UserUpdateRequest userUpdateRequest){
+           AuthenticatedUser currentUser=securityUtils.getCurrentUser();
+           userService.updateUser(currentUser.id(),currentUser.email(),userUpdateRequest);
+           return ResponseEntity.noContent().build();
      }
      @PatchMapping("/me")
      public   ResponseEntity<UserResponse> patchUser(@RequestBody @Valid UserPatchRequest userPatchRequest){
-         return ResponseEntity.ok(userService.patchUser(userPatchRequest));
+          AuthenticatedUser currentUser=securityUtils.getCurrentUser();
+         return ResponseEntity.ok(userService.patchUser(currentUser.id(),currentUser.email(),userPatchRequest));
      }
 
      //helpers

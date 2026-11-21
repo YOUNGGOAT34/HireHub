@@ -1,10 +1,14 @@
 package com.goat.HireHub.user;
+import com.goat.HireHub.exception.BadRequestException;
 import com.goat.HireHub.exception.ConflictException;
 import com.goat.HireHub.exception.ResourceNotFoundException;
 import com.goat.HireHub.security.SecurityUtils;
 import com.goat.HireHub.user.dto.*;
+import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Slice;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.Pageable;
@@ -54,28 +58,56 @@ public class UserService {
      }
 
      @Transactional
-     @CacheEvict(value="user",key ="#currentUserId")
+     @Caching(
+             evict = {
+                     @CacheEvict(value="user",key="#userId"),
+                     @CacheEvict(value="authUsers",key="#email.trim().toLowerCase()")
+             }
+     )
      public void deleteUserById(Long currentUserId){
            userRepository.deleteUserById(currentUserId);
      }
      @Transactional
-     public UserResponse updateUser(UserUpdateRequest userRequest){
-         User savedUser= userRepository.findById(1L).orElse(null);
-          String email=userRequest.email().toLowerCase().trim();
-          if (!savedUser.getEmail().equals(email) && findByEmail(email)){
-               throw new ConflictException("This email address is already taken by another account");
-          }
-          savedUser.setLastName(userRequest.lastName());
-          savedUser.setFirstName(userRequest.firstName());
-          savedUser.setUsername(userRequest.username());
-          savedUser.setEmail(email);
 
-          return UserResponse.from(savedUser);
+     @Caching(
+             evict = {
+                     @CacheEvict(value="user",key="#userId"),
+                     @CacheEvict(value="authUsers",key="#email.trim().toLowerCase()")
+             }
+     )
+     public void updateUser(Long userId,String email,UserUpdateRequest userRequest){
+          try{
+              userRepository.updateUser(userId,
+                      userRequest.firstName(),
+                      userRequest.lastName(),
+                      userRequest.email(),
+                      userRequest.username());
+
+          }catch(DataIntegrityViolationException e){
+              if(e.getCause() instanceof ConstraintViolationException cve){
+                   String constraintName=cve.getConstraintName();
+
+                   if (constraintName !=null){
+                        if(constraintName.toLowerCase().contains("email_constraint")){
+                            throw new ConflictException("email is already in use");
+                        }
+                        if(constraintName.toLowerCase().contains("username_constraint")){
+                             throw new ConflictException("username already in use");
+                        }
+                   }
+              }
+              throw new ConflictException("email or username already in use");
+          }
 
      }
 
      @Transactional
-     public UserResponse patchUser(UserPatchRequest userRequest){
+     public UserResponse patchUser(Long userId,String email,UserPatchRequest userRequest){
+         if(userRequest.email()==null
+                 && userRequest.lastName()==null
+                 && userRequest.firstName()==null
+         && userRequest.username()==null) throw new BadRequestException("empty patch body");
+
           User savedUser=userRepository.findById(1L).orElse(null);
           if (userRequest.email()!=null){
                String email=userRequest.email().toLowerCase().trim();
@@ -136,5 +168,7 @@ public class UserService {
      private UserResponse getCurrentUser(){
           return getById(securityUtils.getCurrentUser().id());
      }
+
+
 
 }

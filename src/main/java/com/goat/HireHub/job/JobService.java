@@ -126,7 +126,7 @@ public class JobService {
         Long companyId=jobRepository.findCompanyIdByJobId(id)
                 .orElseThrow(()->new ResourceNotFoundException("job",id));
         authorizeAccess(companyId);
-        jobRepository.patchJob(id,updatedJob.salary(),
+        jobRepository.updateJob(id,updatedJob.salary(),
                 updatedJob.title(),
                 updatedJob.description(),
                 updatedJob.url(),

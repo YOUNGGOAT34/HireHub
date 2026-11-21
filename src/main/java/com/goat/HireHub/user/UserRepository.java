@@ -53,5 +53,35 @@ public interface UserRepository extends JpaRepository<User,Long>, JpaSpecificati
     )
     void deleteUserById(@Param("userId")Long userId);
 
+    @Modifying
+    @Query(value= """
+               UPDATE users 
+            """)
+    void patchUser(@Param("userId")Long userId);
+
+    @Modifying
+    @Query(
+            value= """
+                     UPDATE users
+                     SET first_name= :firstName,
+                         last_name= :lastName,
+                         email= :email,
+                         username= :username
+                     WHERE user_id= :userId
+                     AND(
+                         last_name IS DISTINCT FROM :lastName
+                         OR first_name IS DISTINCT FROM :firstName
+                         OR email IS DISTINCT FROM :email
+                         OR username IS DISTINCT FROM :username
+                     )
+                    """,
+            nativeQuery = true
+    )
+    void updateUser(@Param("userId")Long userId,
+                    @Param("firstName")String firstName,
+                    @Param("lastName")String lastName,
+                    @Param("email")String email,
+                    @Param("username")String username
+    );
 
 }

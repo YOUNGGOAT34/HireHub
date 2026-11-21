@@ -41,7 +41,10 @@ CREATE TABLE jobs(
        first_name VARCHAR(50) NOT NULL,
        last_name VARCHAR(50) NOT NULL,
        username VARCHAR(50) UNIQUE,
-       password_hash VARCHAR(72) NOT NULL
+       password_hash VARCHAR(72) NOT NULL,
+
+       CONSTRAINT user_email_constraint UNIQUE(email),
+       CONSTRAINT username_constraint UNIQUE(username)
   );
 
 -- company_memberships
