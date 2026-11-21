@@ -103,4 +103,19 @@ public interface UserRepository extends JpaRepository<User,Long>, JpaSpecificati
                     @Param("username")String username
     );
 
+    @Modifying
+    @Query(
+            value= """
+                      INSERT INTO users(user_id,email,first_name,last_name,username,password_hash)
+                      VALUES(nextval('users_seq'), :email, :firstName, :lastName, :username, :passwordHash)
+                    """,
+            nativeQuery = true
+    )
+    void createAccount(@Param("email")String email,
+                       @Param("firstName")String firstName,
+                       @Param("lastName")String lastName,
+                       @Param("username")String username,
+                       @Param("passwordHash")String passwordHash
+                       );
+
 }

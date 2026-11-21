@@ -17,7 +17,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
-@Transactional(readOnly = true)
 public class UserService {
      private final UserRepository userRepository;
      private final PasswordEncoder passwordEncoder;
@@ -33,16 +32,17 @@ public class UserService {
      }
 
      //users
+     @Transactional(readOnly = true)
     @Cacheable(value="users",key="{#pageable.pageNumber,#pageable.pageSize,#pageable.sort}")
      public Slice<UserResponse> getAllUsers(Pageable pageable){
           return userRepository.findAllUsers(pageable);
      }
-
+    @Transactional(readOnly = true)
      @Cacheable(value="user",key="{#userId}")
      public UserResponse getUserById(Long userId){
             return getById(userId);
      }
-
+    @Transactional(readOnly = true)
      @Cacheable(value="user",key="{#firstName?.trim()?.toLowerCase()," +
              "#lastName?.trim()?.toLowerCase()," +
              "#username,#pageable.pageNumber,#pageable.pageSize,#pageable.sort}")
@@ -67,8 +67,8 @@ public class UserService {
      public void deleteUserById(Long currentUserId){
            userRepository.deleteUserById(currentUserId);
      }
-     @Transactional
 
+     @Transactional
      @Caching(
              evict = {
                      @CacheEvict(value="user",key="#userId"),
@@ -80,8 +80,8 @@ public class UserService {
               userRepository.updateUser(userId,
                       userRequest.firstName(),
                       userRequest.lastName(),
-                      userRequest.email(),
-                      userRequest.username());
+                      userRequest.email().trim().toLowerCase(),
+                      userRequest.username().trim().toLowerCase());
 
           }catch(DataIntegrityViolationException e){
               if(e.getCause() instanceof ConstraintViolationException cve){
@@ -95,8 +95,10 @@ public class UserService {
                              throw new ConflictException("username already in use");
                         }
                    }
-              }
               throw new ConflictException("email or username already in use");
+              }
+
+              throw e;
           }
 
      }
@@ -115,14 +117,13 @@ public class UserService {
          && userRequest.username()==null){
              throw new BadRequestException("empty patch body");
          }
-
           try{
                userRepository.patchUser(
                         userId,
                        userRequest.firstName(),
                        userRequest.lastName(),
-                       userRequest.email(),
-                       userRequest.username()
+                       userRequest.email()==null?null:userRequest.email().trim().toLowerCase(),
+                       userRequest.username()==null?null:userRequest.username().trim().toLowerCase()
                );
           }catch (DataIntegrityViolationException e){
                 if(e.getCause() instanceof ConstraintViolationException cve){
@@ -138,32 +139,46 @@ public class UserService {
                           }
                     }
 
+                throw new ConflictException("email or username already in use");
                 }
 
-                throw new ConflictException("email or username already in use");
-          }
+                throw e;
 
+          }
 
      }
 
+     @Transactional
+     public void registerUser(UserRequest userRequest){
 
-     public UserResponse registerUser(UserRequest userRequest){
-          String email= userRequest.email().toLowerCase().trim();
+          try{
+              userRepository.createAccount(userRequest.email().trim().toLowerCase(),
+                                           userRequest.firstName().trim(),
+                                          userRequest.lastName().trim(),
+                                          userRequest.username().trim().toLowerCase(),
+                                          passwordEncoder.encode(userRequest.password())
+                      );
 
-          if(findByEmail(email)){
-                throw new ConflictException("An account with this email already exists");
-          }
-          User user=new User();
-          user.setEmail(email);
-          user.setFirstName(userRequest.firstName());
-          user.setLastName(userRequest.lastName());
-          user.setUsername(userRequest.username());
-          user.setPasswordHash(passwordEncoder.encode(userRequest.password()));
-          return  UserResponse.from(userRepository.save(user));
-     }
+          }catch(DataIntegrityViolationException e){
+               if(e.getCause() instanceof ConstraintViolationException cve){
+                    String constraint=cve.getConstraintName();
 
-     private Boolean findByEmail(String email){
-            return userRepository.existsByEmailIgnoreCase(email);
+                    if(constraint!=null){
+                         if(constraint.trim().contains("email_constraint")){
+                             throw new ConflictException("email already in use");
+                         }
+
+                         if(constraint.trim().contains("username_constraint")){
+                             throw new ConflictException("username already in use");
+                         }
+                    }
+
+                    throw new ConflictException("email or username already in use");
+               }
+
+               throw e;
+         }
+
      }
 
      private UserResponse getById(Long id){
@@ -174,7 +189,5 @@ public class UserService {
      private UserResponse getCurrentUser(){
           return getById(securityUtils.getCurrentUser().id());
      }
-
-
 
 }
