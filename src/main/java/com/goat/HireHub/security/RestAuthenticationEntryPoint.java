@@ -8,19 +8,33 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 
+import java.io.IOException;
+
 @Component
 public class RestAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
-    private final HandlerExceptionResolver resolver;
+//    private final HandlerExceptionResolver resolver;
+//
+//    public RestAuthenticationEntryPoint(
+//            @Qualifier("handlerExceptionResolver") HandlerExceptionResolver resolver) {
+//        this.resolver = resolver;
+//    }
+//
+//    @Override
+//    public void commence(HttpServletRequest request, HttpServletResponse response,
+//                         AuthenticationException ex) {
+//        resolver.resolveException(request, response, null, ex);
+//    }
 
-    public RestAuthenticationEntryPoint(
-            @Qualifier("handlerExceptionResolver") HandlerExceptionResolver resolver) {
-        this.resolver = resolver;
-    }
+     @Override
+     public void commence(HttpServletRequest request,
+                          HttpServletResponse response,
+                          AuthenticationException authenticationException)
+             throws IOException
+     {
+            response.setStatus(401);
+            response.setContentType("application/json");
+            response.getWriter().write("{\"error\":\"unauthorized\"}");
+     }
 
-    @Override
-    public void commence(HttpServletRequest request, HttpServletResponse response,
-                         AuthenticationException ex) {
-        resolver.resolveException(request, response, null, ex);
-    }
 }

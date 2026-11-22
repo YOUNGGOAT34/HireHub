@@ -84,7 +84,7 @@ public class UserService {
                       userRequest.username().trim().toLowerCase());
 
           }catch(DataIntegrityViolationException e){
-              throwConflictViolationException(e);
+              throwDataIntegrityViolationException(e);
           }
 
      }
@@ -112,7 +112,7 @@ public class UserService {
                        userRequest.username()==null?null:userRequest.username().trim().toLowerCase()
                );
           }catch (DataIntegrityViolationException e){
-               throwConflictViolationException(e);
+               throwDataIntegrityViolationException(e);
           }
 
      }
@@ -129,7 +129,7 @@ public class UserService {
                       );
 
           }catch(DataIntegrityViolationException e){
-               throwConflictViolationException(e);
+               throwDataIntegrityViolationException(e);
          }
 
      }
@@ -143,7 +143,7 @@ public class UserService {
           return getById(securityUtils.getCurrentUser().id());
      }
 
-     private void throwConflictViolationException(DataIntegrityViolationException e){
+     private void throwDataIntegrityViolationException(DataIntegrityViolationException e){
          if(e.getCause() instanceof ConstraintViolationException cve){
              String constraint=cve.getConstraintName();
 

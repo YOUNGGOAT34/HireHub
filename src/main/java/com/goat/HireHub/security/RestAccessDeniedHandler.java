@@ -8,19 +8,31 @@ import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 
+import java.io.IOException;
+
 @Component
 public class RestAccessDeniedHandler implements AccessDeniedHandler {
 
-    private final HandlerExceptionResolver resolver;
-
-    public RestAccessDeniedHandler(
-            @Qualifier("handlerExceptionResolver") HandlerExceptionResolver resolver) {
-        this.resolver = resolver;
-    }
+//    private final HandlerExceptionResolver resolver;
+//
+//    public RestAccessDeniedHandler(
+//            @Qualifier("handlerExceptionResolver") HandlerExceptionResolver resolver) {
+//        this.resolver = resolver;
+//    }
+//
+//    @Override
+//    public void handle(HttpServletRequest request, HttpServletResponse response,
+//                       AccessDeniedException ex) {
+//        resolver.resolveException(request, response, null, ex);
+//    }
 
     @Override
-    public void handle(HttpServletRequest request, HttpServletResponse response,
-                       AccessDeniedException ex) {
-        resolver.resolveException(request, response, null, ex);
+    public void handle(HttpServletRequest request,
+                       HttpServletResponse response,
+                       AccessDeniedException ex
+                       )throws IOException {
+          response.setStatus(403);
+          response.setContentType("application/json");
+          response.getWriter().write("{\"error\":\"unauthorized\"}");
     }
 }
