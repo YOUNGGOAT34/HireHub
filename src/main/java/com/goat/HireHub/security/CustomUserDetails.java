@@ -41,6 +41,10 @@ public class CustomUserDetails implements UserDetails {
          this.user=user;
          this.enabled=true;
     }
+
+    public AuthenticatedUser getUser(){
+        return this.user;
+    }
     @Override
     public @NotNull String getUsername(){
          return this.user.email();
@@ -51,11 +55,11 @@ public class CustomUserDetails implements UserDetails {
          return this.user.passwordHash();
     }
 
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities(){
          return List.of();
     }
-
     //flags
     @Override
     public boolean isEnabled(){
@@ -77,5 +81,9 @@ public class CustomUserDetails implements UserDetails {
          return true;
     }
 
+    //getters and setters for extra data
+    public Long getId(){
+        return user.id();
+    }
 
 }

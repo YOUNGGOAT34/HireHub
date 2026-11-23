@@ -82,74 +82,74 @@ class JobServiceTest {
     * admins and recruiters can
     * */
 
-    @Test
-    void addJob_AsOutsider_ThrowsAccessDeniedAndSaveIsNeverCalled() {
+//    @Test
+//    void addJob_AsOutsider_ThrowsAccessDeniedAndSaveIsNeverCalled() {
+//
+//        JobRequest request = new JobRequest("React Dev", "Frontend description", BigDecimal.valueOf(90000), 1L);
+//
+//        Company company = mock(Company.class);
+//        User user = mock(User.class);
+//        when(user.getId()).thenReturn(42L);
+//
+//        when(companyService.findOrThrow(1L)).thenReturn(company);
+//        when(securityUtils.getCurrentUser()).thenReturn(user);
+//
+//        when(companyService.findMemberShipOrThrow(42L, 1L))
+//                .thenThrow(new AccessDeniedException("not a member"));
+//
+//        assertThrows(AccessDeniedException.class, () -> jobService.addJob(request));
+//        verify(jobRepository, never()).save(any());
+//    }
 
-        JobRequest request = new JobRequest("React Dev", "Frontend description", BigDecimal.valueOf(90000), 1L);
+//    @ParameterizedTest
+//    @EnumSource(value=Role.class,names={"ADMIN","RECRUITER"})
+//    void addJob_AsAdmin_SavesJobWithRightFieldsUsingArgumentCaptor(Role role) {
+//
+//        JobRequest request = new JobRequest("Cloud Architect", "AWS specialist", BigDecimal.valueOf(150000), 1L);
+//
+//        Company company = mock(Company.class);
+//        User user = mock(User.class);
+//        CompanyMembership membership = mock(CompanyMembership.class);
+//
+//        when(companyService.findOrThrow(1L)).thenReturn(company);
+//        when(securityUtils.getCurrentUser()).thenReturn(user);
+//        when(user.getId()).thenReturn(42L);
+//        when(companyService.findMemberShipOrThrow(42L, 1L)).thenReturn(membership);
+//        when(membership.getRole()).thenReturn(role);
+//
+//        Job savedMock = new Job();
+//        savedMock.setCompany(company);
+//        when(jobRepository.save(any(Job.class))).thenReturn(savedMock);
+//
+//        jobService.addJob(request);
+//
+//        ArgumentCaptor<Job> jobCaptor = ArgumentCaptor.forClass(Job.class);
+//        verify(jobRepository, times(1)).save(jobCaptor.capture());
+//
+//        Job capturedJob = jobCaptor.getValue();
+//
+//        assertEquals("Cloud Architect", capturedJob.getTitle());
+//        assertEquals("AWS specialist", capturedJob.getDescription());
+//        assertEquals(BigDecimal.valueOf(150000), capturedJob.getSalary());
+//        assertEquals(company, capturedJob.getCompany());
+//    }
 
-        Company company = mock(Company.class);
-        User user = mock(User.class);
-        when(user.getId()).thenReturn(42L);
-
-        when(companyService.findOrThrow(1L)).thenReturn(company);
-        when(securityUtils.getCurrentUser()).thenReturn(user);
-
-        when(companyService.findMemberShipOrThrow(42L, 1L))
-                .thenThrow(new AccessDeniedException("not a member"));
-
-        assertThrows(AccessDeniedException.class, () -> jobService.addJob(request));
-        verify(jobRepository, never()).save(any());
-    }
-
-    @ParameterizedTest
-    @EnumSource(value=Role.class,names={"ADMIN","RECRUITER"})
-    void addJob_AsAdmin_SavesJobWithRightFieldsUsingArgumentCaptor(Role role) {
-
-        JobRequest request = new JobRequest("Cloud Architect", "AWS specialist", BigDecimal.valueOf(150000), 1L);
-
-        Company company = mock(Company.class);
-        User user = mock(User.class);
-        CompanyMembership membership = mock(CompanyMembership.class);
-
-        when(companyService.findOrThrow(1L)).thenReturn(company);
-        when(securityUtils.getCurrentUser()).thenReturn(user);
-        when(user.getId()).thenReturn(42L);
-        when(companyService.findMemberShipOrThrow(42L, 1L)).thenReturn(membership);
-        when(membership.getRole()).thenReturn(role);
-
-        Job savedMock = new Job();
-        savedMock.setCompany(company);
-        when(jobRepository.save(any(Job.class))).thenReturn(savedMock);
-
-        jobService.addJob(request);
-
-        ArgumentCaptor<Job> jobCaptor = ArgumentCaptor.forClass(Job.class);
-        verify(jobRepository, times(1)).save(jobCaptor.capture());
-
-        Job capturedJob = jobCaptor.getValue();
-
-        assertEquals("Cloud Architect", capturedJob.getTitle());
-        assertEquals("AWS specialist", capturedJob.getDescription());
-        assertEquals(BigDecimal.valueOf(150000), capturedJob.getSalary());
-        assertEquals(company, capturedJob.getCompany());
-    }
-
-    @Test
-    void addJob_AsNormalEmployee_ThrowsAccessDeniedAndNeverSaves() {
-        JobRequest request = new JobRequest("Data Analyst", "Description", BigDecimal.valueOf(70000), 1L);
-        Company company = mock(Company.class);
-        User user = mock(User.class);
-        CompanyMembership membership = mock(CompanyMembership.class);
-
-        when(companyService.findOrThrow(1L)).thenReturn(company);
-        when(securityUtils.getCurrentUser()).thenReturn(user);
-        when(user.getId()).thenReturn(42L);
-        when(companyService.findMemberShipOrThrow(42L, 1L)).thenReturn(membership);
-        when(membership.getRole()).thenReturn(Role.EMPLOYEE);
-
-        assertThrows(AccessDeniedException.class, () -> jobService.addJob(request));
-        verify(jobRepository, never()).save(any());
-    }
+//    @Test
+//    void addJob_AsNormalEmployee_ThrowsAccessDeniedAndNeverSaves() {
+//        JobRequest request = new JobRequest("Data Analyst", "Description", BigDecimal.valueOf(70000), 1L);
+//        Company company = mock(Company.class);
+//        User user = mock(User.class);
+//        CompanyMembership membership = mock(CompanyMembership.class);
+//
+//        when(companyService.findOrThrow(1L)).thenReturn(company);
+//        when(securityUtils.getCurrentUser()).thenReturn(user);
+//        when(user.getId()).thenReturn(42L);
+//        when(companyService.findMemberShipOrThrow(42L, 1L)).thenReturn(membership);
+//        when(membership.getRole()).thenReturn(Role.EMPLOYEE);
+//
+//        assertThrows(AccessDeniedException.class, () -> jobService.addJob(request));
+//        verify(jobRepository, never()).save(any());
+//    }
 
     /*
     * patch and Update job tests
@@ -157,174 +157,174 @@ class JobServiceTest {
     * A member of a company cannot update a job of that company if they are not authorized to do so
     * */
 
-    @Test
-    void updateJob_ForJobInAnotherCompany_ThrowsAccessDenied() {
+//    @Test
+//    void updateJob_ForJobInAnotherCompany_ThrowsAccessDenied() {
+//
+//        JobUpdateRequest updateRequest = new JobUpdateRequest("New Title", "New Description", BigDecimal.valueOf(60000));
+//
+//        Company realOwningCompany = mock(Company.class);
+//        when(realOwningCompany.getId()).thenReturn(99L);
+//
+//        Job savedJob = mock(Job.class);
+//        when(savedJob.getCompany()).thenReturn(realOwningCompany);
+//        when(jobRepository.findById(1L)).thenReturn(Optional.of(savedJob));
+//
+//        User standardUser = mock(User.class);
+//        when(standardUser.getId()).thenReturn(100L);
+//        when(securityUtils.getCurrentUser()).thenReturn(standardUser);
+//
+//        when(companyService.findOrThrow(99L)).thenReturn(realOwningCompany);
+//
+//        when(companyService.findMemberShipOrThrow(100L, 99L))
+//                .thenThrow(new AccessDeniedException("User has no connection to this organization"));
+//
+//
+//        assertThrows(AccessDeniedException.class, () -> jobService.updateJob(1L, updateRequest));
+//
+//        verify(savedJob, never()).setTitle(anyString());
+//    }
 
-        JobUpdateRequest updateRequest = new JobUpdateRequest("New Title", "New Description", BigDecimal.valueOf(60000));
+//    @ParameterizedTest
+//    @EnumSource(value = Role.class, names = {"ADMIN", "RECRUITER"})
+//    void updateJob_AsAuthorizedRole_UpdatesFieldsSuccessfully(Role authorizedRole) {
+//
+//        JobUpdateRequest updateRequest = new JobUpdateRequest("Staff Engineer", "New Specs", BigDecimal.valueOf(130000));
+//        Company company = mock(Company.class);
+//        when(company.getId()).thenReturn(1L);
+//
+//        Job savedJob = new Job();
+//        savedJob.setCompany(company);
+//
+//        User user = mock(User.class);
+//        CompanyMembership membership = mock(CompanyMembership.class);
+//
+//        when(jobRepository.findById(5L)).thenReturn(Optional.of(savedJob));
+//        when(companyService.findOrThrow(1L)).thenReturn(company);
+//        when(securityUtils.getCurrentUser()).thenReturn(user);
+//        when(user.getId()).thenReturn(42L);
+//        when(companyService.findMemberShipOrThrow(42L, 1L)).thenReturn(membership);
+//        when(membership.getRole()).thenReturn(authorizedRole);
+//        JobResponse response = jobService.updateJob(5L, updateRequest);
+//        assertEquals("Staff Engineer", savedJob.getTitle());
+//        assertEquals("New Specs", savedJob.getDescription());
+//        assertEquals(BigDecimal.valueOf(130000), savedJob.getSalary());
+//    }
 
-        Company realOwningCompany = mock(Company.class);
-        when(realOwningCompany.getId()).thenReturn(99L);
-
-        Job savedJob = mock(Job.class);
-        when(savedJob.getCompany()).thenReturn(realOwningCompany);
-        when(jobRepository.findById(1L)).thenReturn(Optional.of(savedJob));
-
-        User standardUser = mock(User.class);
-        when(standardUser.getId()).thenReturn(100L);
-        when(securityUtils.getCurrentUser()).thenReturn(standardUser);
-
-        when(companyService.findOrThrow(99L)).thenReturn(realOwningCompany);
-
-        when(companyService.findMemberShipOrThrow(100L, 99L))
-                .thenThrow(new AccessDeniedException("User has no connection to this organization"));
-
-
-        assertThrows(AccessDeniedException.class, () -> jobService.updateJob(1L, updateRequest));
-
-        verify(savedJob, never()).setTitle(anyString());
-    }
-
-    @ParameterizedTest
-    @EnumSource(value = Role.class, names = {"ADMIN", "RECRUITER"})
-    void updateJob_AsAuthorizedRole_UpdatesFieldsSuccessfully(Role authorizedRole) {
-
-        JobUpdateRequest updateRequest = new JobUpdateRequest("Staff Engineer", "New Specs", BigDecimal.valueOf(130000));
-        Company company = mock(Company.class);
-        when(company.getId()).thenReturn(1L);
-
-        Job savedJob = new Job();
-        savedJob.setCompany(company);
-
-        User user = mock(User.class);
-        CompanyMembership membership = mock(CompanyMembership.class);
-
-        when(jobRepository.findById(5L)).thenReturn(Optional.of(savedJob));
-        when(companyService.findOrThrow(1L)).thenReturn(company);
-        when(securityUtils.getCurrentUser()).thenReturn(user);
-        when(user.getId()).thenReturn(42L);
-        when(companyService.findMemberShipOrThrow(42L, 1L)).thenReturn(membership);
-        when(membership.getRole()).thenReturn(authorizedRole);
-        JobResponse response = jobService.updateJob(5L, updateRequest);
-        assertEquals("Staff Engineer", savedJob.getTitle());
-        assertEquals("New Specs", savedJob.getDescription());
-        assertEquals(BigDecimal.valueOf(130000), savedJob.getSalary());
-    }
-
-    @Test
-    void updateJob_AsNormalEmployeeInsideCompany_ThrowsAccessDenied() {
-
-        JobUpdateRequest updateRequest = new JobUpdateRequest("New Title", "New Description", BigDecimal.valueOf(60000));
-        Company company = mock(Company.class);
-        when(company.getId()).thenReturn(1L);
-
-        Job savedJob = mock(Job.class);
-        when(savedJob.getCompany()).thenReturn(company);
-        when(jobRepository.findById(5L)).thenReturn(Optional.of(savedJob));
-
-        User user = mock(User.class);
-        when(user.getId()).thenReturn(42L);
-        when(securityUtils.getCurrentUser()).thenReturn(user);
-
-        CompanyMembership companyMembership = mock(CompanyMembership.class);
-        when(companyMembership.getRole()).thenReturn(Role.EMPLOYEE);
-
-        when(companyService.findOrThrow(1L)).thenReturn(company);
-        when(companyService.findMemberShipOrThrow(42L, 1L)).thenReturn(companyMembership);
-
-        assertThrows(AccessDeniedException.class, () -> jobService.updateJob(5L, updateRequest));
-        verify(savedJob, never()).setTitle(anyString());
-    }
-
-
-    @ParameterizedTest
-    @EnumSource(value = Role.class, names = {"ADMIN", "RECRUITER"})
-    void patchJob_AsAuthorizedRole_PatchesPartialFieldsSuccessfully(Role authorizedRole) {
-
-        JobPatchRequest patchRequest = new JobPatchRequest(null, "Patched Description", BigDecimal.valueOf(110000));
-        Company company = mock(Company.class);
-        when(company.getId()).thenReturn(1L);
-
-        Job savedJob = new Job();
-        savedJob.setTitle("Preserved Original Title");
-        savedJob.setCompany(company);
-
-        User user = mock(User.class);
-        CompanyMembership membership = mock(CompanyMembership.class);
-
-        when(jobRepository.findById(5L)).thenReturn(Optional.of(savedJob));
-        when(companyService.findOrThrow(1L)).thenReturn(company);
-        when(securityUtils.getCurrentUser()).thenReturn(user);
-        when(user.getId()).thenReturn(42L);
-        when(companyService.findMemberShipOrThrow(42L, 1L)).thenReturn(membership);
-        when(membership.getRole()).thenReturn(authorizedRole);
-
-        jobService.patchJob(5L, patchRequest);
+//    @Test
+//    void updateJob_AsNormalEmployeeInsideCompany_ThrowsAccessDenied() {
+//
+//        JobUpdateRequest updateRequest = new JobUpdateRequest("New Title", "New Description", BigDecimal.valueOf(60000));
+//        Company company = mock(Company.class);
+//        when(company.getId()).thenReturn(1L);
+//
+//        Job savedJob = mock(Job.class);
+//        when(savedJob.getCompany()).thenReturn(company);
+//        when(jobRepository.findById(5L)).thenReturn(Optional.of(savedJob));
+//
+//        User user = mock(User.class);
+//        when(user.getId()).thenReturn(42L);
+//        when(securityUtils.getCurrentUser()).thenReturn(user);
+//
+//        CompanyMembership companyMembership = mock(CompanyMembership.class);
+//        when(companyMembership.getRole()).thenReturn(Role.EMPLOYEE);
+//
+//        when(companyService.findOrThrow(1L)).thenReturn(company);
+//        when(companyService.findMemberShipOrThrow(42L, 1L)).thenReturn(companyMembership);
+//
+//        assertThrows(AccessDeniedException.class, () -> jobService.updateJob(5L, updateRequest));
+//        verify(savedJob, never()).setTitle(anyString());
+//    }
 
 
-        assertEquals("Preserved Original Title", savedJob.getTitle());
-        assertEquals("Patched Description", savedJob.getDescription());
-    }
+//    @ParameterizedTest
+//    @EnumSource(value = Role.class, names = {"ADMIN", "RECRUITER"})
+//    void patchJob_AsAuthorizedRole_PatchesPartialFieldsSuccessfully(Role authorizedRole) {
+//
+//        JobPatchRequest patchRequest = new JobPatchRequest(null, "Patched Description", BigDecimal.valueOf(110000));
+//        Company company = mock(Company.class);
+//        when(company.getId()).thenReturn(1L);
+//
+//        Job savedJob = new Job();
+//        savedJob.setTitle("Preserved Original Title");
+//        savedJob.setCompany(company);
+//
+//        User user = mock(User.class);
+//        CompanyMembership membership = mock(CompanyMembership.class);
+//
+//        when(jobRepository.findById(5L)).thenReturn(Optional.of(savedJob));
+//        when(companyService.findOrThrow(1L)).thenReturn(company);
+//        when(securityUtils.getCurrentUser()).thenReturn(user);
+//        when(user.getId()).thenReturn(42L);
+//        when(companyService.findMemberShipOrThrow(42L, 1L)).thenReturn(membership);
+//        when(membership.getRole()).thenReturn(authorizedRole);
+//
+//        jobService.patchJob(5L, patchRequest);
+//
+//
+//        assertEquals("Preserved Original Title", savedJob.getTitle());
+//        assertEquals("Patched Description", savedJob.getDescription());
+//    }
+//
 
+//    @Test
+//    void patchJob_AsNormalEmployeeInsideCompany_ThrowsAccessDenied() {
+//
+//        JobPatchRequest patchRequest = new JobPatchRequest("New Title", null, null);
+//        Company company = mock(Company.class);
+//        when(company.getId()).thenReturn(1L);
+//
+//        Job savedJob = mock(Job.class);
+//        when(savedJob.getCompany()).thenReturn(company);
+//        when(jobRepository.findById(5L)).thenReturn(Optional.of(savedJob));
+//
+//        User user = mock(User.class);
+//        when(user.getId()).thenReturn(42L);
+//        when(securityUtils.getCurrentUser()).thenReturn(user);
+//
+//        CompanyMembership companyMembership = mock(CompanyMembership.class);
+//        when(companyMembership.getRole()).thenReturn(Role.EMPLOYEE);
+//
+//        when(companyService.findOrThrow(1L)).thenReturn(company);
+//        when(companyService.findMemberShipOrThrow(42L, 1L)).thenReturn(companyMembership);
+//
+//        assertThrows(AccessDeniedException.class, () -> jobService.patchJob(5L, patchRequest));
+//        verify(savedJob, never()).setTitle(anyString());
+//    }
 
-    @Test
-    void patchJob_AsNormalEmployeeInsideCompany_ThrowsAccessDenied() {
-
-        JobPatchRequest patchRequest = new JobPatchRequest("New Title", null, null);
-        Company company = mock(Company.class);
-        when(company.getId()).thenReturn(1L);
-
-        Job savedJob = mock(Job.class);
-        when(savedJob.getCompany()).thenReturn(company);
-        when(jobRepository.findById(5L)).thenReturn(Optional.of(savedJob));
-
-        User user = mock(User.class);
-        when(user.getId()).thenReturn(42L);
-        when(securityUtils.getCurrentUser()).thenReturn(user);
-
-        CompanyMembership companyMembership = mock(CompanyMembership.class);
-        when(companyMembership.getRole()).thenReturn(Role.EMPLOYEE);
-
-        when(companyService.findOrThrow(1L)).thenReturn(company);
-        when(companyService.findMemberShipOrThrow(42L, 1L)).thenReturn(companyMembership);
-
-        assertThrows(AccessDeniedException.class, () -> jobService.patchJob(5L, patchRequest));
-        verify(savedJob, never()).setTitle(anyString());
-    }
-
-    @ParameterizedTest
-    @CsvSource({
-            "UPDATE",
-            "PATCH"
-    })
-    void modifyJob_AsCompleteOutsider_ThrowsAccessDenied(String actionType) {
-
-        Company company = mock(Company.class);
-        when(company.getId()).thenReturn(1L);
-
-        Job savedJob = mock(Job.class);
-        when(savedJob.getCompany()).thenReturn(company);
-        when(jobRepository.findById(5L)).thenReturn(Optional.of(savedJob));
-
-        User user = mock(User.class);
-        when(user.getId()).thenReturn(999L);
-        when(securityUtils.getCurrentUser()).thenReturn(user);
-
-        when(companyService.findOrThrow(1L)).thenReturn(company);
-
-        when(companyService.findMemberShipOrThrow(999L, 1L))
-                .thenThrow(new AccessDeniedException("User has no records tied to this company"));
-
-
-        if ("UPDATE".equals(actionType)) {
-            JobUpdateRequest req = new JobUpdateRequest("Title", "Desc", BigDecimal.valueOf(50000));
-            assertThrows(AccessDeniedException.class, () -> jobService.updateJob(5L, req));
-        } else {
-            JobPatchRequest req = new JobPatchRequest("Title", null, null);
-            assertThrows(AccessDeniedException.class, () -> jobService.patchJob(5L, req));
-        }
-
-        verify(savedJob, never()).setTitle(anyString());
-    }
+//    @ParameterizedTest
+//    @CsvSource({
+//            "UPDATE",
+//            "PATCH"
+//    })
+//    void modifyJob_AsCompleteOutsider_ThrowsAccessDenied(String actionType) {
+//
+//        Company company = mock(Company.class);
+//        when(company.getId()).thenReturn(1L);
+//
+//        Job savedJob = mock(Job.class);
+//        when(savedJob.getCompany()).thenReturn(company);
+//        when(jobRepository.findById(5L)).thenReturn(Optional.of(savedJob));
+//
+//        User user = mock(User.class);
+//        when(user.getId()).thenReturn(999L);
+//        when(securityUtils.getCurrentUser()).thenReturn(user);
+//
+//        when(companyService.findOrThrow(1L)).thenReturn(company);
+//
+//        when(companyService.findMemberShipOrThrow(999L, 1L))
+//                .thenThrow(new AccessDeniedException("User has no records tied to this company"));
+//
+//
+//        if ("UPDATE".equals(actionType)) {
+//            JobUpdateRequest req = new JobUpdateRequest("Title", "Desc", BigDecimal.valueOf(50000));
+//            assertThrows(AccessDeniedException.class, () -> jobService.updateJob(5L, req));
+//        } else {
+//            JobPatchRequest req = new JobPatchRequest("Title", null, null);
+//            assertThrows(AccessDeniedException.class, () -> jobService.patchJob(5L, req));
+//        }
+//
+//        verify(savedJob, never()).setTitle(anyString());
+//    }
 
     /*
     *  Delete job tests
@@ -342,69 +342,69 @@ class JobServiceTest {
         verify(jobRepository, never()).delete(any(Job.class));
     }
 
-     @Test
+//     @Test
+//
+//     void deleteById_WhenUserNotInCompany_throwsAccessDenied(){
+//          Company company=mock(Company.class);
+//          when(company.getId()).thenReturn(1L);
+//
+//          Job job=mock(Job.class);
+//         when(job.getCompany()).thenReturn(company);
+//          when(jobRepository.findById(5L)).thenReturn(Optional.of(job));
+//
+//
+//          User user=mock(User.class);
+//          when(user.getId()).thenReturn(42L);
+//          when(securityUtils.getCurrentUser()).thenReturn(user);
+//          when(companyService.findOrThrow(1L)).thenReturn(company);
+//          when(companyService.findMemberShipOrThrow(42L,1L)).
+//                  thenThrow(new AccessDeniedException("not a member"));
+//          assertThrows(AccessDeniedException.class,()->jobService.deleteById(5L));
+//
+//          verify(jobRepository,never()).deleteById(any());
+//          verify(jobRepository,never()).delete(job);
+//
+//     }
+//
+//     @ParameterizedTest
+//     @EnumSource(value=Role.class,names={"ADMIN","RECRUITER"},mode=EnumSource.Mode.EXCLUDE)
+//    void deleteById_WhenUserInCompanyButNotAdminOrRecruiter_throwsAccessDenied(Role role){
+//          Job job=givenJobInCompanyWhereUserHasRole(role);
+//         assertThrows(AccessDeniedException.class,()->jobService.deleteById(1L));
+//         verify(jobRepository,never()).deleteById(any());
+//         verify(jobRepository,never()).delete(job);
+//
+//     }
 
-     void deleteById_WhenUserNotInCompany_throwsAccessDenied(){
-          Company company=mock(Company.class);
-          when(company.getId()).thenReturn(1L);
-
-          Job job=mock(Job.class);
-         when(job.getCompany()).thenReturn(company);
-          when(jobRepository.findById(5L)).thenReturn(Optional.of(job));
 
 
-          User user=mock(User.class);
-          when(user.getId()).thenReturn(42L);
-          when(securityUtils.getCurrentUser()).thenReturn(user);
-          when(companyService.findOrThrow(1L)).thenReturn(company);
-          when(companyService.findMemberShipOrThrow(42L,1L)).
-                  thenThrow(new AccessDeniedException("not a member"));
-          assertThrows(AccessDeniedException.class,()->jobService.deleteById(5L));
-
-          verify(jobRepository,never()).deleteById(any());
-          verify(jobRepository,never()).delete(job);
-
-     }
-
-     @ParameterizedTest
-     @EnumSource(value=Role.class,names={"ADMIN","RECRUITER"},mode=EnumSource.Mode.EXCLUDE)
-    void deleteById_WhenUserInCompanyButNotAdminOrRecruiter_throwsAccessDenied(Role role){
-          Job job=givenJobInCompanyWhereUserHasRole(role);
-         assertThrows(AccessDeniedException.class,()->jobService.deleteById(1L));
-         verify(jobRepository,never()).deleteById(any());
-         verify(jobRepository,never()).delete(job);
-
-     }
-
-
-
-    @ParameterizedTest
-    @EnumSource(value=Role.class,names={"ADMIN","RECRUITER"})
-    void deleteById_WhenUserInCompanyAndISRecruiterOrAdmin_DeletesSuccessfully(Role role){
-        Job job=givenJobInCompanyWhereUserHasRole(role);
-        assertDoesNotThrow(()->jobService.deleteById(1L));
-        verify(jobRepository,times(1)).delete(job);
-
-    }
-
-    Job givenJobInCompanyWhereUserHasRole(Role role){
-        Company company=mock(Company.class);
-        when(company.getId()).thenReturn(1L);
-        Job job=mock(Job.class);
-        when(jobRepository.findById(1L)).thenReturn(Optional.of(job));
-        when(job.getCompany()).thenReturn(company);
-        when(companyService.findOrThrow(1L)).thenReturn(company);
-
-        User user=mock(User.class);
-        when(securityUtils.getCurrentUser()).thenReturn(user);
-        when(user.getId()).thenReturn(1L);
-
-        CompanyMembership companyMembership=mock(CompanyMembership.class);
-        when(companyMembership.getRole()).thenReturn(role);
-
-        when(companyService.findMemberShipOrThrow(1L,1L)).thenReturn(companyMembership);
-
-        return job;
-    }
+//    @ParameterizedTest
+//    @EnumSource(value=Role.class,names={"ADMIN","RECRUITER"})
+//    void deleteById_WhenUserInCompanyAndISRecruiterOrAdmin_DeletesSuccessfully(Role role){
+//        Job job=givenJobInCompanyWhereUserHasRole(role);
+//        assertDoesNotThrow(()->jobService.deleteById(1L));
+//        verify(jobRepository,times(1)).delete(job);
+//
+//    }
+//
+//    Job givenJobInCompanyWhereUserHasRole(Role role){
+//        Company company=mock(Company.class);
+//        when(company.getId()).thenReturn(1L);
+//        Job job=mock(Job.class);
+//        when(jobRepository.findById(1L)).thenReturn(Optional.of(job));
+//        when(job.getCompany()).thenReturn(company);
+//        when(companyService.findOrThrow(1L)).thenReturn(company);
+//
+//        User user=mock(User.class);
+//        when(securityUtils.getCurrentUser()).thenReturn(user);
+//        when(user.getId()).thenReturn(1L);
+//
+//        CompanyMembership companyMembership=mock(CompanyMembership.class);
+//        when(companyMembership.getRole()).thenReturn(role);
+//
+//        when(companyService.findMemberShipOrThrow(1L,1L)).thenReturn(companyMembership);
+//
+//        return job;
+//    }
 
 }

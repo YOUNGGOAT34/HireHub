@@ -1,9 +1,7 @@
 package com.goat.HireHub.job;
 import com.goat.HireHub.ControllerBase;
 import com.goat.HireHub.exception.ResourceNotFoundException;
-import com.goat.HireHub.job.dto.JobRequest;
-import com.goat.HireHub.job.dto.JobResponse;
-import com.goat.HireHub.job.dto.JobResponseSummary;
+import com.goat.HireHub.job.dto.*;
 import com.goat.HireHub.security.JwtService;
 import com.goat.HireHub.security.SecurityConfig;
 import org.junit.jupiter.api.Test;
@@ -22,7 +20,6 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import javax.naming.AuthenticationException;
-
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
@@ -48,7 +45,6 @@ class JobControllerTest extends ControllerBase {
 
 
     //pagination and search
-
     @ParameterizedTest
     @ValueSource(strings = {
             "sortBy=password", "direction=banana", "page=-1", "size=0", "size=1000"
@@ -111,42 +107,37 @@ class JobControllerTest extends ControllerBase {
     }
 
 
+    @Test
+    void search_validParams_passesFiltersAndPageableToService() throws Exception {
+        when(jobService.searchJobs(any(), any(), any(), any(),any(),any(),any(),any(),any(),any(Pageable.class)))
+                .thenReturn(Page.empty());
 
+        mockMvc.perform(get("/jobs/search")
+                        .param("title", "java")
+                        .param("minSalary", "1000")
+                        .param("maxSalary", "5000")
+                        .param("companyName", "Safaricom")
+                        .param("companyId", "3")
+                        .param("page", "1")
+                        .param("size", "20")
+                        .param("sortBy", "title")
+                        .param("direction", "asc"))
+                .andExpect(status().isOk());
 
-//
-//    @Test
-//    void search_validParams_passesFiltersAndPageableToService() throws Exception {
-//        when(jobService.searchJobs(any(), any(), any(), any(),any(),any(), any(Pageable.class)))
-//                .thenReturn(Page.empty());
-//
-//        mockMvc.perform(get("/jobs/search")
-//                        .param("title", "java")
-//                        .param("minSalary", "1000")
-//                        .param("maxSalary", "5000")
-//                        .param("companyName", "Safaricom")
-//                        .param("companyId", "3")
-//                        .param("page", "1")
-//                        .param("size", "20")
-//                        .param("sortBy", "title")
-//                        .param("direction", "asc"))
-//                .andExpect(status().isOk());
-//
-//        ArgumentCaptor<Pageable> captor = ArgumentCaptor.forClass(Pageable.class);
-//        verify(jobService).searchJobs(
-//                eq("java"), eq(new BigDecimal("1000")), eq(new BigDecimal("5000")),
-//                eq("Safaricom"), eq(3L) ,captor.capture();
-//        Pageable p = captor.getValue();
-//        assertEquals(1, p.getPageNumber());
-//        assertEquals(20, p.getPageSize());
-//        assertEquals(Sort.Direction.ASC, p.getSort().getOrderFor("title").getDirection());
-//    }
-
+        ArgumentCaptor<Pageable> captor = ArgumentCaptor.forClass(Pageable.class);
+        verify(jobService).searchJobs(
+                eq("java"), eq(new BigDecimal("1000")), eq(new BigDecimal("5000")),
+                eq("Safaricom"),eq("3L"),any(),any(),any(),any() ,captor.capture());
+        Pageable p = captor.getValue();
+        assertEquals(1, p.getPageNumber());
+        assertEquals(20, p.getPageSize());
+        assertEquals(Sort.Direction.ASC, p.getSort().getOrderFor("title").getDirection());
+    }
 
     @Test
     void search_noParams_appliesDefaultsAndNullFilters() throws Exception {
         when(jobService.searchJobs(any(), any(), any(), any(), any(),any(),any(),any(),any(),any(Pageable.class)))
                 .thenReturn(Page.empty());
-
         mockMvc.perform(get("/jobs/search")).andExpect(status().isOk());
 
         ArgumentCaptor<Pageable> captor = ArgumentCaptor.forClass(Pageable.class);
@@ -176,8 +167,6 @@ class JobControllerTest extends ControllerBase {
     }
 
 
-
-
     @Test
     void search_noResults_returns200WithEmptyContent() throws Exception {
         when(jobService.searchJobs(any(), any(), any(), any(),any(), any(),any(),any(),any(), any(Pageable.class)))
@@ -205,7 +194,6 @@ class JobControllerTest extends ControllerBase {
     @Test
     void addJob_validBody_returns201AndPassesValuesToService() throws Exception {
         when(jobService.addJob(any(JobRequest.class))).thenReturn(sampleJob(10L, "Java Developer"));
-
         mockMvc.perform(post("/jobs")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(VALID_CREATE))
@@ -218,29 +206,31 @@ class JobControllerTest extends ControllerBase {
         assertEquals("Java Developer", captor.getValue().title());
         assertEquals(1L, captor.getValue().companyId());
     }
-
     @Test
     void updateJob_validBody_returns200() throws Exception {
-        when(jobService.updateJob(eq(5L), any())).thenReturn(sampleJob(5L, "Senior Java Developer"));
 
         mockMvc.perform(put("/jobs/5")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(VALID_UPDATE))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.title").value("Senior Java Developer"));
+                .andExpect(status().isNoContent());
+        ArgumentCaptor<JobUpdateRequest> captor=ArgumentCaptor.forClass(JobUpdateRequest.class);
+        verify(jobService).updateJob(5L,captor.capture());
+
+        assertEquals("Senior Java Developer",captor.getValue().title());
+        assertEquals("Lead APIs",captor.getValue().description());
+        assertEquals(0,new BigDecimal("80000").compareTo(captor.getValue().salary()));
     }
 
     @Test
     void patchJob_onlyOneFieldSent_returns200() throws Exception {
-        when(jobService.patchJob(eq(5L), any())).thenReturn(sampleJob(5L, "New Title"));
-
         mockMvc.perform(patch("/jobs/5")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {"title":"New Title"}
                                 """))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.title").value("New Title"));
+                .andExpect(status().isNoContent());
+        ArgumentCaptor<JobPatchRequest> captor=ArgumentCaptor.forClass(JobPatchRequest.class);
+        assertEquals("New Title",captor.getValue().title());
     }
 
     @Test
@@ -251,7 +241,6 @@ class JobControllerTest extends ControllerBase {
 
         verify(jobService).deleteById(5L);
     }
-
 
 
 //validation on writes
@@ -363,7 +352,6 @@ class JobControllerTest extends ControllerBase {
 
     @Test
     void updateJob_whenJobMissing_returns404() throws Exception {
-        when(jobService.updateJob(eq(99L), any())).thenThrow(new ResourceNotFoundException("Job", 99L));
 
         mockMvc.perform(put("/jobs/99")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -373,7 +361,6 @@ class JobControllerTest extends ControllerBase {
 
     @Test
     void patchJob_whenJobMissing_returns404() throws Exception {
-        when(jobService.patchJob(eq(99L), any())).thenThrow(new ResourceNotFoundException("Job", 99L));
 
         mockMvc.perform(patch("/jobs/99")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -418,7 +405,6 @@ class JobControllerTest extends ControllerBase {
 
     @Test
     void updateJob_whenServiceDeniesAccess_returns403() throws Exception {
-        when(jobService.updateJob(eq(5L), any())).thenThrow(new AccessDeniedException("not a member"));
 
         mockMvc.perform(put("/jobs/5")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -428,7 +414,6 @@ class JobControllerTest extends ControllerBase {
 
     @Test
     void patchJob_whenServiceDeniesAccess_returns403() throws Exception {
-        when(jobService.patchJob(eq(5L), any())).thenThrow(new AccessDeniedException("not a member"));
 
         mockMvc.perform(patch("/jobs/5")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -448,8 +433,6 @@ class JobControllerTest extends ControllerBase {
     }
 
     //helpers
-
-
     private JobResponseSummary sampleJobSummary(Long id, String title) {
         return new JobResponseSummary(id, title, new BigDecimal("50000"), 1L, "Safaricom","Nairobi",EmploymentType.FULL_TIME,ExperienceLevel.ENTRY_LEVEL,WorkPlaceType.ON_SITE,"https//:example.com", Instant.now());
     }
@@ -458,6 +441,5 @@ class JobControllerTest extends ControllerBase {
     private JobResponse sampleJob(Long id, String title) {
         return new JobResponse(id, title, "Build APIs", new BigDecimal("50000"), 1L, "Safaricom","Nairobi",EmploymentType.FULL_TIME,ExperienceLevel.ENTRY_LEVEL,WorkPlaceType.ON_SITE,"https//:example.com", Instant.now());
     }
-
 
 }

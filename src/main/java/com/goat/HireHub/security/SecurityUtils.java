@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class SecurityUtils {
-
     public AuthenticatedUser getCurrentUser() {
 
         Authentication auth=SecurityContextHolder.getContext().getAuthentication();

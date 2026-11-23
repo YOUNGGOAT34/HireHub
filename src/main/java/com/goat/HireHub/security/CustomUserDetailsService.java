@@ -11,16 +11,28 @@ import org.springframework.stereotype.Service;
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
 
-    private final UserRepository userRepository;
+//    private final UserRepository userRepository;
+//
+//    public CustomUserDetailsService(UserRepository userRepository){
+//         this.userRepository=userRepository;
+//    }
+//    @Override
+//    @Cacheable(value="authUsers",key="#email.trim().toLowerCase()")
+//    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+//        AuthenticatedUser user = userRepository.findAuthenticatedUserByEmail(email)
+//                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + email));
+//        return new CustomUserDetails(user);
+//    }
 
-    public CustomUserDetailsService(UserRepository userRepository){
-         this.userRepository=userRepository;
+    private final UserRepository userRepository;
+    public CustomUserDetailsService(UserRepository repo){
+        this.userRepository=repo;
     }
+
     @Override
-    @Cacheable(value="authUsers",key="#email.trim().toLowerCase()")
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        AuthenticatedUser user = userRepository.findAuthenticatedUserByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + email));
+    public UserDetails loadUserByUsername(String email){
+        AuthenticatedUser user=userRepository.findAuthenticatedUserByEmail(email.trim().toLowerCase())
+                .orElseThrow(()-> new UsernameNotFoundException("username not found"));
         return new CustomUserDetails(user);
     }
 }

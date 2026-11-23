@@ -72,7 +72,8 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http,
                                                    RestAuthenticationEntryPoint entryPoint,
-                                                   RestAccessDeniedHandler accessDenied
+                                                   RestAccessDeniedHandler accessDenied,
+                                                   AuthenticationProvider authenticationProvider
                                                    ){
          http
                  .csrf(csrf->csrf.disable())
@@ -82,6 +83,7 @@ public class SecurityConfig {
                          ex.authenticationEntryPoint(entryPoint)
                                  .accessDeniedHandler(accessDenied)
                          )
+                 .authenticationProvider(authenticationProvider)
                  .authorizeHttpRequests(
                            auth-> auth
 //                                   .requestMatchers("/error").permitAll()
@@ -97,5 +99,17 @@ public class SecurityConfig {
     PasswordEncoder passwordEncoder(){
         return new BCryptPasswordEncoder();
     }
+    @Bean
+    public AuthenticationProvider authenticationProvider(CustomUserDetailsService userDetailsService,
+                                                         PasswordEncoder passwordEncoder
+                                                         ){
+         DaoAuthenticationProvider provider=new DaoAuthenticationProvider(userDetailsService);
+         provider.setPasswordEncoder(passwordEncoder);
+         return provider;
+    }
 
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration){
+        return configuration.getAuthenticationManager();
+    }
 }
