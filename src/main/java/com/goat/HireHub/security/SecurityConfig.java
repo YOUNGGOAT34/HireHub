@@ -64,10 +64,10 @@ public class SecurityConfig {
 //    }
 
 
-    private final JwtAuthenticationFilter jwtAuthenticationFilter;
-    public SecurityConfig(JwtAuthenticationFilter authenticationFilter){
-        this.jwtAuthenticationFilter=authenticationFilter;
-    }
+//    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+//    public SecurityConfig(JwtAuthenticationFilter authenticationFilter){
+//        this.jwtAuthenticationFilter=authenticationFilter;
+//    }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http,
@@ -90,8 +90,8 @@ public class SecurityConfig {
                                    .requestMatchers("/auth/**").permitAll()
 //                                   .requestMatchers(HttpMethod.GET,"/jobs/**","/companies/**").permitAll()
 //                                   .requestMatchers("/swagger-ui.html","/swagger-ui/**","/v3/api-docs/**").permitAll()
-                                   .anyRequest().authenticated())
-                 .addFilterBefore(jwtAuthenticationFilter,UsernamePasswordAuthenticationFilter.class);
+                                   .anyRequest().authenticated());
+//                 .addFilterBefore(jwtAuthenticationFilter,UsernamePasswordAuthenticationFilter.class);
 
                  return http.build();
     }
