@@ -1,5 +1,5 @@
 
-package com.goat.HireHub.security;
+package com.goat.HireHub.security.dto;
 
 public record LoginResponse(
         String token,
