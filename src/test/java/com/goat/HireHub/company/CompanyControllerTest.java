@@ -138,7 +138,7 @@ class CompanyControllerTest extends ControllerBase{
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content.length()").value(2))
                 .andExpect(jsonPath("$.content[0].name").value("Safaricom"))
-                .andExpect(jsonPath("$.totalElements").value(2))
+                .andExpect(jsonPath("$.numberOfElements").value(2))
                 .andExpect(jsonPath("$.last").value(true));
     }
 
@@ -212,6 +212,7 @@ class CompanyControllerTest extends ControllerBase{
                                 """))
                 .andExpect(status().isNoContent());
         ArgumentCaptor<CompanyPatchRequest> captor=ArgumentCaptor.forClass(CompanyPatchRequest.class);
+        verify(companyService).patchCompany(eq(5L),captor.capture());
         assertEquals("New Name",captor.getValue().name());
     }
 
@@ -244,7 +245,6 @@ class CompanyControllerTest extends ControllerBase{
     }
 
     //validation on writes
-
     @ParameterizedTest
     @ValueSource(strings = {
             // blank name
@@ -395,9 +395,9 @@ class CompanyControllerTest extends ControllerBase{
 
     @Test
     void patchCompany_whenCompanyMissing_returns404() throws Exception {
-        doThrow(ResourceNotFoundException.class)
+        doThrow(new ResourceNotFoundException("Company",99L))
                 .when(companyService).patchCompany(eq(5L),any(CompanyPatchRequest.class));
-        mockMvc.perform(patch("/companies/99")
+        mockMvc.perform(patch("/companies/5")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {"name":"New Name"}

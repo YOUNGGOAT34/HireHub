@@ -46,7 +46,7 @@ public class CompanyController {
                                                                 @RequestParam(required = false) String name,
                                                                 @RequestParam (defaultValue = "desc") String direction){
          validateSortField(sortBy);
-         Sort.Direction sortDirection= Sort.Direction.fromString(direction);
+         Sort.Direction sortDirection= validateSortDirection(direction);
          Pageable pageable=PageRequest.of(page,size,Sort.by(sortDirection,sortBy));
          return ResponseEntity.ok(companyService.searchCompany(name,pageable));
      }
@@ -74,7 +74,6 @@ public class CompanyController {
 
           return ResponseEntity.status(HttpStatus.CREATED).body(companyService.addMember(id,request.email(),request.role()));
      }
-
      @DeleteMapping("/{id}")
      public ResponseEntity<Void> deleteCompany(@PathVariable @Positive(message="Id must be greater than zero") Long id){
               companyService.deleteById(id);
@@ -128,9 +127,9 @@ public class CompanyController {
 
      private Sort.Direction validateSortDirection(String direction){
          Set<String> allowedSortFields=Set.of("desc","asc");
-         if (!allowedSortFields.contains(direction)) {
+         if (!allowedSortFields.contains(direction.toLowerCase())) {
              throw new BadRequestException(
-                     "Invalid sort field: " + direction
+                     "Invalid sort direction: " + direction
              );
          }
          return Sort.Direction.fromString(direction);

@@ -1,3 +1,5 @@
+package com.goat.HireHub.devTests;
+
 import com.goat.HireHub.security.JwtService;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;

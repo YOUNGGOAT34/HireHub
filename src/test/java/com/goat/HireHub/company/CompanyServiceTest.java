@@ -97,8 +97,9 @@ class CompanyServiceTest {
 
     //mutation security tests,delete,update,patch
     @Test
-    void modifyCompany_WhenCompanyDoesNotExist_ThrowsResourceNotFoundException() {
-        when(companyRepository.findById(99L)).thenReturn(Optional.empty());
+    void deleteById_WhenCompanyDoesNotExist_ThrowsResourceNotFoundException() {
+        givenCurrentUser();
+        when(companyMembershipRepository.findRoleByUserIdAndCompanyId(USER_ID,99L)).thenReturn(Optional.empty());
         assertThrows(ResourceNotFoundException.class, () -> companyService.deleteById(99L));
         verify(companyRepository, never()).deleteById(anyLong());
         verifyNoInteractions(publisher);
@@ -125,7 +126,7 @@ class CompanyServiceTest {
     void updateCompany_AsAdmin_UpdatesFieldsSuccessfully() throws Exception{
         givenUserHasRole("ADMIN");
         companyService.updateCompany(COMPANY_ID,new CompanyRequest("Updated Name","Updated description"));
-        verify(companyRepository).updateCompany(COMPANY_ID,"UpdatedName","Updated description");
+        verify(companyRepository).updateCompany(COMPANY_ID,"Updated Name","Updated description");
     }
 
     @ParameterizedTest
@@ -206,7 +207,8 @@ class CompanyServiceTest {
         ConflictException ex=assertThrows(ConflictException.class,
                 ()->companyService.addMember(COMPANY_ID,"duplicate@hub.com",Role.RECRUITER)
                 );
-        assertTrue(ex.getMessage().contains("duplicate@hub,com"));
+        System.out.println(ex.getMessage());
+        assertTrue(ex.getMessage().contains("duplicate@hub.com"));
 
        verifyNoInteractions(publisher);
     }
