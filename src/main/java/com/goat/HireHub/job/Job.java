@@ -39,7 +39,7 @@ public class Job {
        private Instant createdAt;
        @Column(name="workplace_type",nullable = false)
        @Enumerated(EnumType.STRING)
-       private WorkPlaceType workPlaceType;
+       private WorkplaceType workPlaceType;
       @Column(name="experience_level",nullable = false)
       @Enumerated(EnumType.STRING)
        private ExperienceLevel experienceLevel;
@@ -134,11 +134,11 @@ public class Job {
            return this.location;
     }
 
-    public void setWorkPlaceType(WorkPlaceType workPlaceType){
+    public void setWorkPlaceType(WorkplaceType workPlaceType){
            this.workPlaceType=workPlaceType;
     }
 
-    public WorkPlaceType getWorkPlaceType(){
+    public WorkplaceType getWorkPlaceType(){
            return this.workPlaceType;
     }
 

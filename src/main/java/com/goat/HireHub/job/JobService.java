@@ -6,7 +6,6 @@ import com.goat.HireHub.exception.ResourceNotFoundException;
 import com.goat.HireHub.job.dto.*;
 import com.goat.HireHub.job.requirement.JobRequirementsRepository;
 import com.goat.HireHub.security.SecurityUtils;
-import com.goat.HireHub.skill.Skill;
 import com.goat.HireHub.skill.SkillRepository;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -18,7 +17,6 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -63,7 +61,7 @@ public class JobService {
             String companyName,
             String location,
             Long companyId,
-            WorkPlaceType workPlaceType,
+            WorkplaceType workPlaceType,
             ExperienceLevel experienceLevel,
             EmploymentType employmentType,
             Pageable pageable
@@ -114,12 +112,11 @@ public class JobService {
         job.setCompany(company);
         job.setLocation(request.location());
         job.setUrl(request.url());
-        job.setWorkPlaceType(request.workPlaceType());
+        job.setWorkPlaceType(request.workplaceType());
         job.setEmploymentType(request.employmentType());
         job.setExperienceLevel(request.experienceLevel());
         return JobResponse.from(jobRepository.save(job));
     }
-
     @Transactional
     @CacheEvict(value="job",key="#id")
     public void updateJob(Long id, JobUpdateRequest updatedJob){
@@ -131,7 +128,7 @@ public class JobService {
                 updatedJob.description(),
                 updatedJob.url(),
                 updatedJob.location(),
-                updatedJob.workPlaceType().name(),
+                updatedJob.workplaceType().name(),
                 updatedJob.employmentType().name(),
                 updatedJob.experienceLevel().name()
         );

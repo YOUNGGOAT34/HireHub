@@ -54,7 +54,7 @@ public class JobSpecification {
         };
     }
 
-    public static Specification<Job> byWorkPlaceType(WorkPlaceType workPlaceType) {
+    public static Specification<Job> byWorkPlaceType(WorkplaceType workPlaceType) {
         return (root,query,criteriaBuilder)->{
             if(workPlaceType==null) return null;
             return criteriaBuilder.equal(root.get("workPlaceType"),workPlaceType);
@@ -82,7 +82,7 @@ public class JobSpecification {
             String location,
             String companyName,
             Long companyId,
-            WorkPlaceType workPlaceType,
+            WorkplaceType workPlaceType,
             ExperienceLevel experienceLevel,
             EmploymentType employmentType
     ){

@@ -1,5 +1,5 @@
 package com.goat.HireHub.job;
 
-public enum WorkPlaceType {
+public enum WorkplaceType {
     HYBRID,ON_SITE,REMOTE
 }

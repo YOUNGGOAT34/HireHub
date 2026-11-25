@@ -64,7 +64,7 @@ public class JobController {
                                            @RequestParam(required=false) @PositiveOrZero(message = "maximum salary must be positive") BigDecimal maxSalary,
                                            @RequestParam(required = false) String companyName,
                                            @RequestParam(required = false) String location,
-                                           @RequestParam(required = false) WorkPlaceType workPlaceType,
+                                           @RequestParam(required = false) WorkplaceType workPlaceType,
                                            @RequestParam(required = false)ExperienceLevel experienceLevel,
                                            @RequestParam(required = false)EmploymentType employmentType,
                                            @RequestParam(required = false) @Positive(message = "company id must be greater than zero") Long companyId,
@@ -76,7 +76,7 @@ public class JobController {
             );
         }
 
-          Sort.Direction sortDirection=Sort.Direction.fromString(direction.toLowerCase());
+          Sort.Direction sortDirection=validateSortDirection(direction.toLowerCase());
           Pageable pageable=PageRequest.of(page,size, Sort.by(sortDirection,sortBy).and(Sort.by(sortDirection,"id")));
           return jobService.searchJobs(title,minSalary,maxSalary,companyName,location,companyId,workPlaceType,experienceLevel,employmentType,pageable);
     }

@@ -2,7 +2,7 @@ package com.goat.HireHub.job.dto;
 
 import com.goat.HireHub.job.EmploymentType;
 import com.goat.HireHub.job.ExperienceLevel;
-import com.goat.HireHub.job.WorkPlaceType;
+import com.goat.HireHub.job.WorkplaceType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -16,8 +16,8 @@ public record  JobRequest(
                           @Size(max=1000) @NotBlank (message="job description is required") String description,
                           @Positive(message = "salary must be greater than zero") BigDecimal salary,
                           @NotNull(message = "company id is required") Long companyId,
-                          @NotNull(message = "work place type is required")
-                          WorkPlaceType workPlaceType,
+                          @NotNull(message = "workplace type is required")
+                          WorkplaceType workplaceType,
                           @NotNull(message = "experience level is required")
                           ExperienceLevel experienceLevel,
                           @NotNull(message = "employment type is required")

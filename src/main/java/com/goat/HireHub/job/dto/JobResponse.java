@@ -3,7 +3,7 @@ package com.goat.HireHub.job.dto;
 import com.goat.HireHub.job.EmploymentType;
 import com.goat.HireHub.job.ExperienceLevel;
 import com.goat.HireHub.job.Job;
-import com.goat.HireHub.job.WorkPlaceType;
+import com.goat.HireHub.job.WorkplaceType;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -17,7 +17,7 @@ public record JobResponse(Long id,
                           String location,
                           EmploymentType employmentType,
                           ExperienceLevel experienceLevel,
-                          WorkPlaceType workPlaceType,
+                          WorkplaceType workPlaceType,
                           String url,
                           Instant createdAt
                           ) {

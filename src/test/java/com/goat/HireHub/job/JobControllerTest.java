@@ -2,24 +2,18 @@ package com.goat.HireHub.job;
 import com.goat.HireHub.ControllerBase;
 import com.goat.HireHub.exception.ResourceNotFoundException;
 import com.goat.HireHub.job.dto.*;
-import com.goat.HireHub.security.JwtService;
-import com.goat.HireHub.security.SecurityConfig;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.*;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-import javax.naming.AuthenticationException;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
@@ -27,6 +21,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(JobController.class)
@@ -37,10 +32,17 @@ class JobControllerTest extends ControllerBase {
       JobService jobService;
 
     private static final String VALID_CREATE = """
-            {"title":"Java Developer","description":"Build APIs","salary":50000,"companyId":1}
+            {"title":"Java Developer","description":"Build APIs","salary":50000,"companyId":1,
+            "employmentType":"FULL_TIME","experienceLevel":"ENTRY_LEVEL","workplaceType":"ON_SITE",
+            "location":"Nairobi","url":"https://example.com/jobs/1"
+            }
             """;
     private static final String VALID_UPDATE = """
-            {"title":"Senior Java Developer","description":"Lead APIs","salary":80000}
+            {
+            "title":"Senior Java Developer","description":"Lead APIs","salary":80000,
+            "employmentType":"FULL_TIME","experienceLevel":"ENTRY_LEVEL","workplaceType":"ON_SITE",
+            "location":"Nairobi","url":"https://example.com/jobs/1"
+            }
             """;
 
     //pagination and search
@@ -126,7 +128,7 @@ class JobControllerTest extends ControllerBase {
         ArgumentCaptor<Pageable> captor = ArgumentCaptor.forClass(Pageable.class);
         verify(jobService).searchJobs(
                 eq("java"), eq(new BigDecimal("1000")), eq(new BigDecimal("5000")),
-                eq("Safaricom"),eq("3L"),any(),any(),any(),any() ,captor.capture());
+                eq("Safaricom"),isNull(),eq(3L),isNull(),isNull(),isNull() ,captor.capture());
         Pageable p = captor.getValue();
         assertEquals(1, p.getPageNumber());
         assertEquals(20, p.getPageSize());
@@ -161,8 +163,8 @@ class JobControllerTest extends ControllerBase {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content.length()").value(2))
                 .andExpect(jsonPath("$.content[0].title").value("Java Dev"))
-                .andExpect(jsonPath("$.totalElements").value(2))
-                .andExpect(jsonPath("$.totalPages").value(1));
+                .andExpect(jsonPath("$.numberOfElements").value(2))
+                .andExpect(jsonPath("$.last").value(true));
     }
 
 
@@ -206,22 +208,21 @@ class JobControllerTest extends ControllerBase {
         assertEquals(1L, captor.getValue().companyId());
     }
     @Test
-    void updateJob_validBody_returns200() throws Exception {
+    void updateJob_validBody_returns204() throws Exception {
 
         mockMvc.perform(put("/jobs/5")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(VALID_UPDATE))
                 .andExpect(status().isNoContent());
         ArgumentCaptor<JobUpdateRequest> captor=ArgumentCaptor.forClass(JobUpdateRequest.class);
-        verify(jobService).updateJob(5L,captor.capture());
-
+        verify(jobService).updateJob(eq(5L),captor.capture());
         assertEquals("Senior Java Developer",captor.getValue().title());
         assertEquals("Lead APIs",captor.getValue().description());
         assertEquals(0,new BigDecimal("80000").compareTo(captor.getValue().salary()));
     }
 
     @Test
-    void patchJob_onlyOneFieldSent_returns200() throws Exception {
+    void patchJob_onlyOneFieldSent_returns204() throws Exception {
         mockMvc.perform(patch("/jobs/5")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -229,6 +230,7 @@ class JobControllerTest extends ControllerBase {
                                 """))
                 .andExpect(status().isNoContent());
         ArgumentCaptor<JobPatchRequest> captor=ArgumentCaptor.forClass(JobPatchRequest.class);
+        verify(jobService).patchJob(eq(5L),captor.capture());
         assertEquals("New Title",captor.getValue().title());
     }
 
@@ -240,7 +242,6 @@ class JobControllerTest extends ControllerBase {
 
         verify(jobService).deleteById(5L);
     }
-
 
 //validation on writes
     @ParameterizedTest
@@ -351,30 +352,34 @@ class JobControllerTest extends ControllerBase {
 
     @Test
     void updateJob_whenJobMissing_returns404() throws Exception {
-
+       doThrow(new ResourceNotFoundException("job",99L))
+               .when(jobService).updateJob(eq(99L),any(JobUpdateRequest.class));
         mockMvc.perform(put("/jobs/99")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(VALID_UPDATE))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.detail").value("job not found with id 99"));
     }
 
     @Test
     void patchJob_whenJobMissing_returns404() throws Exception {
-
+        doThrow(new ResourceNotFoundException("Job",99L))
+                .when(jobService).patchJob(eq(99L),any(JobPatchRequest.class));
         mockMvc.perform(patch("/jobs/99")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {"title":"New Title"}
                                 """))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.detail").value("Job not found with id 99"));
     }
 
     @Test
     void deleteJob_whenJobMissing_returns404() throws Exception {
         doThrow(new ResourceNotFoundException("Job", 99L)).when(jobService).deleteById(99L);
-
         mockMvc.perform(delete("/jobs/99"))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.detail").value("Job not found with id 99"));
     }
 
     @Test
@@ -399,33 +404,37 @@ class JobControllerTest extends ControllerBase {
         mockMvc.perform(post("/jobs")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(VALID_CREATE))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.title").value("Access denied"));
     }
 
     @Test
     void updateJob_whenServiceDeniesAccess_returns403() throws Exception {
-
+       doThrow(new AccessDeniedException("not a member"))
+               .when(jobService).updateJob(eq(5L),any(JobUpdateRequest.class));
         mockMvc.perform(put("/jobs/5")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(VALID_UPDATE))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.title").value("Access denied"));
     }
 
     @Test
     void patchJob_whenServiceDeniesAccess_returns403() throws Exception {
-
+        doThrow(new AccessDeniedException("not a member"))
+                .when(jobService).patchJob(eq(5L),any(JobPatchRequest.class));
         mockMvc.perform(patch("/jobs/5")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {"title":"Hacked"}
                                 """))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.title").value("Access denied"));
     }
 
     @Test
     void deleteJob_whenServiceDeniesAccess_returns403() throws Exception {
         doThrow(new AccessDeniedException("not a member")).when(jobService).deleteById(5L);
-
         mockMvc.perform(delete("/jobs/5"))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.title").value("Access denied"));
@@ -433,12 +442,12 @@ class JobControllerTest extends ControllerBase {
 
     //helpers
     private JobResponseSummary sampleJobSummary(Long id, String title) {
-        return new JobResponseSummary(id, title, new BigDecimal("50000"), 1L, "Safaricom","Nairobi",EmploymentType.FULL_TIME,ExperienceLevel.ENTRY_LEVEL,WorkPlaceType.ON_SITE,"https//:example.com", Instant.now());
+        return new JobResponseSummary(id, title, new BigDecimal("50000"), 1L, "Safaricom","Nairobi",EmploymentType.FULL_TIME,ExperienceLevel.ENTRY_LEVEL, WorkplaceType.ON_SITE,"https//:example.com", Instant.now());
     }
 
 
     private JobResponse sampleJob(Long id, String title) {
-        return new JobResponse(id, title, "Build APIs", new BigDecimal("50000"), 1L, "Safaricom","Nairobi",EmploymentType.FULL_TIME,ExperienceLevel.ENTRY_LEVEL,WorkPlaceType.ON_SITE,"https//:example.com", Instant.now());
+        return new JobResponse(id, title, "Build APIs", new BigDecimal("50000"), 1L, "Safaricom","Nairobi",EmploymentType.FULL_TIME,ExperienceLevel.ENTRY_LEVEL, WorkplaceType.ON_SITE,"https//:example.com", Instant.now());
     }
 
 }

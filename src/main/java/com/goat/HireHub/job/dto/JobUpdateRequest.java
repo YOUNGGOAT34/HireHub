@@ -2,7 +2,7 @@ package com.goat.HireHub.job.dto;
 
 import com.goat.HireHub.job.EmploymentType;
 import com.goat.HireHub.job.ExperienceLevel;
-import com.goat.HireHub.job.WorkPlaceType;
+import com.goat.HireHub.job.WorkplaceType;
 import jakarta.validation.constraints.*;
 import org.hibernate.validator.constraints.URL;
 
@@ -21,7 +21,7 @@ public record  JobUpdateRequest(
         @Pattern(regexp = ".*\\S.*", message = "location cannot be empty or whitespace if provided")
         String location,
         @NotNull(message = "work place type is required")
-        WorkPlaceType workPlaceType,
+        WorkplaceType workplaceType,
         @NotNull(message = "experience level is required")
         ExperienceLevel experienceLevel,
         @NotNull(message = "employment type is required")
