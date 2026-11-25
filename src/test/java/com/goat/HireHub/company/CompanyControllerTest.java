@@ -139,7 +139,7 @@ class CompanyControllerTest extends ControllerBase{
                 .andExpect(jsonPath("$.content.length()").value(2))
                 .andExpect(jsonPath("$.content[0].name").value("Safaricom"))
                 .andExpect(jsonPath("$.totalElements").value(2))
-                .andExpect(jsonPath("$.totalPages").value(1));
+                .andExpect(jsonPath("$.last").value(true));
     }
 
     @Test
@@ -197,6 +197,7 @@ class CompanyControllerTest extends ControllerBase{
                         .content(VALID_COMPANY))
                 .andExpect(status().isNoContent());
         ArgumentCaptor<CompanyRequest> captor=ArgumentCaptor.forClass(CompanyRequest.class);
+        verify(companyService).updateCompany(eq(5L),captor.capture());
         assertEquals("Safaricom",captor.getValue().name());
         assertEquals("Telecom company",captor.getValue().description());
     }
@@ -384,7 +385,8 @@ class CompanyControllerTest extends ControllerBase{
 
     @Test
     void updateCompany_whenCompanyMissing_returns404() throws Exception {
-
+        doThrow(ResourceNotFoundException.class)
+                .when(companyService).updateCompany(eq(99L),any(CompanyRequest.class));
         mockMvc.perform(put("/companies/99")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(VALID_COMPANY))
@@ -393,6 +395,8 @@ class CompanyControllerTest extends ControllerBase{
 
     @Test
     void patchCompany_whenCompanyMissing_returns404() throws Exception {
+        doThrow(ResourceNotFoundException.class)
+                .when(companyService).patchCompany(eq(5L),any(CompanyPatchRequest.class));
         mockMvc.perform(patch("/companies/99")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -447,32 +451,30 @@ class CompanyControllerTest extends ControllerBase{
 
 //permissions ,service throws 403
 
-//    @Test
-//    void updateCompany_whenNotAdmin_returns403() throws Exception {
-//        when(companyService.updateCompany(eq(5L), any())).thenThrow(new AccessDeniedException("not admin"));
-//
-//        mockMvc.perform(put("/companies/5")
-//                        .contentType(MediaType.APPLICATION_JSON)
-//                        .content(VALID_COMPANY))
-//                .andExpect(status().isForbidden());
-//    }
+    @Test
+    void updateCompany_whenNotAdmin_returns403() throws Exception {
+        doThrow(new AccessDeniedException("not admin"))
+                .when(companyService).updateCompany(eq(5L),any(CompanyRequest.class));
+        mockMvc.perform(put("/companies/5")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(VALID_COMPANY))
+                .andExpect(status().isForbidden());
+    }
 
-//    @Test
-//    void patchCompany_whenNotAdmin_returns403() throws Exception {
-//        when(companyService.patchCompany(eq(5L), any())).thenThrow(new AccessDeniedException("not admin"));
-//
-//        mockMvc.perform(patch("/companies/5")
-//                        .contentType(MediaType.APPLICATION_JSON)
-//                        .content("""
-//                                {"name":"Hacked"}
-//                                """))
-//                .andExpect(status().isForbidden());
-//    }
-
+    @Test
+    void patchCompany_whenNotAdmin_returns403() throws Exception {
+       doThrow(new AccessDeniedException("not admin"))
+               .when(companyService).patchCompany(eq(5L),any(CompanyPatchRequest.class));
+        mockMvc.perform(patch("/companies/5")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"name":"Hacked"}
+                                """))
+                .andExpect(status().isForbidden());
+    }
     @Test
     void deleteCompany_whenNotAdmin_returns403() throws Exception {
         doThrow(new AccessDeniedException("not admin")).when(companyService).deleteById(5L);
-
         mockMvc.perform(delete("/companies/5"))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.title").value("Access denied"));
@@ -487,7 +489,6 @@ class CompanyControllerTest extends ControllerBase{
                         .content(VALID_INVITE))
                 .andExpect(status().isForbidden());
     }
-
 
     //wrong types ,ids and methods
 

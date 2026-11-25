@@ -82,24 +82,24 @@ class JobServiceTest {
     * admins and recruiters can
     * */
 
-//    @Test
-//    void addJob_AsOutsider_ThrowsAccessDeniedAndSaveIsNeverCalled() {
-//
-//        JobRequest request = new JobRequest("React Dev", "Frontend description", BigDecimal.valueOf(90000), 1L);
-//
-//        Company company = mock(Company.class);
-//        User user = mock(User.class);
-//        when(user.getId()).thenReturn(42L);
-//
-//        when(companyService.findOrThrow(1L)).thenReturn(company);
-//        when(securityUtils.getCurrentUser()).thenReturn(user);
-//
-//        when(companyService.findMemberShipOrThrow(42L, 1L))
-//                .thenThrow(new AccessDeniedException("not a member"));
-//
-//        assertThrows(AccessDeniedException.class, () -> jobService.addJob(request));
-//        verify(jobRepository, never()).save(any());
-//    }
+    @Test
+    void addJob_AsOutsider_ThrowsAccessDeniedAndSaveIsNeverCalled() {
+
+        JobRequest request = new JobRequest("React Dev", "Frontend description", BigDecimal.valueOf(90000), 1L);
+
+        Company company = mock(Company.class);
+        User user = mock(User.class);
+        when(user.getId()).thenReturn(42L);
+
+        when(companyService.findOrThrow(1L)).thenReturn(company);
+        when(securityUtils.getCurrentUser()).thenReturn(user);
+
+        when(companyService.findMemberShipOrThrow(42L, 1L))
+                .thenThrow(new AccessDeniedException("not a member"));
+
+        assertThrows(AccessDeniedException.class, () -> jobService.addJob(request));
+        verify(jobRepository, never()).save(any());
+    }
 
 //    @ParameterizedTest
 //    @EnumSource(value=Role.class,names={"ADMIN","RECRUITER"})

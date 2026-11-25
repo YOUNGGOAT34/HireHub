@@ -4,6 +4,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.*;
+import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -42,10 +44,6 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return problem(HttpStatus.NOT_FOUND,"Not Found",e.getMessage());
     }
 
-    @ExceptionHandler(UsernameNotFoundException.class)
-    public ProblemDetail handleAccountNotFound(UsernameNotFoundException e){
-           return problem(HttpStatus.NOT_FOUND,"does not exist",e.getMessage());
-    }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ProblemDetail handleConflict(DataIntegrityViolationException e) {
@@ -73,11 +71,23 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     //security exceptions
 
-    @ExceptionHandler(org.springframework.security.authentication.BadCredentialsException.class)
+    @ExceptionHandler({org.springframework.security.authentication.BadCredentialsException.class,UsernameNotFoundException.class})
     public ProblemDetail handleBadCredentials(
             org.springframework.security.authentication.BadCredentialsException ex) {
 
         return problem(HttpStatus.UNAUTHORIZED,"Authentication Failed","Invalid email or password. Please try again");
+    }
+
+    @ExceptionHandler(DisabledException.class)
+    public ProblemDetail handleDisabledAccount(
+             DisabledException ex
+    ){
+         return problem(HttpStatus.UNAUTHORIZED,"disabled account","this account has been disabled");
+    }
+
+    @ExceptionHandler(LockedException.class)
+    public ProblemDetail handleLockedAccount(){
+         return problem(HttpStatus.UNAUTHORIZED,"locked account","this account is locked");
     }
 
     @ExceptionHandler(AuthenticationException.class)

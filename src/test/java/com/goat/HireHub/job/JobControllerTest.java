@@ -43,7 +43,6 @@ class JobControllerTest extends ControllerBase {
             {"title":"Senior Java Developer","description":"Lead APIs","salary":80000}
             """;
 
-
     //pagination and search
     @ParameterizedTest
     @ValueSource(strings = {
