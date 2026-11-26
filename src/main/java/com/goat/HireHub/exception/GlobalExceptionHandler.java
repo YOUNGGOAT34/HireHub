@@ -74,7 +74,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler({org.springframework.security.authentication.BadCredentialsException.class,UsernameNotFoundException.class})
     public ProblemDetail handleBadCredentials(
             org.springframework.security.authentication.BadCredentialsException ex) {
-
+        System.out.println("DO WE GET HERE????????");
         return problem(HttpStatus.UNAUTHORIZED,"Authentication Failed","Invalid email or password. Please try again");
     }
 

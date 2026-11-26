@@ -198,6 +198,11 @@ class JobRepositoryTest extends PostgresTestBase {
         j.setTitle(title);
         j.setDescription("Description for " + title);
         j.setSalary(new BigDecimal(salary));
+        j.setLocation("Nairobi");
+        j.setUrl("https://example.com");
+        j.setEmploymentType(EmploymentType.FULL_TIME);
+        j.setExperienceLevel(ExperienceLevel.ENTRY_LEVEL);
+        j.setWorkPlaceType(WorkplaceType.ON_SITE);
         j.setCompany(company);
         return j;
     }

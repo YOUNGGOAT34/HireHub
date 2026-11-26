@@ -38,7 +38,7 @@ public interface JobRepository extends JpaRepository<Job,Long>, JpaSpecification
     void deleteSkillsByJobId(@Param("jobId")Long jobId);
     @Modifying
     @Query("DELETE FROM Job j WHERE j.id= :id ")
-    void deleteJobById(@Param("id")Long id);
+    void deleteJobById(@Param("id")Long jobId);
     @Query(value="SELECT company_id FROM jobs WHERE job_id= :id",nativeQuery = true)
     Optional<Long> findCompanyIdByJobId(@Param("id")Long jobId);
     @Modifying

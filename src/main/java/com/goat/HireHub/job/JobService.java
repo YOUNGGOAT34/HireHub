@@ -86,9 +86,9 @@ public class JobService {
                 );
     }
 
-    @Cacheable(value="job",key="#id")
-    public JobResponse getById(Long id){
-            return JobResponse.from(findWithCompanyOrThrow(id));
+    @Cacheable(value="job",key="#jobId")
+    public JobResponse getById(Long jobId){
+            return JobResponse.from(findWithCompanyOrThrow(jobId));
     }
 
     @Transactional
@@ -136,7 +136,7 @@ public class JobService {
 
     @Transactional
     @CacheEvict(value="job",key="#id")
-    public void patchJob(Long id, JobPatchRequest updatedJob){
+    public void patchJob(Long jobId, JobPatchRequest updatedJob){
         if(updatedJob.salary()==null && updatedJob.title()==null
                 && updatedJob.description()==null
                 && updatedJob.url()==null
@@ -146,11 +146,11 @@ public class JobService {
                 && updatedJob.experienceLevel()==null
         ) throw new BadRequestException("empty patch body");
 
-        Long companyId=jobRepository.findCompanyIdByJobId(id)
-                        .orElseThrow(()->new ResourceNotFoundException("job",id));
+        Long companyId=jobRepository.findCompanyIdByJobId(jobId)
+                        .orElseThrow(()->new ResourceNotFoundException("job",jobId));
 
         authorizeAccess(companyId);
-        jobRepository.patchJob(id,updatedJob.salary(),
+        jobRepository.patchJob(jobId,updatedJob.salary(),
                      updatedJob.title(),
                 updatedJob.description(),
                 updatedJob.url(),

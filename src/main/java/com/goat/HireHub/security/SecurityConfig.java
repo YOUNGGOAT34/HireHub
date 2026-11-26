@@ -86,7 +86,7 @@ public class SecurityConfig {
                  .authenticationProvider(authenticationProvider)
                  .authorizeHttpRequests(
                            auth-> auth
-//                                   .requestMatchers("/error").permitAll()
+                                   .requestMatchers("/error").permitAll()
                                    .requestMatchers("/auth/**").permitAll()
 //                                   .requestMatchers(HttpMethod.GET,"/jobs/**","/companies/**").permitAll()
 //                                   .requestMatchers("/swagger-ui.html","/swagger-ui/**","/v3/api-docs/**").permitAll()
